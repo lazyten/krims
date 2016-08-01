@@ -19,28 +19,15 @@
 ##
 ## ---------------------------------------------------------------------
 
-# Installs the cmake package information this project provides
-#
-# Requires the variable PackageModuleLocation to be set.
+# Check we have at least the required version:
+cmake_minimum_required(VERSION 3.0.0)
 
-# Write a basic version file for krims
-include(CMakePackageConfigHelpers)
-write_basic_package_version_file(
-	"${krims_BINARY_DIR}/krimsConfigVersion.cmake"
-	COMPATIBILITY AnyNewerVersion
-)
+# Set basedir for this module
+set(DRB_DIR "${CMAKE_CURRENT_LIST_DIR}/DebugReleaseBuild"
+	CACHE INTERNAL "Base directory of the DebugReleaseBuild module.")
 
-# Adjust a configure file
-configure_file(cmake/krimsConfig.cmake.in
-	"${krims_BINARY_DIR}/krimsConfig.cmake"
-	COPYONLY
-)
-
-# Set an export location:
-install(FILES
-	"${krims_BINARY_DIR}/krimsConfig.cmake"
-	"${krims_BINARY_DIR}/krimsConfigVersion.cmake"
-	DESTINATION "${PackageModuleLocation}/krims"
-	COMPONENT devel
-)
-
+# include other files:
+include("${DRB_DIR}/drb_init.cmake")
+include("${DRB_DIR}/drb_utils.cmake")
+include("${DRB_DIR}/drb_setup_compiler_flags.cmake")
+include("${DRB_DIR}/drb_targets.cmake")

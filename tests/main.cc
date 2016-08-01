@@ -17,22 +17,5 @@
 // along with krims. If not, see <http://www.gnu.org/licenses/>.
 //
 
-#pragma once
-#include "krims/version_defs.hh"
-#include <string>
-
-namespace krims {
-
-struct version {
-  // Note: CMake automatically fills this version information
-  // via the header version_defs.hh and the WriteVersionHeader module
-
-  static int constexpr major{__version_var_major};
-  static int constexpr minor{__version_var_minor};
-  static int constexpr patch{__version_var_patch};
-
-  // Return the version as a string
-  static std::string version_string();
-};
-
-}  // namespace krims
+#define CATCH_CONFIG_MAIN
+#include <catch.hpp>

@@ -26,32 +26,29 @@ set(KRIMS_SOURCES
 	version.cc
 )
 
-add_library(krims ${KRIMS_SOURCES})
-set(krims_TARGETS krims)
-
 # Dump the current version as an include file.
-#include_linalgwrap_cmake_module(WriteVersionHeader)
-#write_version_header("${CMAKE_BINARY_DIR}/src/krims/version_defs.hh")
+include(WriteVersionHeader)
+write_version_header("${CMAKE_BINARY_DIR}/src/krims/version_defs.hh")
 
-## Add the libraries for Debug and Release builds:
-#drb_add_library(krims
-#	DBGSUFFIX  ".g"
-#	FILES ${KRIMS_SOURCES}
-#)
-#
-#drb_set_target_properties(
-#	ALL krims
-#	PROPERTIES
-#	VERSION "${PROJECT_VERSION}"
-#)
-#
-#drb_target_compile_definitions(ALL     krims PUBLIC ${KRIMS_DEFINITIONS})
-#drb_target_compile_definitions(DEBUG   krims PUBLIC ${KRIMS_DEFINITIONS_DEBUG})
-#drb_target_compile_definitions(RELEASE krims PUBLIC ${KRIMS_DEFINITIONS_RELEASE})
-#
-#drb_target_link_libraries(ALL     krims ${KRIMS_DEPENDENCIES})
-#drb_target_link_libraries(DEBUG   krims ${KRIMS_DEPENDENCIES_DEBUG})
-#drb_target_link_libraries(RELEASE krims ${KRIMS_DEPENDENCIES_RELEASE})
+# Add the libraries for Debug and Release builds:
+drb_add_library(krims
+	DBGSUFFIX  ".g"
+	FILES ${KRIMS_SOURCES}
+)
+
+drb_set_target_properties(
+	ALL krims
+	PROPERTIES
+	VERSION "${PROJECT_VERSION}"
+)
+
+drb_target_compile_definitions(ALL     krims PUBLIC ${KRIMS_DEFINITIONS})
+drb_target_compile_definitions(DEBUG   krims PUBLIC ${KRIMS_DEFINITIONS_DEBUG})
+drb_target_compile_definitions(RELEASE krims PUBLIC ${KRIMS_DEFINITIONS_RELEASE})
+
+drb_target_link_libraries(ALL     krims ${KRIMS_DEPENDENCIES})
+drb_target_link_libraries(DEBUG   krims ${KRIMS_DEPENDENCIES_DEBUG})
+drb_target_link_libraries(RELEASE krims ${KRIMS_DEPENDENCIES_RELEASE})
 
 # set the installation property for these targets:
 install(TARGETS ${krims_TARGETS}

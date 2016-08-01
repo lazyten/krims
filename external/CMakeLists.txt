@@ -1,0 +1,98 @@
+if (BUILD_EXTERNAL_RAPIDCHECK)
+	#
+	# Add subdirectory
+	#
+
+	# Check wether rapidcheck is there
+	if(NOT EXISTS "${CMAKE_CURRENT_LIST_DIR}/rapidcheck/CMakeLists.txt")
+		message(FATAL_ERROR "Could not find rapidcheck at expected place. Try a manual git checkout.")
+	endif()
+
+	# Set flags such that rapidcheck tests are built.
+	set(RC_ENABLE_TESTS ON CACHE BOOL "Build RapidCheck tests")
+
+	# Add the rapidcheck subdirectory
+	add_subdirectory(rapidcheck)
+
+	#
+	# Adjust compiler flags
+	#
+
+	# Set some compiler options to make rapidcheck compile
+	enable_if_compiles(KRIMS_RAPIDCHECK_EXTRA_FLAGS "-Wno-gnu-zero-variadic-macro-arguments")
+	#enable_if_compiles(KRIMS_RAPIDCHECK_EXTRA_FLAGS "-Wno-error=pedantic")
+	enable_if_compiles(KRIMS_RAPIDCHECK_EXTRA_FLAGS "-Wno-pedantic")
+	set(KRIMS_RAPIDCHECK_EXTRA_FLAGS "${KRIMS_RAPIDCHECK_EXTRA_FLAGS} ${CMAKE_CXX_FLAGS_RELEASE}")
+
+	# Activate extra flags for all potential rapidcheck targets.
+	foreach(_potential_target
+			rapidcheck
+			rapidcheck_tests
+			rapidcheck_test_utils
+			rapidcheck_boost_tests
+			rapidcheck_gmock_tests
+			boost_test_integration
+			database
+			counter
+			gtest_integration
+			classify
+			mapparser
+	)
+		if(TARGET ${_potential_target})
+			set_target_properties(${_potential_target} PROPERTIES COMPILE_FLAGS "${KRIMS_RAPIDCHECK_EXTRA_FLAGS}")
+		endif()
+	endforeach()
+
+	# unset the extra flags
+	unset(KRIMS_RAPIDCHECK_EXTRA_FLAGS)
+
+#	#
+#	# Install rapidcheck
+#	#
+#
+#	# Export definitions:
+#	export(TARGETS rapidcheck
+#		NAMESPACE Upstream::
+#		FILE "${krims_BINARY_DIR}/rapidcheckTargets.cmake"
+#	)
+#
+#	# And write a config file:
+#	file(WRITE "${krims_BINARY_DIR}/rapidcheckConfig.cmake"
+#		"include(\"\${CMAKE_CURRENT_LIST_DIR}/rapidcheckTargets.cmake\")"
+#	)
+#
+#	if(KRIMS_INSTALL_RAPIDCHECK)
+#		if(BUILD_SHARED_LIBS)
+#			install(FILES "${rapidcheck_BINARY_DIR}/librapidcheck.so"
+#				DESTINATION lib
+#				COMPONENT library-rapidcheck
+#			)
+#		else()
+#			install(FILES "${rapidcheck_BINARY_DIR}/librapidcheck.a"
+#				DESTINATION lib
+#				COMPONENT library-rapidcheck
+#			)
+#		endif()
+#
+#		# install the includes:
+#		install(DIRECTORY "${rapidcheck_SOURCE_DIR}/include"
+#			DESTINATION "."
+#			COMPONENT devel-rapidcheck
+#			FILES_MATCHING REGEX ".*\\.(h|hpp)$"
+#		)
+#
+#		# TODO this does not work, since we cannot define the export group
+#		#      for the rapidcheck target.
+#		# and install them appropriately:
+#		#install(EXPORT rapidcheck
+#		#	FILE "rapidcheckTargets.cmake"
+#		#	NAMESPACE Upstream::
+#		#	DESTINATION "${PackageModuleLocation}/rapidcheck"
+#		#)
+#
+#		message(STATUS "Enabled installation of external rapidcheck library.")
+#	endif()
+#
+#	# For downstream compatibility:
+#	add_library(common_rapidcheck ALIAS rapidcheck)
+endif()

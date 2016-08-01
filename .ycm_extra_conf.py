@@ -21,8 +21,7 @@ flags = [
     # Compile debug code as well
     '-DDEBUG',
     # Compile extra code blocks:
-    # '-DLINALGWRAP_HAVE_GLIBC_STACKTRACE',
-    '-DLINALGWRAP_HAVE_ARMADILLO',
+    '-DKRIMS_HAVE_CXX14',
     # Compile as c++14
     '-std=c++14',
     # Treat .h header files as c++:
@@ -32,6 +31,10 @@ flags = [
     # To suppress errors shown here, use "-isystem" 
     # instead of "-I"
     '-I', 'src',
+    '-isystem', './external/rapidcheck/include',
+    '-isystem', './external/rapidcheck/ext/catch/include',
+    '-isystem', './build/external/catch/src/catchFromGit/include',
+    '-isystem', '../catch/include',
 ]
 
 def DirectoryOfThisScript():

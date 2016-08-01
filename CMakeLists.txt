@@ -21,24 +21,73 @@
 
 cmake_minimum_required(VERSION 3.0.0)
 
+# Set the module path
+list(APPEND CMAKE_MODULE_PATH  "${CMAKE_CURRENT_LIST_DIR}/cmake/modules")
+
+# Load the DebugReleaseBuild module for a simultaneous Debug and Release
+# and release build and initialise it.
+include(DebugReleaseBuild)
+drb_init()
+
+##########################################################################
+# Global options
+
+# Path where cmake wants the modules and config packages:
+set(PackageModuleLocation share/cmake)
+
+# setup global options (needs to be done before call to project())
+option(KRIMS_ENABLE_TESTS "Build krims tests" ON)
+option(KRIMS_ENABLE_EXAMPLES "Build krims examples" ON)
+
+##########################################################################
+# Project setup
+
 # enable the new version feature introduced in cmake 3.0.0
 cmake_policy(SET CMP0048 NEW)
 project(krims VERSION 0.0.0)
+message("\n#")
+message("# Configuring ${PROJECT_NAME}")
+message("#")
 
 # Global include directories for this project:
 include_directories("${PROJECT_SOURCE_DIR}/src")  # for default sources
-include_directories("${PROJECT_SOURCE_DIR}/src")  # for generated sources
+include_directories("${PROJECT_BINARY_DIR}/src")  # for generated sources
 
-# set the standard and enforce it:
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+# enable testing of this project
+enable_testing()
 
-# make sure we no not use the gnu++ extensions:
-# this adds c++n instead of gnu++n to the command line
-set(CMAKE_CXX_EXTENSIONS OFF)
+##########################################################################
+# Setup hard and optional dependencies and find components
 
+# Determine and setup compiler flags, enforcing C++11
+drb_setup_compiler_flags(11)
+
+# setup hard dependencies
+include(cmake/setup_dependencies.cmake)
+
+# setup optional dependencies and features.
+include(cmake/setup_optional.cmake)
+
+##########################################################################
+# Pass on to subdirectories:
+
+# The external dependencies compiled along this project
+add_subdirectory(external)
+
+# The src directory does most of the work: Here the library is build and
+# installation is configured.
 add_subdirectory(src)
+
+# Add subdirectories for the testing.
+if(KRIMS_ENABLE_TESTS) 
+	add_subdirectory(tests)
+endif()
+
+# Add subdirectories for the examples.
+if(KRIMS_ENABLE_EXAMPLES)
+	add_subdirectory(examples)
+endif()
 
 ##########################################################################
 # Finally install package:
-include(cmake/install_package.cmake)
+include(cmake/install_modules_and_packages.cmake)
