@@ -25,6 +25,7 @@
 set(KRIMS_SOURCES
 	exceptions/ExceptionBase.cc
 	exceptions/exception_defs.cc
+	ParameterMap.cc
 	version.cc
 )
 
