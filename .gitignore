@@ -12,3 +12,4 @@ build
 
 # building external projects:
 external/.last_pull
+external/rapidcheck

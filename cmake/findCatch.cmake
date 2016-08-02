@@ -78,7 +78,11 @@ if ("${catch_INCLUDE_DIR}" STREQUAL "catch_INCLUDE_DIR-NOTFOUND")
 		# Setup catch target
 		add_library(${catch_TARGET} INTERFACE)
 		add_dependencies(${catch_TARGET} catchFromGit)
-		target_include_directories(${catch_TARGET} INTERFACE "${PROJECT_BINARY_DIR}/external/catch/src/catchFromGit/include")
+
+		ExternalProject_Get_Property(catchFromGit source_dir)
+		target_include_directories(${catch_TARGET} INTERFACE
+			"${source_dir}/include")
+		unset(source_dir)
 
 		# Print message and return
 		message(STATUS "Using catch from git repository.")
