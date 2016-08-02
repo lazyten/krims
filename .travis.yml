@@ -86,7 +86,7 @@ script:
   # Make build directory
   - mkdir build && cd build
   # Link to cached part
-  - mkdir -p $HOME/rapidcheck_build
+  - mkdir -p $HOME/rapidcheck_build external
   - ln -s "$HOME/rapidcheck_build" external/rapidcheck
   # Configure build directory
   - cmake -DCMAKE_CXX_COMPILER=${CXX_COMPILER} -DCMAKE_C_COMPILER=${CC_COMPILER}
