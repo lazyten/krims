@@ -24,8 +24,9 @@ sudo: required
 dist: trusty
 
 cache:
-  # The directory where the rapidcheck build is cached
-  - $HOME/rapidcheck_build
+  directories:
+    # The directory where the rapidcheck build is cached
+    - $HOME/rapidcheck_build
 
 branches:
   except:
