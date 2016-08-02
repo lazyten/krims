@@ -23,6 +23,10 @@ language: cpp
 sudo: required
 dist: trusty
 
+cache:
+  # The directory where the rapidcheck build is cached
+  - $HOME/rapidcheck_build
+
 branches:
   except:
     - dev
@@ -79,10 +83,16 @@ matrix:
       env: CC_COMPILER="gcc-5" CXX_COMPILER="g++-5" TESTCASE="krims_tests_RELEASE"
 
 script:
+  # Make build directory
   - mkdir build && cd build
+  # Link to cached part
+  - mkdir -p $HOME/rapidcheck_build
+  - ln -s "$HOME/rapidcheck_build" external/rapidcheck
+  # Configure build directory
   - cmake -DCMAKE_CXX_COMPILER=${CXX_COMPILER} -DCMAKE_C_COMPILER=${CC_COMPILER}
            -DCMAKE_BUILD_TYPE=DebugRelease ${EXTRA_OPTS}
            -DRC_ENABLE_TESTS=OFF -DAUTOCHECKOUT_MISSING_REPOS=ON
            -GNinja ..
+  # Build and test
   - cmake --build  . -- -j ${CORES}
   - if [ "${TESTCASE}" ]; then ctest --output-on-failure -R ${TESTCASE}; else true; fi
