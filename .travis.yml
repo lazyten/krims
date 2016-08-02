@@ -23,11 +23,6 @@ language: cpp
 sudo: required
 dist: trusty
 
-cache:
-  directories:
-    # The directory where the rapidcheck build is cached
-    - $HOME/rapidcheck_build
-
 branches:
   except:
     - dev
@@ -84,12 +79,7 @@ matrix:
       env: CC_COMPILER="gcc-5" CXX_COMPILER="g++-5" TESTCASE="krims_tests_RELEASE"
 
 script:
-  # Make build and cache directories
-  - mkdir -p build $HOME/rapidcheck_build build/external
-  - cd build
-  # Link to cached part
-  - ln -s "$HOME/rapidcheck_build" external/rapidcheck
-  # Confgure, build and test
+  - mkdir build && cd build
   - cmake -DCMAKE_CXX_COMPILER=${CXX_COMPILER} -DCMAKE_C_COMPILER=${CC_COMPILER}
            -DCMAKE_BUILD_TYPE=DebugRelease ${EXTRA_OPTS}
            -DRC_ENABLE_TESTS=OFF -DAUTOCHECKOUT_MISSING_REPOS=ON
