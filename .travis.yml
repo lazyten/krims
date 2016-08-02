@@ -47,7 +47,7 @@ matrix:
       - sudo apt-get update
       - sudo apt-get install -y ninja-build g++-4.9
       compiler: clang
-      env: COMPILER_VER="3.5" TESTCASE="krims_tests_RELEASE"
+      env: CC_COMPILER="clang" CXX_COMPILER="clang++" TESTCASE="krims_tests_RELEASE"
     #
     # Clang 3.8 (has c++14)
     - install:
@@ -60,11 +60,11 @@ matrix:
       - sudo apt-get update
       - sudo apt-get install -y ninja-build g++-5 clang-3.8
       compiler: clang
-      env: COMPILER_VER="3.8" TESTCASE="krims_tests_DEBUG"
+      env: CC_COMPILER="clang-3.8" CXX_COMPILER="clang++-3.8" TESTCASE="krims_tests_DEBUG"
     #
     # gcc-4.8 (c++11 and without tests, since rapidcheck does not compile like this)
     - compiler: gcc
-      env: COMPILER_VER="4.8" EXTRA_OPTS="-DKRIMS_ENABLE_TESTS=OFF"
+      env: CC_COMPILER="gcc" CXX_COMPILER="g++" EXTRA_OPTS="-DKRIMS_ENABLE_TESTS=OFF"
     #
     # gcc-5 (with tests and c++14)
     - install:
@@ -74,11 +74,11 @@ matrix:
       - sudo apt-get update
       - sudo apt-get install -y ninja-build g++-5
       compiler: gcc
-      env: COMPILER_VER="5" TESTCASE="krims_tests_RELEASE"
+      env: CC_COMPILER="gcc-5" CXX_COMPILER="g++-5" TESTCASE="krims_tests_RELEASE"
 
 script:
   - mkdir build && cd build
-  - cmake -DCMAKE_CXX_COMPILER=${CXX}-${COMPILER_VER} -DCMAKE_C_COMPILER=${CC}-${COMPILER_VER}
+  - cmake -DCMAKE_CXX_COMPILER=${CXX_COMPILER} -DCMAKE_C_COMPILER=${CC_COMPILER}
            -DCMAKE_BUILD_TYPE=DebugRelease -DRC_ENABLE_TESTS=OFF -DAUTOCHECKOUT_MISSING_LIBS=ON -GNinja ..
   - cmake --build  . -- -j ${CORES}
   - if [ "${TESTCASE}" ]; then ctest --output-on-failure -R ${TESTCASE}; else true; fi
