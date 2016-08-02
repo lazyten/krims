@@ -41,9 +41,11 @@ include(CheckCXXSourceCompiles)
 #-- C++ standard --#
 ####################
 if (DRB_HAS_CXX14_SUPPORT)
+	message(STATUS "Detected C++14 support: Setting KRIMS_HAVE_CXX14")
 	LIST(APPEND KRIMS_DEFINITIONS "KRIMS_HAVE_CXX14")
 endif()
 if (DRB_HAS_CXX17_SUPPORT)
+	message(STATUS "Detected C++17 support: Setting KRIMS_HAVE_CXX17")
 	LIST(APPEND KRIMS_DEFINITIONS "KRIMS_HAVE_CXX17")
 endif()
 
