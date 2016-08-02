@@ -17,16 +17,9 @@
 // along with krims. If not, see <http://www.gnu.org/licenses/>.
 //
 
-#define CATCH_CONFIG_RUNNER
-#include <catch.hpp>
-#include <krims/exceptions.hh>
+#pragma once
 
-int main(int argc, char* const argv[]) {
-  // Make sure that the program does not get aborted,
-  // but all krims exceptions throw instead.
-  krims::exceptions::AssertDbgEffect::set_throw();
+// Include this header to get the krims exception system.
 
-  // Run catch:
-  int result = Catch::Session().run(argc, argv);
-  return result;
-}
+#include "exceptions/Exceptions.hh"
+#include "exceptions/exception_helper_functions.hh"
