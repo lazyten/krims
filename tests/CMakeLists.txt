@@ -23,7 +23,7 @@
 # The sources for the test executable
 #
 set(KRIMS_TESTS_SOURCES
-	DummyTest.cc
+	ExceptionTests.cc
 	main.cc
 )
 

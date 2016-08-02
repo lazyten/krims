@@ -17,16 +17,12 @@
 // along with krims. If not, see <http://www.gnu.org/licenses/>.
 //
 
-#define CATCH_CONFIG_RUNNER
-#include <catch.hpp>
-#include <krims/exceptions.hh>
+#include "exception_defs.hh"
 
-int main(int argc, char* const argv[]) {
-  // Make sure that the program does not get aborted,
-  // but all krims exceptions throw instead.
-  krims::exceptions::AssertDbgEffect::set_throw();
+namespace krims {
+namespace exceptions {
+// Set default effect of the assert_dbg macro to ABORT
+ExceptionEffect AssertDbgEffect::m_eff = ExceptionEffect::ABORT;
 
-  // Run catch:
-  int result = Catch::Session().run(argc, argv);
-  return result;
-}
+}  // namespace exceptions
+}  // namespace krims
