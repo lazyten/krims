@@ -31,12 +31,12 @@
 #
 # Options and properties required
 #
-option(AUTOCHECKOUT_MISSING_LIBS "Automatically checkout missing libraries" OFF)
+option(AUTOCHECKOUT_MISSING_REPOS "Automatically checkout missing repositories" OFF)
 set_property(DIRECTORY PROPERTY EP_STEP_TARGETS configure build test)
 
 # The name for the catch target.
-# Note that just "catch" cannot be used since rapidcheck (which is checked out later)
-# uses this.
+# Note that just "catch" cannot be used since rapidcheck (which is usually
+# checked out as well) uses this.
 set(catch_TARGET "catch_hdr")
 
 #
@@ -60,7 +60,7 @@ find_path(catch_INCLUDE_DIR catch.hpp
 
 string(TOUPPER "${PROJECT_NAME}" PROJECT_UPPER)
 if ("${catch_INCLUDE_DIR}" STREQUAL "catch_INCLUDE_DIR-NOTFOUND")
-	if (AUTOCHECKOUT_MISSING_LIBS)
+	if (AUTOCHECKOUT_MISSING_REPOS)
 		include(ExternalProject)
 		ExternalProject_Add(catchFromGit
 			PREFIX "${PROJECT_BINARY_DIR}/external/catch"
@@ -87,7 +87,7 @@ if ("${catch_INCLUDE_DIR}" STREQUAL "catch_INCLUDE_DIR-NOTFOUND")
 
 	message(FATAL_ERROR "Could not find catch include directory. 
 Either disable testing of ${PROJECT_NAME} by setting ${PROJECT_UPPER}_ENABLE_TESTS to OFF \
-or enable autocheckout via -DAUTOCHECKOUT_MISSING_LIBS=ON \
+or enable autocheckout via -DAUTOCHECKOUT_MISSING_REPOS=ON \
 or provide a hint where the catch include file can be found via \
 the environment variable catch_INCLUDE_DIR.")
 endif()

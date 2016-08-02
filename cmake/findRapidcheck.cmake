@@ -32,7 +32,7 @@
 #
 # Options and properties required
 #
-option(AUTOCHECKOUT_MISSING_LIBS "Automatically checkout missing libraries" OFF)
+option(AUTOCHECKOUT_MISSING_REPOS "Automatically checkout missing repositories" OFF)
 set(BUILD_EXTERNAL_RAPIDCHECK bool off
 	cache internal
 	"Should the rapidcheck folder in the external project dir be build.")
@@ -51,7 +51,7 @@ endif()
 find_package(rapidcheck QUIET CONFIG)
 string(TOUPPER "${PROJECT_NAME}" PROJECT_UPPER)
 if ("${rapidcheck_DIR}" STREQUAL "rapidcheck_DIR-NOTFOUND")
-	if (AUTOCHECKOUT_MISSING_LIBS)
+	if (AUTOCHECKOUT_MISSING_REPOS)
 		execute_process(
 			COMMAND "sh" "get_rapidcheck.sh"
 			WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/external"
@@ -68,7 +68,7 @@ if ("${rapidcheck_DIR}" STREQUAL "rapidcheck_DIR-NOTFOUND")
 
 	message(FATAL_ERROR "Could not find rapidcheck library.
 Either disable testing of ${PROJECT_NAME} by setting ${PROJECT_UPPER}_ENABLE_TESTS to OFF \
-or enable autocheckout via -DAUTOCHECKOUT_MISSING_LIBS=ON.")
+or enable autocheckout via -DAUTOCHECKOUT_MISSING_REPOS=ON.")
 endif()
 
 message(WARNING "This part of findRapidcheck has never been tested.")
