@@ -41,19 +41,24 @@ matrix:
   include:
     # Clang 3.5 (has only c++11)
     - install:
+      # Repo for g++-4.9 (to avoid buggy libstdc++)
+      - sudo add-apt-repository -y "ppa:ubuntu-toolchain-r/test"
       # Update and install
-      - sudo apt-get install -y ninja-build
+      - sudo apt-get update
+      - sudo apt-get install -y ninja-build g++-4.9
       compiler: clang
       env: CC_COMPILER="clang" CXX_COMPILER="clang++" TESTCASE="krims_tests_RELEASE"
     #
     # Clang 3.8 (has c++14)
     - install:
+      # Repo for g++-4.9 (to avoid buggy libstdc++)
+      - sudo add-apt-repository -y "ppa:ubuntu-toolchain-r/test"
       # Repo for clang-3.8
       - sudo wget -O - http://llvm.org/apt/llvm-snapshot.gpg.key | sudo apt-key add -
       - sudo add-apt-repository -y "deb http://llvm.org/apt/trusty/ llvm-toolchain-trusty-3.8 main"
       # Update and install
       - sudo apt-get update
-      - sudo apt-get install -y ninja-build clang-3.8
+      - sudo apt-get install -y ninja-build clang-3.8 g++-4.9
       compiler: clang
       env: CC_COMPILER="clang-3.8" CXX_COMPILER="clang++-3.8" TESTCASE="krims_tests_DEBUG"
     #
