@@ -144,6 +144,24 @@ TEST_CASE("ParameterMap tests", "[parametermap]") {
   // ---------------------------------------------------------------
   //
 
+  SECTION("Test retrieving data from const maps") {
+    ParameterMap m;
+    m.update("double", 1.24);
+    m.update("noref", 3.141592);
+    m.update("word", "some");
+    m.update("dum", dum);
+
+    const ParameterMap& mref{m};
+    REQUIRE(mref.at<double>("double") == 1.24);
+    REQUIRE(mref.at<double>("noref") == 3.141592);
+    REQUIRE(mref.at<std::string>("word") == "some");
+    REQUIRE(mref.at<DummySubscribable<double>>("dum") == dum);
+  }
+
+  //
+  // ---------------------------------------------------------------
+  //
+
   SECTION("Test at with default return") {
     ParameterMap m;
     m.update("string", s);
