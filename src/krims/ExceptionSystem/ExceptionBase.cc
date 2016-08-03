@@ -33,7 +33,6 @@
 #endif
 
 namespace krims {
-namespace exceptions {
 
 ExceptionBase::ExceptionBase()
       : m_name(""),
@@ -224,5 +223,4 @@ std::string ExceptionBase::generate_message() const noexcept {
   }
 }
 
-}  // exceptions
 }  // krims

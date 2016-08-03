@@ -18,7 +18,7 @@
 //
 
 #include <catch.hpp>
-#include <krims/exceptions.hh>
+#include <krims/ExceptionSystem.hh>
 #include <rapidcheck.h>
 
 namespace krims {
@@ -26,8 +26,6 @@ namespace tests {
 using namespace rc;
 
 TEST_CASE("Exception system", "[exception]") {
-  using namespace krims::exceptions;
-
   SECTION("Test throw or raise mechanism") {
 #ifdef DEBUG
     // Test if an ExcNotImplemented exception would be thrown:
