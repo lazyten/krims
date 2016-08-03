@@ -18,8 +18,8 @@
 //
 
 #pragma once
+#include "ExceptionSystem.hh"
 #include "SubscriptionPointer.hh"
-#include "exceptions.hh"
 #include <algorithm>
 #include <list>
 #include <memory>

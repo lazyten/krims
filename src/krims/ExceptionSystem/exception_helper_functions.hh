@@ -37,7 +37,7 @@
 template <typename T>
 inline void assert_range(T start, T number, T end) {
   assert_dbg((start <= number) && (number < end),
-             ::krims::exceptions::ExcOutsideRange<T>(number, start, end));
+             ::krims::ExcOutsideRange<T>(number, start, end));
 }
 
 /**
@@ -52,7 +52,7 @@ inline void assert_range(T start, T number, T end) {
  */
 template <typename T>
 inline void assert_greater_equal(T lhs, T rhs) {
-  assert_dbg(lhs <= rhs, ::krims::exceptions::ExcTooLarge<T>(lhs, rhs));
+  assert_dbg(lhs <= rhs, ::krims::ExcTooLarge<T>(lhs, rhs));
 }
 
 /**
@@ -67,7 +67,7 @@ inline void assert_greater_equal(T lhs, T rhs) {
  */
 template <typename T>
 inline void assert_greater(T lhs, T rhs) {
-  assert_dbg(lhs < rhs, ::krims::exceptions::ExcTooLargeOrEqual<T>(lhs, rhs));
+  assert_dbg(lhs < rhs, ::krims::ExcTooLargeOrEqual<T>(lhs, rhs));
 }
 
 /**
@@ -81,15 +81,14 @@ inline void assert_greater(T lhs, T rhs) {
  */
 template <typename T>
 inline void assert_equal(T lhs, T rhs) {
-  assert_dbg(lhs == rhs, ::krims::exceptions::ExcNotEqual<T>(lhs, rhs));
+  assert_dbg(lhs == rhs, ::krims::ExcNotEqual<T>(lhs, rhs));
 }
 
 /**
  * Assert whether two sizes match
  */
 inline void assert_size(size_t size1, size_t size2) {
-  assert_dbg(size1 == size2,
-             ::krims::exceptions::ExcSizeMismatch(size1, size2));
+  assert_dbg(size1 == size2, ::krims::ExcSizeMismatch(size1, size2));
 }
 
 /**
@@ -107,5 +106,5 @@ inline void assert_element_sizes(const Container &cont, size_t vsize) {
 
 template <typename T>
 inline void assert_finite(T t) {
-  assert_dbg(std::isfinite(t), ::krims::exceptions::ExcNumberNotFinite(t));
+  assert_dbg(std::isfinite(t), ::krims::ExcNumberNotFinite(t));
 }

@@ -23,7 +23,6 @@
 #include <string>
 
 namespace krims {
-namespace exceptions {
 
 /** Options how to deal with exceptions.
  *
@@ -65,8 +64,7 @@ private:
       auto __exc__cept = exception;                                            \
       __exc__cept.add_exc_data(__FILE__, __LINE__, __PRETTY_FUNCTION__, #cond, \
                                #exception);                                    \
-      if (krims::exceptions::AssertDbgEffect::get() ==                         \
-          krims::exceptions::ExceptionEffect::ABORT) {                         \
+      if (krims::AssertDbgEffect::get() == krims::ExceptionEffect::ABORT) {    \
         std::cerr << __exc__cept.what() << std::endl;                          \
         std::abort();                                                          \
       } else {                                                                 \
@@ -118,7 +116,7 @@ private:
  * is raised.
  */
 #define DefExceptionMsg(Exception, defaulttext)                  \
-  class Exception : public ::krims::exceptions::ExceptionBase {  \
+  class Exception : public ::krims::ExceptionBase {              \
   public:                                                        \
     virtual void print_extra(std::ostream& out) const noexcept { \
       out << defaulttext << std::endl;                           \
@@ -131,7 +129,7 @@ private:
  * @ingroup Exceptions
  */
 #define DefException1(Exception1, type1, outsequence)            \
-  class Exception1 : public ::krims::exceptions::ExceptionBase { \
+  class Exception1 : public ::krims::ExceptionBase {             \
   public:                                                        \
     Exception1(const type1 a1) : arg1(a1) {}                     \
     virtual ~Exception1() noexcept {}                            \
@@ -148,7 +146,7 @@ private:
  * parameters.
  */
 #define DefException2(Exception2, type1, type2, outsequence)           \
-  class Exception2 : public ::krims::exceptions::ExceptionBase {       \
+  class Exception2 : public ::krims::ExceptionBase {                   \
   public:                                                              \
     Exception2(const type1 a1, const type2 a2) : arg1(a1), arg2(a2) {} \
     virtual ~Exception2() noexcept {}                                  \
@@ -168,7 +166,7 @@ private:
  * @ingroup Exceptions
  */
 #define DefException3(Exception3, type1, type2, type3, outsequence) \
-  class Exception3 : public ::krims::exceptions::ExceptionBase {    \
+  class Exception3 : public ::krims::ExceptionBase {                \
   public:                                                           \
     Exception3(const type1 a1, const type2 a2, const type3 a3)      \
           : arg1(a1), arg2(a2), arg3(a3) {}                         \
@@ -190,7 +188,7 @@ private:
  * @ingroup Exceptions
  */
 #define DefException4(Exception4, type1, type2, type3, type4, outsequence)     \
-  class Exception4 : public ::krims::exceptions::ExceptionBase {               \
+  class Exception4 : public ::krims::ExceptionBase {                           \
   public:                                                                      \
     Exception4(const type1 a1, const type2 a2, const type3 a3, const type4 a4) \
           : arg1(a1), arg2(a2), arg3(a3), arg4(a4) {}                          \
@@ -214,7 +212,7 @@ private:
  */
 #define DefException5(Exception5, type1, type2, type3, type4, type5,           \
                       outsequence)                                             \
-  class Exception5 : public ::krims::exceptions::ExceptionBase {               \
+  class Exception5 : public ::krims::ExceptionBase {                           \
   public:                                                                      \
     Exception5(const type1 a1, const type2 a2, const type3 a3, const type4 a4, \
                const type5 a5)                                                 \
@@ -232,5 +230,4 @@ private:
     const type5 arg5;                                                          \
   }
 
-}  // namespace exceptions
 }  // namespace krims

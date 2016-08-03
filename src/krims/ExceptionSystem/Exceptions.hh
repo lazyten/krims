@@ -22,7 +22,6 @@
 #include <complex>
 
 namespace krims {
-namespace exceptions {
 
 //
 // Numerics
@@ -180,5 +179,4 @@ DefExceptionMsg(ExcIO, "An input/output error has occurred.");
  */
 DefException1(ExcFileNotOpen, char *, << "Could not open file " << arg1);
 
-}  // namespace exceptions
 }  // namespace krims

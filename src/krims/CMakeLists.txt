@@ -23,9 +23,8 @@
 # set the source files.
 #
 set(KRIMS_SOURCES
-	exceptions/ExceptionBase.cc
-	exceptions/exception_defs.cc
-	ParameterMap.cc
+	ExceptionSystem/exception_defs.cc
+	ExceptionSystem/ExceptionBase.cc
 	version.cc
 )
 

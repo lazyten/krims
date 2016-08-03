@@ -17,16 +17,28 @@
 // along with krims. If not, see <http://www.gnu.org/licenses/>.
 //
 
-#define CATCH_CONFIG_RUNNER
-#include <catch.hpp>
-#include <krims/ExceptionSystem.hh>
+#pragma once
+#include <complex>
+#include <type_traits>
 
-int main(int argc, char* const argv[]) {
-  // Make sure that the program does not get aborted,
-  // but all krims exceptions throw instead.
-  krims::AssertDbgEffect::set_throw();
+namespace krims {
 
-  // Run catch:
-  int result = Catch::Session().run(argc, argv);
-  return result;
+//@{
+/** \brief helper struct to extract the underlying real type from a
+ *         potentially complex scalar type.
+ *
+ * The real type is accessible via the member type "type".
+ *  */
+template <typename Scalar>
+struct RealTypeOf {
+  static_assert(std::is_arithmetic<Scalar>::value,
+                "RealTypeOf can only operate oni arithmetic types.");
+  typedef Scalar type;
+};
+
+template <typename Scalar>
+struct RealTypeOf<std::complex<Scalar>> {
+  typedef Scalar type;
+};
+//@}
 }

@@ -23,7 +23,6 @@
 #include <string>
 
 namespace krims {
-namespace exceptions {
 
 /** \brief Base class for all exceptions in krims
  *
@@ -92,5 +91,4 @@ private:
   mutable std::string m_what_str;
 };
 
-}  // namespace exceptions
 }  // namespace krims

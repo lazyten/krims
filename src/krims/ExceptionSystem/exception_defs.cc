@@ -17,9 +17,10 @@
 // along with krims. If not, see <http://www.gnu.org/licenses/>.
 //
 
-#pragma once
+#include "exception_defs.hh"
 
-// Include this header to get the krims exception system.
+namespace krims {
+// Set default effect of the assert_dbg macro to ABORT
+ExceptionEffect AssertDbgEffect::m_eff = ExceptionEffect::ABORT;
 
-#include "exceptions/Exceptions.hh"
-#include "exceptions/exception_helper_functions.hh"
+}  // namespace krims
