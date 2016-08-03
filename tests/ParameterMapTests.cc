@@ -106,7 +106,7 @@ TEST_CASE("ParameterMap tests", "[parametermap]") {
     m.update("dum", dum);
 
     PointerWrapper<std::string> sptr = m.at_ptr<std::string>("string");
-    REQUIRE(sptr.contains_shared_ptr());
+    REQUIRE(sptr.is_shared_ptr());
     REQUIRE(*sptr == s);
     REQUIRE(*static_cast<std::shared_ptr<std::string>>(sptr) == s);
 
@@ -126,7 +126,7 @@ TEST_CASE("ParameterMap tests", "[parametermap]") {
   // ---------------------------------------------------------------
   //
 
-  SECTION("Test update from cheaply copyable data or Subscribable objects") {
+  SECTION("Test update from cheaply copyable data.") {
     ParameterMap m;
     double d = 3.4;
     m.update("double", d);
