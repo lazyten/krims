@@ -39,6 +39,8 @@ struct DummySubscribable : public Subscribable, public std::array<T, 4> {
 };
 }
 
+// TODO redo these tests with const parameter maps
+
 TEST_CASE("ParameterMap tests", "[parametermap]") {
   using namespace parametermap_tests;
 
@@ -52,7 +54,7 @@ TEST_CASE("ParameterMap tests", "[parametermap]") {
     ParameterMap m{};
     m.update_copy("string", s);
     m.update_copy("integer", i);
-    m.update("dummy", make_subscription(dum, "ParameterMap_FirstTest"));
+    m.update("dummy", dum);
 
     // See if we get it back:
     REQUIRE(m.at<int>("integer") == i);
@@ -70,7 +72,7 @@ TEST_CASE("ParameterMap tests", "[parametermap]") {
     ParameterMap m{};
     m.update_copy("s", s);
     m.update_copy("i", i);
-    m.update("dum", make_subscription(dum, "ParameterMap_SecondTest"));
+    m.update("dum", dum);
 
     // Extract using the wrong type
     REQUIRE_THROWS_AS(m.at<double>("i"), ParameterMap::ExcWrongTypeRequested);
@@ -101,18 +103,73 @@ TEST_CASE("ParameterMap tests", "[parametermap]") {
     ParameterMap m{};
     m.update_copy("string", s);
     m.update_copy("integer", i);
-    m.update("dum", make_subscription(dum, "ParameterMap_ThirdTest"));
+    m.update("dum", dum);
+
+    PointerWrapper<std::string> sptr = m.at_ptr<std::string>("string");
+    REQUIRE(sptr.contains_shared_ptr());
+    REQUIRE(*sptr == s);
+    REQUIRE(*static_cast<std::shared_ptr<std::string>>(sptr) == s);
 
     std::shared_ptr<int> iptr = m.at_ptr<int>("integer");
-    std::shared_ptr<std::string> sptr = m.at_ptr<std::string>("string");
-
     REQUIRE(*iptr == i);
-    REQUIRE(*sptr == s);
 
-    REQUIRE_THROWS_AS(m.at_ptr<DummySubscribable<double>>("dum"),
-                      ParameterMap::ExcWrongPointerRequested);
+    PointerWrapper<DummySubscribable<double>> dumptr =
+          m.at_ptr<DummySubscribable<double>>("dum");
+    REQUIRE_THROWS_AS(
+          auto s =
+                static_cast<std::shared_ptr<DummySubscribable<double>>>(dumptr),
+          ExcDisabled);
   }
 #endif
+
+  //
+  // ---------------------------------------------------------------
+  //
+
+  SECTION("Test update from cheaply copyable data or Subscribable objects") {
+    ParameterMap m;
+    double d = 3.4;
+    m.update("double", d);
+    m.update("noref", 3.141592);
+    m.update("word", "some");
+    m.update("dum", dum);
+
+    REQUIRE(m.at<double>("double") == d);
+    REQUIRE(m.at<double>("noref") == 3.141592);
+    REQUIRE(m.at<std::string>("word") == "some");
+    REQUIRE(m.at<DummySubscribable<double>>("dum") == dum);
+  }
+
+  //
+  // ---------------------------------------------------------------
+  //
+
+  SECTION("Test at with default return") {
+    ParameterMap m;
+    m.update("string", s);
+    m.update("integer", i);
+
+    REQUIRE(m.at<int>("blubber", 4) == 4);
+    REQUIRE(m.at<std::string>("blub", "neun") == "neun");
+  }
+
+  //
+  // ---------------------------------------------------------------
+  //
+
+  SECTION("Test construction from initialiser list") {
+    ParameterMap m{{"value1", 1},
+                   {"word", "a"},
+                   {"integer", i},
+                   {"string", s},
+                   {"dum", dum}};
+
+    REQUIRE(m.at<int>("value1") == 1);
+    REQUIRE(m.at<std::string>("word") == "a");
+    REQUIRE(m.at<int>("integer") == i);
+    REQUIRE(m.at<std::string>("string") == s);
+    REQUIRE(m.at<DummySubscribable<double>>("dum") == dum);
+  }
 
   //
   // ---------------------------------------------------------------
@@ -123,7 +180,7 @@ TEST_CASE("ParameterMap tests", "[parametermap]") {
     ParameterMap m{};
     m.update_copy("s", s);
     m.update_copy("i", i);
-    m.update("dum", make_subscription(dum, "ParameterMap_SecondTest"));
+    m.update("dum", dum);
 
     // check it is there:
     REQUIRE(m.exists("i"));

@@ -19,174 +19,235 @@
 
 #pragma once
 #include "ExceptionSystem.hh"
+#include "PointerWrapper.hh"
 #include "SubscriptionPointer.hh"
+#include "TypeUtils.hh"
 #include <map>
 #include <memory>
 #include <string>
 
 namespace krims {
 
-/** ParameterMap is essentially a map from std::string to
- *  a shared pointer of void. This way an arbitrary amount of arbitrary
- *  objects can be passed around using this object and they can be quickly
- *  accessed by the std::string key.
+/** ParameterMap is essentially a map from std::string to objects of
+ *  arbitrary type.
+ *
+ *  This way an arbitrary amount of arbitrary objects can be passed
+ *  around using this object and they can be quickly accessed by the
+ *  std::string key.
  */
 class ParameterMap {
-
-  // TODO: Use default argument in get functions (if key is not defined)
-  //       integral and basic types should be supplied by value.
-
-  // TODO use a dual pointer class that contains either a subscription pointer
-  // or a shared pointer. It is default constructed from both a subscription
-  // pointer or a shared pointer.
-  // Further it can be converted to the aprorpiate pointertype explicitly
-  // and provides check functions to see which pointer it contains.
+public:
+  class EntryValue;
 
 public:
+  typedef std::map<std::string, EntryValue> inner_map_type;
+  typedef std::pair<const std::string, EntryValue> entry_type;
+
   //
   // Exception declaration:
   //
   /** Exception to indicate that a wrong type was requested */
-  DefException3(ExcWrongTypeRequested, std::string, std::string, std::string,
-                << "Requested type " << arg1 << " from ParameterMap using key "
-                << arg2 << ". The value however has type " << arg3 << ".");
+  DefException2(ExcWrongTypeRequested, std::string, std::string,
+                << "Requested invalid type " << arg1 << " from ParameterMap."
+                << " The value has type " << arg2 << ".");
 
   /** Exception thrown if a key is not valid */
   DefException1(ExcUnknownKey, std::string, << "The key " << arg1
                                             << " is unknown.");
 
-  DefExceptionMsg(ExcWrongPointerRequested,
-                  "Cannot return shared pointer if object was stored using a "
-                  "SubscriptionPointer.");
-
-private:
-  //
-  // The ExtractValueFromPointer class
-  //
-  /** Helper class to make sure that no compiler error gets produced
-   * when T is not a Subscribable
-   */
-  template <typename T,
-            typename = typename std::is_base_of<Subscribable, T>::type>
-  struct DereferencePointerSubscriptionPointer {
-    typedef T& result_type;
-    typedef const std::shared_ptr<void> argument_type;
-
-    T& operator()(std::shared_ptr<void> p) const;
-  };
-
-  /** Specialisation for objects which are not subscribable
-   *
-   * Does nothing.
-   * */
-  template <typename T>
-  struct DereferencePointerSubscriptionPointer<T, std::false_type> {
-    typedef T& result_type;
-    typedef const std::shared_ptr<void> argument_type;
-
-    T& operator()(std::shared_ptr<void>);
-
-  private:
-    /** A dummy value to return */
-    static constexpr T* m_ptr = nullptr;
-  };
-
   //
   // The entry class
   //
-  class Entry {
+  /** \brief Class to contain an entry in a parameter map, i.e. the thing the
+   *  key string actually points to.
+   *
+   * Can be constructed from elementary types by copying their value or from
+   * a std::shared_ptr or a SubscriptionPointer to the object we emplace in the
+   * map or from an object which is subscribable (which will automatically be
+   * subscribed to.
+   */
+  class EntryValue {
   public:
-    /** Default constructor: Construct empty object */
-    Entry();
+    /** \brief Default constructor: Constructs empty object */
+    EntryValue() : m_object_ptr_ptr{nullptr} {}
 
-    template <typename T>
-    explicit Entry(std::shared_ptr<T> ptr);
+    /** \brief Make a EntryValue out of a type which is cheap to copy.
+     *
+     * This includes std::string and all relevant numeric types (integers,
+     * floating point numbers, complex numbers)
+     **/
+    template <typename T, typename std::enable_if<IsCheaplyCopyable<T>::value,
+                                                  int>::type = 0>
+    EntryValue(T t) {
+      copy_in<T>(t);
+    }
 
-    template <typename T>
-    explicit Entry(SubscriptionPointer<T> ptr);
+    /** \brief Make an EntryValue out of a const char*.
+     *
+     * This behaves like the equivalent EntryValue of a  std::string */
+    EntryValue(const char* s) : EntryValue(std::string(s)) {}
 
+    /** \brief Make an EntryValue from a shared pointer */
     template <typename T>
-    T& get(const std::string& key);
+    EntryValue(std::shared_ptr<T> t_ptr);
 
-    template <typename T>
-    const T& get(const std::string& key) const;
+    /** Make an EntryValue from a Subscribable object */
+    template <typename T,
+              typename std::enable_if<std::is_base_of<Subscribable, T>::value,
+                                      int>::type = 0>
+    EntryValue(T& t);
 
+    /** Obtain a non-const pointer to the internal object */
     template <typename T>
-    std::shared_ptr<T> get_ptr(const std::string& key);
+    PointerWrapper<T> get_ptr();
 
+    /** Obtain a const pointer to the internal object */
     template <typename T>
-    std::shared_ptr<const T> get_ptr(const std::string& key) const;
+    PointerWrapper<const T> get_ptr() const;
+
+    /** Obtain a reference to the internal object */
+    template <typename T>
+    T& get() {
+      return *get_ptr<T>();
+    }
+
+    /** Obtain a const reference to the internal object */
+    template <typename T>
+    const T& get() const {
+      return *get_ptr<T>();
+    }
+
+    /** Is the object empty */
+    bool empty() const { return m_object_ptr_ptr == nullptr; }
 
   private:
-    // The stored pointer
-    std::shared_ptr<void> m_object_ptr;
+    //! Stupidly copy the object and set the m_object_ptr_ptr
+    template <typename T>
+    void copy_in(T t);
 
-    // Is the object_ptr a pointer to the object
-    // or a pointer to a subscription_pointer
-    bool m_via_subscription_ptr;
+    /** The stored pointer to the Pointerwrapper<T>
+     * In other words: Twice dereferencing this will always
+     * get us the object back.
+     */
+    std::shared_ptr<void> m_object_ptr_ptr;
+
 #ifdef DEBUG
     std::string m_type_name;
 #endif
   };
 
-public:
-  /** Insert or update using a shared pointer */
-  template <typename T>
-  void update(std::string key, std::shared_ptr<T> object_ptr);
+  /** \name Constructors */
+  ///@{
+  /** \brief default constructor
+   * Constructs empty map */
+  ParameterMap() : m_container{} {}
 
-  /** Insert or update using a SubscriptionPointer */
-  template <typename T>
-  void update(std::string key, SubscriptionPointer<T> object_ptr);
+  /** \brief Construct parameter map from initialiser list of entry_types */
+  ParameterMap(std::initializer_list<entry_type> il) : m_container(il) {}
+  ///@}
 
-  // TODO have simple overload for primitive types (int, double, ...
-  //      which calls update_copy automatically.
-  //
-  //      Have simple overload for Subscriabables which makes a subscription
-  //      automatically
+  /** \name Modifiers */
+  ///@{
+  /** \brief Insert or update using a shared pointer */
+  template <typename T>
+  void update(const std::string& key, std::shared_ptr<T> object_ptr) {
+    m_container[key] = EntryValue{std::move(object_ptr)};
+  }
+
+  /** Insert or update using a Subscribable object */
+  template <typename T,
+            typename std::enable_if<std::is_base_of<Subscribable, T>::value,
+                                    int>::type = 0>
+  void update(const std::string& key, T& t) {
+    m_container[key] = EntryValue{t};
+  }
+
+  /** Insert or update using an object which can be cheaply copied */
+  template <typename T,
+            typename std::enable_if<IsCheaplyCopyable<T>::value, int>::type = 0>
+  void update(const std::string& key, T t) {
+    m_container[key] = EntryValue{std::move(t)};
+  }
+
+  /** Insert or update using a const char*, which behaves as if it was a string
+   */
+  void update(const std::string& key, const char* s) {
+    m_container[key] = EntryValue{s};
+  }
 
   /** Insert or update a key with a copy of an element */
   template <typename T>
-  void update_copy(std::string key, T object);
+  void update_copy(std::string key, T object) {
+    m_container[key] = EntryValue{std::make_shared<T>(object)};
+  }
 
-  /** Remove an element */
-  void erase(const std::string& key);
+  /** \brief Try to remove an element.
+   *
+   * Return the number of removed elements (i.e. 0 or 1)*/
+  size_t erase(const std::string& key) { return m_container.erase(key); }
 
-  /** Check weather a key exists */
-  bool exists(const std::string& key) const;
+  void clear() noexcept { m_container.clear(); }
+  ///@}
 
-  /** TODO: More functions: Clear, operator[], size, iterator */
-
-  /** Get the value of an element
+  /** Return the value at a given key in a specific type
+   *
+   * If the value cannot be found an ExcUnknownKey is thrown.
+   * If the type requested is wrong the program is aborted.
    */
   template <typename T>
   T& at(const std::string& key);
 
-  /** Return the value at a given key in a specific type
+  /** \brief Return the value at a given key in a specific type (const version)
+   * See non-const version for details.
    */
   template <typename T>
   const T& at(const std::string& key) const;
 
-  /** Return the pointer to the value of a specific key.
+  /** \brief Get the value of an element.
    *
-   * This only works if the data has been supplied to the
-   * parameter map via a shared pointer as well or has
-   * been supplied by update_copy().
+   * If the key cannot be found, returns the reference provided instead.
+   * If the type requested is wrong the program is aborted.
    */
   template <typename T>
-  std::shared_ptr<T> at_ptr(const std::string& key);
+  T& at(const std::string& key, T& default_value);
 
-  /** Return the pointer to the value of a specific key.
-   *
-   * This only works if the data has been supplied to the
-   * parameter map via a shared pointer as well or has
-   * been supplied by update_copy().
+  /** \brief Get the value of an element (const version).
+   * See non-const version for details.
    */
   template <typename T>
-  std::shared_ptr<const T> at_ptr(const std::string& key) const;
+  const T& at(const std::string& key, const T& default_value) const;
+
+  /** \brief Return the pointer to the value of a specific key.
+   *
+   * The returned object is a PointerWrapper, meaning that it internally
+   * may contain a shared pointer, but it may also contain a
+   * SubscriptionPointer. It can be used as if it was a normal pointer,
+   * but in order to extract the actual shared_ptr out of it an explicit
+   * cast to the appropriate shared_ptr type is required.
+   *
+   * In case this is not possible (i.e. it does contain a
+   * SubscriptionPointer instead) an exception is raised in Debug mode.
+   * Use the contains_shared_ptr() function to check this.
+   */
+  template <typename T>
+  PointerWrapper<T> at_ptr(const std::string& key);
+
+  /** Return the pointer to the value of a specific key. (const version)
+   *
+   * See non-const version for details
+   */
+  template <typename T>
+  PointerWrapper<const T> at_ptr(const std::string& key) const;
+
+  // TODO find, iterators
+
+  /** Check weather a key exists */
+  bool exists(const std::string& key) const {
+    return m_container.find(key) != std::end(m_container);
+  }
 
 private:
-  // TODO use unordered_map !!! (amortised constant []
-  std::map<std::string, Entry> m_container;
+  inner_map_type m_container;
 };
 
 //
@@ -194,145 +255,121 @@ private:
 //
 
 //
-// FullDereference
-//
-template <typename T, typename B>
-T& ParameterMap::DereferencePointerSubscriptionPointer<T, B>::operator()(
-      std::shared_ptr<void> p) const {
-  // Extract pointer to subscription pointer
-  auto ptr_ptr = std::static_pointer_cast<SubscriptionPointer<T>>(p);
-
-  // return the value by twice dereferencing:
-  return *(*ptr_ptr);
-}
-
-template <typename T>
-T& ParameterMap::DereferencePointerSubscriptionPointer<T, std::false_type>::
-operator()(std::shared_ptr<void>) {
-  assert_dbg(false, exceptions::ExcNotImplemented());
-  return *m_ptr;
-}
-
-//
-// Entry subclass
+// EntryValue subclass
 //
 template <typename T>
-ParameterMap::Entry::Entry(std::shared_ptr<T> ptr)
-      : m_object_ptr(ptr), m_via_subscription_ptr(false) {
+ParameterMap::EntryValue::EntryValue(std::shared_ptr<T> t_ptr) {
+  // see copy_in and m_object_ptr_ptr comments for defails why this is done
+  m_object_ptr_ptr = std::make_shared<PointerWrapper<T>>(std::move(t_ptr));
 #ifdef DEBUG
-  m_type_name = typeid(T).name();
+  m_type_name = std::string(typeid(T).name());
+#endif
+}
+
+template <typename T, typename std::enable_if<
+                            std::is_base_of<Subscribable, T>::value, int>::type>
+ParameterMap::EntryValue::EntryValue(T& t) {
+  SubscriptionPointer<T> t_ptr = make_subscription(t, "EntryValue");
+
+  // see copy_in and m_object_ptr_ptr comments for defails why this is done
+  m_object_ptr_ptr = std::make_shared<PointerWrapper<T>>(std::move(t_ptr));
+
+#ifdef DEBUG
+  m_type_name = std::string(typeid(T).name());
 #endif
 }
 
 template <typename T>
-ParameterMap::Entry::Entry(SubscriptionPointer<T> ptr)
-      : m_object_ptr(std::make_shared<SubscriptionPointer<T>>(ptr)),
-        m_via_subscription_ptr(true) {
+void ParameterMap::EntryValue::copy_in(T t) {
+  // Make a shared pointer out of T:
+  auto t_ptr = std::make_shared<T>(std::move(t));
+
+  // Now enwrap the t_ptr inside a PointerWrapper and make
+  // a shared_ptr to the Wrapper, then set it
+  m_object_ptr_ptr = std::make_shared<PointerWrapper<T>>(t_ptr);
+
 #ifdef DEBUG
-  m_type_name = typeid(T).name();
+  // Keep an eye on the type name
+  m_type_name = std::string(typeid(T).name());
 #endif
 }
 
 template <typename T>
-T& ParameterMap::Entry::get(const std::string& key) {
-  // check that the correct type is requested:
-  assert_dbg(m_type_name == typeid(T).name(),
-             ExcWrongTypeRequested(typeid(T).name(), key, m_type_name));
+PointerWrapper<T> ParameterMap::EntryValue::get_ptr() {
+  assert_dbg(m_type_name == std::string(typeid(T).name()),
+             ExcWrongTypeRequested(std::string(typeid(T).name()), m_type_name));
+  assert_dbg(!empty(), ExcInvalidPointer());
 
-  if (m_via_subscription_ptr) {
-    DereferencePointerSubscriptionPointer<T> dereference;
-    return dereference(m_object_ptr);
-  } else {
-    // Extract pointer to type and dereference it
-    return *std::static_pointer_cast<T>(m_object_ptr);
-  }
+  // We need to cast and then dereference to get the PointerWrapper of the
+  // appropriate type out.
+  return *std::static_pointer_cast<PointerWrapper<T>>(m_object_ptr_ptr);
 }
 
 template <typename T>
-const T& ParameterMap::Entry::get(const std::string& key) const {
-  // check that the correct type is requested:
-  assert_dbg(m_type_name == typeid(T).name(),
-             ExcWrongTypeRequested(typeid(T).name(), key, m_type_name));
+PointerWrapper<const T> ParameterMap::EntryValue::get_ptr() const {
+  assert_dbg(m_type_name == std::string(typeid(T).name()),
+             ExcWrongTypeRequested(std::string(typeid(T).name()), m_type_name));
+  assert_dbg(!empty(), ExcInvalidPointer());
 
-  if (m_via_subscription_ptr) {
-    DereferencePointerSubscriptionPointer<T> dereference;
-    return dereference(m_object_ptr);
-  } else {
-    // Extract pointer to type and dereference it
-    return *std::static_pointer_cast<T>(m_object_ptr);
-  }
-}
-
-template <typename T>
-std::shared_ptr<T> ParameterMap::Entry::get_ptr(const std::string& key) {
-  // check that the correct type is requested:
-  assert_dbg(m_type_name == typeid(T).name(),
-             ExcWrongTypeRequested(typeid(T).name(), key, m_type_name));
-
-  assert_dbg(!m_via_subscription_ptr, ExcWrongPointerRequested());
-  return std::static_pointer_cast<T>(m_object_ptr);
-}
-
-template <typename T>
-std::shared_ptr<const T> ParameterMap::Entry::get_ptr(
-      const std::string& key) const {
-  // check that the correct type is requested:
-  assert_dbg(m_type_name == typeid(T).name(),
-             ExcWrongTypeRequested(typeid(T).name(), key, m_type_name));
-
-  assert_dbg(!m_via_subscription_ptr, ExcWrongPointerRequested());
-  return std::static_pointer_cast<const T>(m_object_ptr);
+  // We need to cast and then dereference to get the PointerWrapper of the
+  // appropriate type out.
+  return *std::static_pointer_cast<PointerWrapper<const T>>(m_object_ptr_ptr);
 }
 
 //
 // ParameterMap
 //
 template <typename T>
-void ParameterMap::update(std::string key, std::shared_ptr<T> object_ptr) {
-  // Insert or update a new element:
-  m_container[key] = Entry{object_ptr};
-}
-
-/** Insert or update using a SubscriptionPointer */
-template <typename T>
-void ParameterMap::update(std::string key, SubscriptionPointer<T> object_ptr) {
-  // Insert or update a new element:
-  m_container[key] = Entry{object_ptr};
-}
-
-/** Insert or update a key with a copy of an element */
-template <typename T>
-void ParameterMap::update_copy(std::string key, T object) {
-  m_container[key] = Entry{std::make_shared<T>(object)};
-}
-
-/** Get the value of an element
- */
-template <typename T>
 T& ParameterMap::at(const std::string& key) {
   assert_dbg(exists(key), ExcUnknownKey(key));
-  return m_container.at(key).get<T>(key);
+  EntryValue& e = m_container.at(key);
+  return e.get<T>();
 }
 
-/** Return the value at a given key in a specific type
- */
 template <typename T>
 const T& ParameterMap::at(const std::string& key) const {
   assert_dbg(exists(key), ExcUnknownKey(key));
-  return m_container.at(key).get<T>(key);
+  const EntryValue& e = m_container.at(key);
+  return e.get<T>();
 }
 
 template <typename T>
-std::shared_ptr<T> ParameterMap::at_ptr(const std::string& key) {
+T& ParameterMap::at(const std::string& key, T& default_value) {
+  auto itkey = m_container.find(key);
+  if (itkey == std::end(m_container)) {
+    // Key not found, return default:
+    return default_value;
+  } else {
+    // Key found, return mapped value
+    return itkey->second;
+  }
+}
+
+template <typename T>
+const T& ParameterMap::at(const std::string& key,
+                          const T& default_value) const {
+  auto itkey = m_container.find(key);
+  if (itkey == std::end(m_container)) {
+    // Key not found, return default:
+    return default_value;
+  } else {
+    // Key found, return mapped value
+    return itkey->second.get<T>();
+  }
+}
+
+template <typename T>
+PointerWrapper<T> ParameterMap::at_ptr(const std::string& key) {
   assert_dbg(exists(key), ExcUnknownKey(key));
-  return m_container.at(key).get_ptr<T>(key);
+  EntryValue& e = m_container.at(key);
+  return e.get_ptr<T>();
 }
 
 template <typename T>
-std::shared_ptr<const T> ParameterMap::at_ptr(const std::string& key) const {
-  return m_container.at(key).get_ptr<T>(key);
+PointerWrapper<const T> ParameterMap::at_ptr(const std::string& key) const {
+  assert_dbg(exists(key), ExcUnknownKey(key));
+  const EntryValue& e = m_container.at(key);
+  return e.get_ptr<T>();
 }
-
-// TODO at_with_default function
 
 }  // krims
