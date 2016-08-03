@@ -61,6 +61,8 @@ void print_map(const ParameterMap& map) {
   // Print an always existing key
   std::cout << "always:           " << map.at<std::string>("always")
             << std::endl;
+  std::cout << "sub/always:       "
+            << map.at<std::string>("sub/always", "notfound") << std::endl;
 
   // Print some others
   std::cout << "pi:               " << map.at<double>("pi") << std::endl;
@@ -109,10 +111,32 @@ void modify_map(ParameterMap& map) {
   if (asptr.unique()) return;
 }
 
+void modify_map_other(ParameterMap& map) {
+  // Add/update some other values and things:
+  map.update({{"blubber", 99},
+              {"always", "sure"},
+              {"pi", -10.},
+              {"eins", "11111111"},
+              {"a", std::make_shared<A>()}});
+}
+
 int main() {
   ParameterMap map = make_map();
+
+  std::cout << "Printing map" << std::endl;
   print_map(map);
+
+  ParameterMap submap = map.submap("sub");
+  modify_map_other(submap);
+
+  std::cout << "Printing submap:" << std::endl;
+  print_map(map.submap("sub"));
+
   modify_map(map);
+
+  std::cout << "Printing map" << std::endl;
   print_map(map);
+  std::cout << "Printing submap:" << std::endl;
+  print_map(map.submap("sub"));
   return 0;
 }
