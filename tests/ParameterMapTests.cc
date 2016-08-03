@@ -39,8 +39,6 @@ struct DummySubscribable : public Subscribable, public std::array<T, 4> {
 };
 }
 
-// TODO redo these tests with const parameter maps
-
 TEST_CASE("ParameterMap tests", "[parametermap]") {
   using namespace parametermap_tests;
 
@@ -214,6 +212,50 @@ TEST_CASE("ParameterMap tests", "[parametermap]") {
     REQUIRE(m.exists("s"));
     REQUIRE(!m.exists("dum"));
   }
+
+  //
+  // ---------------------------------------------------------------
+  //
+
+  SECTION("Check submap functionality") {
+    // Add data to map.
+    ParameterMap m{
+          {"tree/sub", s}, {"tree/i", i}, {"dum", dum}, {"tree/value", 9}};
+
+    // check it is there:
+    REQUIRE(m.exists("tree/sub"));
+    REQUIRE(m.exists("tree/i"));
+    REQUIRE(m.exists("tree/value"));
+    REQUIRE(m.exists("dum"));
+
+    ParameterMap sub = m.submap("tree");
+
+    // Check existence:
+    REQUIRE_FALSE(sub.exists("tree/sub"));
+    REQUIRE_FALSE(sub.exists("tree/i"));
+    REQUIRE_FALSE(sub.exists("dum"));
+    REQUIRE(sub.exists("sub"));
+    REQUIRE(sub.exists("i"));
+    REQUIRE(sub.exists("value"));
+
+    // Check value is appropriate:
+    REQUIRE(sub.at<std::string>("sub") == s);
+    REQUIRE(sub.at<int>("i") == i);
+    REQUIRE(sub.at<int>("value") == 9);
+
+    // Check adding a new value in the submap:
+    sub.update("neu", 1.23);
+    sub.update("value", 10);
+    REQUIRE(m.at<double>("tree/neu") == 1.23);
+    REQUIRE(m.at<int>("tree/value") == 10);
+  }
+
+  //
+  // ---------------------------------------------------------------
+  //
+
+  // TODO Test that changing data in copies / submaps does the intended thing
+  // TODO Test mass update from initialiser list
 
 }  // TEST_CASE
 }  // namespace test

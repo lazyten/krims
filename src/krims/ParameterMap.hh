@@ -34,10 +34,15 @@ namespace krims {
  *  This way an arbitrary amount of arbitrary objects can be passed
  *  around using this object and they can be quickly accessed by the
  *  std::string key.
+ *
+ *  TODO: Documentation how / are special and go into submaps down the tree
  */
 class ParameterMap {
 public:
   class EntryValue;
+
+  // TODO: When modifying an entry using update, make sure that the type
+  //       stays unchanged
 
 public:
   typedef std::map<std::string, EntryValue> inner_map_type;
@@ -136,14 +141,31 @@ public:
 #endif
   };
 
-  /** \name Constructors */
+  /** \name Constructors, destructors and assignment */
   ///@{
   /** \brief default constructor
    * Constructs empty map */
-  ParameterMap() : m_container{} {}
+  ParameterMap()
+        : m_container_ptr{std::make_shared<inner_map_type>()},
+          m_location{"/"} {}
 
   /** \brief Construct parameter map from initialiser list of entry_types */
-  ParameterMap(std::initializer_list<entry_type> il) : m_container(il) {}
+  ParameterMap(std::initializer_list<entry_type> il) : ParameterMap{} {
+    update(il);
+  };
+
+  ~ParameterMap() = default;
+  ParameterMap(ParameterMap&&) = default;
+  ParameterMap& operator=(ParameterMap&&) = default;
+
+  /** \brief Copy constructor */
+  ParameterMap(const ParameterMap& other)
+        : m_container_ptr{std::make_shared<inner_map_type>(
+                *other.m_container_ptr)},
+          m_location{other.m_location} {}
+
+  /** \brief Copy assignment operator */
+  ParameterMap& operator=(const ParameterMap& other);
   ///@}
 
   /** \name Modifiers */
@@ -151,7 +173,7 @@ public:
   /** \brief Insert or update using a shared pointer */
   template <typename T>
   void update(const std::string& key, std::shared_ptr<T> object_ptr) {
-    m_container[key] = EntryValue{std::move(object_ptr)};
+    (*m_container_ptr)[make_full_key(key)] = EntryValue{std::move(object_ptr)};
   }
 
   /** Insert or update using a Subscribable object */
@@ -159,34 +181,48 @@ public:
             typename std::enable_if<std::is_base_of<Subscribable, T>::value,
                                     int>::type = 0>
   void update(const std::string& key, T& t) {
-    m_container[key] = EntryValue{t};
+    (*m_container_ptr)[make_full_key(key)] = EntryValue{t};
   }
 
   /** Insert or update using an object which can be cheaply copied */
   template <typename T,
             typename std::enable_if<IsCheaplyCopyable<T>::value, int>::type = 0>
   void update(const std::string& key, T t) {
-    m_container[key] = EntryValue{std::move(t)};
+    (*m_container_ptr)[make_full_key(key)] = EntryValue{std::move(t)};
   }
 
   /** Insert or update using a const char*, which behaves as if it was a string
    */
   void update(const std::string& key, const char* s) {
-    m_container[key] = EntryValue{s};
+    (*m_container_ptr)[make_full_key(key)] = EntryValue{s};
+  }
+
+  /** \brief Update many entries using an initialiser list
+   *
+   * TODO More details, have an example
+   * */
+  void update(std::initializer_list<entry_type> il) {
+    // Make each key a full path key and append/modify entry in map
+    for (entry_type t : il) {
+      (*m_container_ptr)[make_full_key(t.first)] = std::move(t.second);
+    }
   }
 
   /** Insert or update a key with a copy of an element */
   template <typename T>
   void update_copy(std::string key, T object) {
-    m_container[key] = EntryValue{std::make_shared<T>(object)};
+    (*m_container_ptr)[make_full_key(key)] =
+          EntryValue{std::make_shared<T>(object)};
   }
 
   /** \brief Try to remove an element.
    *
    * Return the number of removed elements (i.e. 0 or 1)*/
-  size_t erase(const std::string& key) { return m_container.erase(key); }
+  size_t erase(const std::string& key) {
+    return m_container_ptr->erase(make_full_key(key));
+  }
 
-  void clear() noexcept { m_container.clear(); }
+  void clear() noexcept { m_container_ptr->clear(); }
   ///@}
 
   /** Return the value at a given key in a specific type
@@ -243,11 +279,58 @@ public:
 
   /** Check weather a key exists */
   bool exists(const std::string& key) const {
-    return m_container.find(key) != std::end(m_container);
+    return m_container_ptr->find(make_full_key(key)) !=
+           std::end(*m_container_ptr);
   }
 
+  /** Get a submap starting pointing at location loc
+   *
+   * TODO expand and clarify docs here!
+   * */
+  ParameterMap submap(const std::string& location) const {
+    // TODO This is a very crude implementation of the required functionality
+    // It would be more sensible to have a different Type for this, which stores
+    // a reference to the actual guy or so. But maybe we get away fine if we do
+    // not allow propagation up (e.g. ..)
+
+    // Clean the location path first:
+    std::string newlocation = make_full_key(location);
+
+    // Add a tailing "/" if not yet there
+    if (newlocation.back() != '/') newlocation += "/";
+
+    // Use a special constructor, which makes the resulting ParameterMap object
+    // share
+    // the map string->EntryValue, but stand at a different location
+    return ParameterMap{m_container_ptr, newlocation};
+  }
+
+  // TODO alias names, i.e. link one name to a different one.
+  //      but be careful not to get a cyclic graph.
+
 private:
-  inner_map_type m_container;
+  /** \brief Construct parameter map from another map and a new location. */
+  ParameterMap(std::shared_ptr<inner_map_type> map, std::string newlocation)
+        : m_container_ptr{map}, m_location{newlocation} {}
+
+  /** Make the actual container key from a key supplied by the user */
+  std::string make_full_key(const std::string& key) const {
+    // Prepend location
+    std::string res = m_location + key;
+
+    // TODO Perform path cleanup, i.e. remove duplicate /
+    // and deal with special things like ./. and ../
+    //
+    // Maybe disallow propagation up, i.e. /blubber/blibber/../ or any
+    // paths containing ".." See submap function for details.
+    return res;
+  }
+
+  std::shared_ptr<inner_map_type> m_container_ptr;
+
+  /** The location we are currently on in the tree
+   * Has to end with a slash. */
+  std::string m_location;
 };
 
 //
@@ -259,7 +342,7 @@ private:
 //
 template <typename T>
 ParameterMap::EntryValue::EntryValue(std::shared_ptr<T> t_ptr) {
-  // see copy_in and m_object_ptr_ptr comments for defails why this is done
+  // see copy_in and m_object_ptr_ptr comments for details why this is done
   m_object_ptr_ptr = std::make_shared<PointerWrapper<T>>(std::move(t_ptr));
 #ifdef DEBUG
   m_type_name = std::string(typeid(T).name());
@@ -271,7 +354,7 @@ template <typename T, typename std::enable_if<
 ParameterMap::EntryValue::EntryValue(T& t) {
   SubscriptionPointer<T> t_ptr = make_subscription(t, "EntryValue");
 
-  // see copy_in and m_object_ptr_ptr comments for defails why this is done
+  // see copy_in and m_object_ptr_ptr comments for details why this is done
   m_object_ptr_ptr = std::make_shared<PointerWrapper<T>>(std::move(t_ptr));
 
 #ifdef DEBUG
@@ -319,24 +402,30 @@ PointerWrapper<const T> ParameterMap::EntryValue::get_ptr() const {
 //
 // ParameterMap
 //
+ParameterMap& ParameterMap::operator=(const ParameterMap& other) {
+  m_location = other.m_location;
+  m_container_ptr = std::make_shared<inner_map_type>(*other.m_container_ptr);
+  return *this;
+}
+
 template <typename T>
 T& ParameterMap::at(const std::string& key) {
   assert_dbg(exists(key), ExcUnknownKey(key));
-  EntryValue& e = m_container.at(key);
+  EntryValue& e = m_container_ptr->at(make_full_key(key));
   return e.get<T>();
 }
 
 template <typename T>
 const T& ParameterMap::at(const std::string& key) const {
   assert_dbg(exists(key), ExcUnknownKey(key));
-  const EntryValue& e = m_container.at(key);
+  const EntryValue& e = m_container_ptr->at(make_full_key(key));
   return e.get<T>();
 }
 
 template <typename T>
 T& ParameterMap::at(const std::string& key, T& default_value) {
-  auto itkey = m_container.find(key);
-  if (itkey == std::end(m_container)) {
+  auto itkey = m_container_ptr->find(make_full_key(key));
+  if (itkey == std::end(*m_container_ptr)) {
     // Key not found, return default:
     return default_value;
   } else {
@@ -348,8 +437,8 @@ T& ParameterMap::at(const std::string& key, T& default_value) {
 template <typename T>
 const T& ParameterMap::at(const std::string& key,
                           const T& default_value) const {
-  auto itkey = m_container.find(key);
-  if (itkey == std::end(m_container)) {
+  auto itkey = m_container_ptr->find(make_full_key(key));
+  if (itkey == std::end(*m_container_ptr)) {
     // Key not found, return default:
     return default_value;
   } else {
@@ -361,14 +450,14 @@ const T& ParameterMap::at(const std::string& key,
 template <typename T>
 PointerWrapper<T> ParameterMap::at_ptr(const std::string& key) {
   assert_dbg(exists(key), ExcUnknownKey(key));
-  EntryValue& e = m_container.at(key);
+  EntryValue& e = m_container_ptr->at(make_full_key(key));
   return e.get_ptr<T>();
 }
 
 template <typename T>
 PointerWrapper<const T> ParameterMap::at_ptr(const std::string& key) const {
   assert_dbg(exists(key), ExcUnknownKey(key));
-  const EntryValue& e = m_container.at(key);
+  const EntryValue& e = m_container_ptr->at(make_full_key(key));
   return e.get_ptr<T>();
 }
 
