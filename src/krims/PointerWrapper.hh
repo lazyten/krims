@@ -72,7 +72,7 @@ public:
   /** Does this wrapper contain a shared pointer (true) or a
    *  subscription pointer (false)
    **/
-  constexpr bool contains_shared_ptr() const { return true; }
+  constexpr bool is_shared_ptr() const { return true; }
 
 private:
   const std::shared_ptr<T> m_shared_ptr;
@@ -152,7 +152,7 @@ public:
    *       the program in Debug mode, but will proceed in Release mode and
    *       thereby copy the contained data.
    **/
-  bool contains_shared_ptr() const { return m_contains_shared_ptr; }
+  bool is_shared_ptr() const { return m_contains_shared_ptr; }
 
 private:
   //! The stored subscription pointer (or a nullptr)
@@ -165,6 +165,49 @@ private:
   const bool m_contains_shared_ptr;
 };
 
-// TODO == operators (see subscription pointer)
+//
+// == and != comparison operators:
+//
+/** Compare if the PointerWrapper point to the same object */
+template <typename T>
+inline bool operator==(const PointerWrapper<T>& lhs,
+                       const PointerWrapper<T>& rhs) {
+  return lhs.get() == rhs.get();
+}
+
+/** Compare if the PointerWrappers do not point to the same object */
+template <typename T>
+inline bool operator!=(const PointerWrapper<T>& lhs,
+                       const PointerWrapper<T>& rhs) {
+  return !operator==(lhs, rhs);
+}
+
+/** Compare if the PointerWrapper points to no object, i.e. stores a
+ * nullptr */
+template <typename T>
+inline bool operator==(const PointerWrapper<T>& lhs, std::nullptr_t) {
+  return lhs.get() == nullptr;
+}
+
+/** Compare if the PointerWrapper pointer points to no object, i.e. stores a
+ * nullptr */
+template <typename T>
+inline bool operator==(std::nullptr_t, const PointerWrapper<T>& rhs) {
+  return rhs == nullptr;
+}
+
+/** Compare if the PointerWrapper pointer does not point to no object, i.e.
+ * stores no nullptr */
+template <typename T>
+inline bool operator!=(const PointerWrapper<T>& lhs, std::nullptr_t) {
+  return !operator==(lhs, nullptr);
+}
+
+/** Compare if the PointerWrapper pointer does not point to no object, i.e.
+ * stores no nullptr */
+template <typename T>
+inline bool operator!=(std::nullptr_t, const PointerWrapper<T>& rhs) {
+  return !operator==(nullptr, rhs);
+}
 
 }  // namespace krims
