@@ -17,8 +17,9 @@
 // along with krims. If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "krims/ParameterMap.hh"
 #include <iostream>
+#include <krims/ParameterMap.hh>
+#include <krims/version.hh>
 
 using namespace krims;
 
@@ -121,6 +122,10 @@ void modify_map_other(ParameterMap& map) {
 }
 
 int main() {
+  std::cout << "Using krims version " << krims::version::version_string()
+            << std::endl
+            << std::endl;
+
   ParameterMap map = make_map();
 
   std::cout << "Printing map" << std::endl;

@@ -27,9 +27,9 @@ struct version {
   // Note: CMake automatically fills this version information
   // via the header version_defs.hh and the WriteVersionHeader module
 
-  static int constexpr major{__version_var_major};
-  static int constexpr minor{__version_var_minor};
-  static int constexpr patch{__version_var_patch};
+  static int constexpr major{detail::__version_var_major};
+  static int constexpr minor{detail::__version_var_minor};
+  static int constexpr patch{detail::__version_var_patch};
 
   // Return the version as a string
   static std::string version_string();
