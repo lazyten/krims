@@ -61,13 +61,27 @@ function(WRITE_VERSION_HEADER _filename)
 	list(GET VERSION_LIST 1 WVH_MINOR)
 	list(GET VERSION_LIST 2 WVH_PATCH)
 
-	# Now dump the header:
-
-	file(WRITE "${_filename}"
+	# The content to write to disk:
+	set(CONTENT_TO_WRITE
 "#pragma once
 namespace ${WVH_NAME} {
+	namespace detail {
 	static int constexpr __version_var_major{${WVH_MAJOR}};
 	static int constexpr __version_var_minor{${WVH_MAJOR}};
 	static int constexpr __version_var_patch{${WVH_PATCH}};
-}")
+	} // namespace detail
+} // namespace ${WVH_NAME}
+")
+
+	# if we have a file already, check for changes first
+	if(EXISTS "${_filename}")
+		file(READ "${_filename}" ORIG_CONTENT)
+		if ("${ORIG_CONTENT}" STREQUAL "${CONTENT_TO_WRITE}")
+			# no need to write => timestamps stay unchanged
+			return()
+		endif()
+	endif()
+
+	# Now dump the content:
+	file(WRITE "${_filename}" "${CONTENT_TO_WRITE}")
 endfunction()
