@@ -88,8 +88,8 @@ TEST_CASE("TupleUtils tests", "[TupleUtils]") {
       RC_ASSERT((std::get<0>(t1) - std::get<1>(t1) - std::get<2>(t1)) ==
                 res_sub);
 
-      std::tuple<type1, type2, type3> orig = t1;
-      auto inmult = [](type1& e1, type2& e2, type3& e3) {
+      const std::tuple<type1, type2, type3> orig = t1;
+      auto inmult = [](type1& e1, const type2& e2, type3& e3) {
         e1 *= e2;
         e3 *= e2;
         return e2;
@@ -106,10 +106,10 @@ TEST_CASE("TupleUtils tests", "[TupleUtils]") {
       auto res_concat = krims::apply(concat, t2);
       RC_ASSERT(std::get<0>(t2) + std::get<1>(t2) == res_concat);
 
-      auto id = [](type3 e2) { return e2; };
-      auto val = *gen::arbitrary<type3>().as("Value for id");
-      auto res_id = krims::apply(id, std::make_tuple(val));
-      RC_ASSERT(val == res_id);
+      auto id = [](const type3& e2) { return e2; };
+      auto val = *gen::arbitrary<std::tuple<type3>>().as("Tuple for id");
+      auto res_id = krims::apply(id, val);
+      RC_ASSERT(std::get<0>(val) == res_id);
 
       auto prod = []() { return 1; };
       auto res_prod = krims::apply(prod, std::tuple<>{});
@@ -127,8 +127,8 @@ TEST_CASE("TupleUtils tests", "[TupleUtils]") {
       RC_ASSERT((std::get<3>(tboth) + std::get<4>(tboth)) == res_add.second);
 #else
       // For C++11 only up to 4 tuple elements are allowed
-      auto tboth = std::tuple<type1, type2, type4, type5>(
-            std::get<0>(t1), std::get<1>(t1), std::get<0>(t2), std::get<1>(t2));
+      std::tuple<type1, type2, type4, type5> tboth{
+            std::get<0>(t1), std::get<1>(t1), std::get<0>(t2), std::get<1>(t2)};
       auto add = [](type1& e1, type2& e2, type4& e4, type5& e5) {
         return std::make_pair(e1 + e2, e4 + e5);
       };

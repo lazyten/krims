@@ -77,29 +77,28 @@ constexpr decltype(auto) apply(Func&& f, Tuple&& t) {
 /** Call a functor or std::function object, taking the arguments from a
  * referenced tuple */
 template <typename Func, typename E0>
-constexpr typename std::result_of<Func(E0)>::type apply(Func&& f,
-                                                        std::tuple<E0>& t) {
-  return f(std::forward<E0>(std::get<0>(t)));
+constexpr auto apply(Func&& f, std::tuple<E0>& t)
+      -> decltype(f(std::get<0>(t))) {
+  return f(std::get<0>(t));
 }
 
 template <typename Func, typename E0, typename E1>
-constexpr typename std::result_of<Func(E0, E1)>::type apply(
-      Func&& f, std::tuple<E0, E1>& t) {
-  return f(std::forward<E0>(std::get<0>(t)), std::forward<E1>(std::get<1>(t)));
+constexpr auto apply(Func&& f, std::tuple<E0, E1>& t)
+      -> decltype(f(std::get<0>(t), std::get<1>(t))) {
+  return f(std::get<0>(t), std::get<1>(t));
 }
 
 template <typename Func, typename E0, typename E1, typename E2>
-constexpr typename std::result_of<Func(E0, E1, E2)>::type apply(
-      Func&& f, std::tuple<E0, E1, E2>& t) {
-  return f(std::forward<E0>(std::get<0>(t)), std::forward<E1>(std::get<1>(t)),
-           std::forward<E2>(std::get<2>(t)));
+constexpr auto apply(Func&& f, std::tuple<E0, E1, E2>& t)
+      -> decltype(f(std::get<0>(t), std::get<1>(t), std::get<2>(t))) {
+  return f(std::get<0>(t), std::get<1>(t), std::get<2>(t));
 }
 
 template <typename Func, typename E0, typename E1, typename E2, typename E3>
-constexpr typename std::result_of<Func(E0, E1, E2, E3)>::type apply(
-      Func&& f, std::tuple<E0, E1, E2, E3>& t) {
-  return f(std::forward<E0>(std::get<0>(t)), std::forward<E1>(std::get<1>(t)),
-           std::forward<E2>(std::get<2>(t)), std::forward<E3>(std::get<3>(t)));
+constexpr auto apply(Func&& f, std::tuple<E0, E1, E2, E3>& t)
+      -> decltype(f(std::get<0>(t), std::get<1>(t), std::get<2>(t),
+                    std::get<3>(t))) {
+  return f(std::get<0>(t), std::get<1>(t), std::get<2>(t), std::get<3>(t));
 }
 //@}
 
@@ -110,30 +109,37 @@ constexpr typename std::result_of<Func(E0, E1, E2, E3)>::type apply(
 /** Call a functor or std::function object, taking the arguments from a const
  * referenced tuple */
 template <typename Func, typename E0>
-constexpr typename std::result_of<Func(E0)>::type apply(
-      Func&& f, const std::tuple<E0>& t) {
+constexpr auto apply(Func&& f, const std::tuple<E0>& t)
+      -> decltype(f(std::forward<E0>(std::get<0>(t)))) {
   return f(std::forward<E0>(std::get<0>(t)));
 }
 
 template <typename Func, typename E0, typename E1>
-constexpr typename std::result_of<Func(E0, E1)>::type apply(
-      Func&& f, const std::tuple<E0, E1>& t) {
+constexpr auto apply(Func&& f, const std::tuple<E0, E1>& t)
+      -> decltype(f(std::forward<E0>(std::get<0>(t)),
+                    std::forward<E1>(std::get<1>(t)))) {
   return f(std::forward<E0>(std::get<0>(t)), std::forward<E1>(std::get<1>(t)));
 }
 
 template <typename Func, typename E0, typename E1, typename E2>
-constexpr typename std::result_of<Func(E0, E1, E2)>::type apply(
-      Func&& f, const std::tuple<E0, E1, E2>& t) {
+constexpr auto apply(Func&& f, const std::tuple<E0, E1, E2>& t)
+      -> decltype(f(std::forward<E0>(std::get<0>(t)),
+                    std::forward<E1>(std::get<1>(t)),
+                    std::forward<E2>(std::get<2>(t)))) {
   return f(std::forward<E0>(std::get<0>(t)), std::forward<E1>(std::get<1>(t)),
            std::forward<E2>(std::get<2>(t)));
 }
 
 template <typename Func, typename E0, typename E1, typename E2, typename E3>
-constexpr typename std::result_of<Func(E0, E1, E2, E3)>::type apply(
-      Func&& f, const std::tuple<E0, E1, E2, E3>& t) {
+constexpr auto apply(Func&& f, const std::tuple<E0, E1, E2, E3>& t)
+      -> decltype(f(std::forward<E0>(std::get<0>(t)),
+                    std::forward<E1>(std::get<1>(t)),
+                    std::forward<E2>(std::get<2>(t)),
+                    std::forward<E3>(std::get<3>(t)))) {
   return f(std::forward<E0>(std::get<0>(t)), std::forward<E1>(std::get<1>(t)),
            std::forward<E2>(std::get<2>(t)), std::forward<E3>(std::get<3>(t)));
 }
+
 //@}
 
 //
@@ -142,20 +148,8 @@ constexpr typename std::result_of<Func(E0, E1, E2, E3)>::type apply(
 
 /** Call a functor or std::function object with an empty tuple */
 template <typename Func>
-void apply(Func&& f, const std::tuple<>&) {
-  f();
-}
-
-/** Call a functor or std::function object, taking the arguments from a tuple
- *
- * \note More than 4 tuple elements is only supported for c++14 and above.
- * */
-template <typename Func, typename E0, typename E1, typename E2, typename E3,
-          typename... Es>
-void apply(Func&&, const std::tuple<E0, E1, E2, E3, Es...>&) {
-  static_assert(sizeof...(Es) > 0,
-                "If only c++11 is available apply is only implemented up "
-                "to a tuple with 4 elements");
+auto apply(Func&& f, const std::tuple<>&) -> decltype(f()) {
+  return f();
 }
 #endif
 }  // namespace krims

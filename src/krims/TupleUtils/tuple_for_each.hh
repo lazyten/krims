@@ -107,7 +107,6 @@ constexpr void tuple_for_each(UnOp&& op, std::tuple<E0, E1, E2>& t) {
 
 template <typename UnOp, typename E0, typename E1, typename E2, typename E3>
 constexpr void tuple_for_each(UnOp&& op, std::tuple<E0, E1, E2, E3>& t) {
-  typedef std::tuple<E0, E1, E2, E3> tuple_t;
   op(std::get<0>(t));
   op(std::get<1>(t));
   op(std::get<2>(t));
@@ -134,20 +133,10 @@ constexpr void tuple_for_each(UnOp&& op, const std::tuple<E0, E1, E2>& t) {
 
 template <typename UnOp, typename E0, typename E1, typename E2, typename E3>
 constexpr void tuple_for_each(UnOp&& op, const std::tuple<E0, E1, E2, E3>& t) {
-  typedef std::tuple<E0, E1, E2, E3> tuple_t;
   op(std::get<0>(t));
   op(std::get<1>(t));
   op(std::get<2>(t));
   op(std::get<3>(t));
-}
-
-template <typename UnOp, typename E0, typename E1, typename E2, typename E3,
-          typename... Es>
-constexpr void tuple_for_each(UnOp&&, std::tuple<E0, E1, E2, E3, Es...>&&) {
-  static_assert(
-        sizeof...(Es) > 0,
-        "If only c++11 is available tuple_for_each is only implemented up "
-        "to a tuple with 4 elements");
 }
 //@}
 #endif

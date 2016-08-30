@@ -136,8 +136,7 @@ constexpr auto tuple_map(UnOp&& op, std::tuple<E0, E1, E2>& t)
 template <typename UnOp, typename E0, typename E1, typename E2, typename E3>
 constexpr auto tuple_map(UnOp&& op, std::tuple<E0, E1, E2, E3>& t)
       -> decltype(std::make_tuple(op(std::get<0>(t)), op(std::get<1>(t)),
-                                  op(std::get<2>(t)), op(std::get<3>(t))));
-{
+                                  op(std::get<2>(t)), op(std::get<3>(t)))) {
   return std::make_tuple(op(std::get<0>(t)), op(std::get<1>(t)),
                          op(std::get<2>(t)), op(std::get<3>(t)));
 }
@@ -168,8 +167,7 @@ constexpr auto tuple_map(UnOp&& op, const std::tuple<E0, E1, E2>& t)
 template <typename UnOp, typename E0, typename E1, typename E2, typename E3>
 constexpr auto tuple_map(UnOp&& op, const std::tuple<E0, E1, E2, E3>& t)
       -> decltype(std::make_tuple(op(std::get<0>(t)), op(std::get<1>(t)),
-                                  op(std::get<2>(t)), op(std::get<3>(t))));
-{
+                                  op(std::get<2>(t)), op(std::get<3>(t)))) {
   return std::make_tuple(op(std::get<0>(t)), op(std::get<1>(t)),
                          op(std::get<2>(t)), op(std::get<3>(t)));
 }
