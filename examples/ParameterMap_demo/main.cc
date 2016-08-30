@@ -57,7 +57,7 @@ ParameterMap make_map() {
 void print_map(const ParameterMap& map) {
   // Print value of key blubber, which is an integer.
   // If blubber is not in the map, the default value 0 is chosen
-  std::cout << "blubber:          " << map.at<int>("blubber", 0) << std::endl;
+  std::cout << "blubber:          " << map.at("blubber", 0) << std::endl;
 
   // Print an always existing key
   std::cout << "always:           " << map.at<std::string>("always")
