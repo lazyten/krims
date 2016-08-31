@@ -27,6 +27,7 @@ set(KRIMS_TESTS_SOURCES
 	SubscriptionTests.cc
 	ParameterMapTests.cc
 	TupleUtilsTests.cc
+	NumCompTests.cc
 	main.cc
 )
 
