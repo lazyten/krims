@@ -283,33 +283,6 @@ TEST_CASE("TupleUtils tests", "[TupleUtils]") {
       RC_ASSERT(std::get<3>(t1) == -std::get<3>(res_minus));
     };
 
-    REQUIRE(rc::check("Testing tuple_map_4", test));
-  }  // Section tuple_map_4
-
-  SECTION("Test tuple_map_4") {
-    typedef double type1;
-    typedef float type2;
-    typedef int type3;
-    typedef long type4;
-
-    auto test = [&]() {
-      auto t1 = *gen::arbitrary<std::tuple<type1, type2, type3, type4>>().as(
-            "Tuple 1");
-      auto t2 = *gen::arbitrary<std::tuple<type1, type4, type3, type2>>().as(
-            "Tuple 2");
-      auto res_add = tuple_map(tuple_utils_tests::add{}, t1, t2);
-      RC_ASSERT(std::get<0>(t1) + std::get<0>(t2) == std::get<0>(res_add));
-      RC_ASSERT(std::get<1>(t1) + std::get<1>(t2) == std::get<1>(res_add));
-      RC_ASSERT(std::get<2>(t1) + std::get<2>(t2) == std::get<2>(res_add));
-      RC_ASSERT(std::get<3>(t1) + std::get<3>(t2) == std::get<3>(res_add));
-
-      auto res_minus = tuple_map(tuple_utils_tests::minus{}, t1);
-      RC_ASSERT(std::get<0>(t1) == -std::get<0>(res_minus));
-      RC_ASSERT(std::get<1>(t1) == -std::get<1>(res_minus));
-      RC_ASSERT(std::get<2>(t1) == -std::get<2>(res_minus));
-      RC_ASSERT(std::get<3>(t1) == -std::get<3>(res_minus));
-    };
-
     REQUIRE(rc::check("Testing tuple_map for 4 elements", test));
   }  // Section tuple_map_4
 
