@@ -1,8 +1,8 @@
 # Krims
-[![Build Status](https://travis-ci.org/linalgwrap/krims.svg?branch=master)](https://travis-ci.org/linalgwrap/krims)[![Licence](https://img.shields.io/badge/license-LGPL_v3.0-blue.svg)](LICENSE)
+[![Build Status](https://travis-ci.org/linalgwrap/krims.svg?branch=master)](https://travis-ci.org/linalgwrap/krims) [![Licence](https://img.shields.io/badge/license-LGPL_v3.0-blue.svg)](LICENSE)
 
 Library of common *Krimskrams* (German for "odds and ends").
-It contains very basic stuff which provides a useful foundation for many other projects.
+It contains some very basic stuff which provides a useful foundation for many other projects.
 
 ## Building
 All compilers starting from ``clang-3.5`` and ``gcc-4.8`` should be able to build the code.
@@ -116,10 +116,10 @@ double get(size_t i) {
 }
 ```
 
-### Performing numeric-aware comparison
+### Performing floating point comparisons
 - Available via the header ``<krims/NumComp.hh>``,
   which is available at [src/krims/NumComp.hh](src/krims/NumComp.hh).
-- This set of classes easily perform floating-point error-aware comparison
+- This set of classes easily perform error-tolerant comparison
   of floating point types or ``std::complex<T>`` types.
 - For example
 ```cpp
@@ -167,3 +167,83 @@ int main() {
 	}
 }
 ```
+
+### ``Subscribable`` base class and ``SubscriptionPointer``
+- Provides a mechanism to transparently subscribe to objects,
+  which are only available as references.
+- Storing a reference to an object inside another class can be problematic,
+  since it may well happen that the referenced object goes out of
+  scope. If the class uses this reference thereafter
+  a surprising error may result.
+- This system tries to circumvent this problem by introducing a
+  ``SubscriptionPointer`` which may subscribe to an object
+  derived off the ``Subscribable`` base class.
+  Each such subscription increases a reference count inside
+  ``Subscribable``.
+- If the ``Subscribable`` object, i.e. the object ``SubscriptionPointer``
+  points to, is destroyed with a reference count greater
+  zero, an Exception is raised via the krims exception system.
+  In other words the reference counting only happens in the
+  Debug version of the library.
+- Note that the classes are *not* yet thread-safe.
+- The implementation is provided it the headers
+  [src/krims/Subscribable.hh](src/krims/Subscribable.hh)
+  and
+  [src/krims/SubscriptionPointer.hh](src/krims/SubscriptionPointer.hh).
+- This class provides an alternative to the smart ``std::shared_ptr``
+  of C++11. Especially in cases where large amounts of data
+  (like big matrices) need to be accessed from various places
+  in a code without being the owner of the data, this system is useful.
+- The ParameterMap (see below) has full support
+  for storing arbitrary subscribable objects by reference.
+
+### Useful type properties and type transformations (``TypeUtils.hh``)
+- Some utility classes aiding with SFINAE or type conversion
+  are available via the header ``<krims/TypeUtils.hh>``
+  (located at [src/krims/TypeUtils.hh](src/krims/TypeUtils.hh))
+- ``RealTypeOf`` extracts the real type of a complex number
+  of is the identity to a normal float
+- ``IsCheaplyCopyable`` determines whether data of this type
+  is considered to be cheaply copyable.
+
+### ``ParameterMap``: A hierachical dictionary for managing data of arbitrary type.
+- The ParameterMap allows to store and access data of an arbitrary type
+  with the aid of ``std::string`` lookup keys.
+- Data is automatically either stored by-value
+  (for cheaply copyable types like floating point values,
+  integers or strings), as a ``std::shared_ptr`` or as a ``SubscriptionPointer``.
+- One can use ``std::initializer_list``s to easily construct or update ParameterMaps,
+  e.g.
+```cpp
+ParameterMap map{ {"key": 3}, {"key2" : "value2" } };
+auto i = std::make_shared<int>(15);
+map.update({"an integer", i});
+// or equivalently:
+map.update("an integer", i);
+```
+- If one is happy to copy the data inside the map, the function ``update_copy``
+  is available, which effectively is a convenience for making and storing
+  a ``std::shared_ptr`` to the copy.
+- The data can be retrieved as a pointer or by reference.
+  A default value can be provided for use if the key does not exist:
+```cpp
+// Use default value 5 if key does not exist
+map.at("nonexistent", 5)
+```
+  On retrieval of the value, the type needs to specified once again.
+  If the type does not match the original type, an error is thrown
+  in Debug mode.
+```cpp
+auto this_is_15 = map.at<int>("an integer");
+
+// Error, will abort program in Debug mode
+auto error = map.at<std::string>("an integer");
+```
+- The ``ParameterMap`` has preliminary support for hierachical storage:
+  Keys which contain a slash ``/`` are interpreted like a UNIX path.
+  Using the ``submap`` function, one can navigate into a subpath,
+  which offers the same interface as the original map.
+  This way one can selectively shadow parts of the stored data
+  and allow different parts of the program to transparently
+  manage parameters or references to results of computations.
+- An example is located at [examples/ParameterMap_demo](examples/ParameterMap_demo)
