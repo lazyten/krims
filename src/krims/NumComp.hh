@@ -70,6 +70,7 @@ struct NumCompConstants {
    * \see NumCompAccuracyLevel for more details.
    * */
   static double default_tolerance_factor;
+  // TODO hard-coded double type
 
   /** The default failure action */
   static NumCompActionType default_failure_action;
@@ -80,6 +81,7 @@ struct NumCompConstants {
 template <typename T>
 class NumComp {
 public:
+  // TODO hard-coded double type
   typedef typename std::conditional<std::is_floating_point<T>::value, T,
                                     double>::type error_type;
 
