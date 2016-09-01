@@ -20,24 +20,42 @@
 ##
 ## ---------------------------------------------------------------------
 
-#
-# Settings
-#
-# The git repo to checkout
-FROM="https://github.com/emil-e/rapidcheck"
-
-# Folder to check it out to
-WHAT="rapidcheck"
-
-# Interval: How often to update:
-INTERVAL="1 hour"
-
-# File to use in order to test a successful checkout
-CHECKFILE="CMakeLists.txt"
-
-if [ ! -f "$PWD/get.lib.sh" ]; then
-	echo "PWD needs to be the location of the get.lib.sh file."
+if [ -z "$FROM" ]; then
+	echo "Please define FROM to a non-zero value"
+	exit 1
+fi
+if [ -z "$INTERVAL" ]; then
+	echo "Please define INTERVAL to a non-zero value"
+	exit 1
+fi
+if [ -z "$CHECKFILE" ]; then
+	echo "Please define CHECKFILE to a non-zero value"
+	exit 1
+fi
+if [ -z "$WHAT" ]; then
+	echo "Please define WHAT to a non-zero value"
 	exit 1
 fi
 
-. "$PWD/get.lib.sh"
+mkdir -p .last_pull
+TIMEFILE=".last_pull/$WHAT"
+if [ -f "$WHAT/$CHECKFILE" ]; then
+	TMP=`mktemp`
+	touch --date="-$INTERVAL" $TMP || exit 1
+	if [ ! -f "$TIMEFILE" -o "$TIMEFILE" -ot $TMP ]; then
+		echo "-- Updating  $WHAT  from git"
+		(
+			cd "$WHAT"
+			git pull
+		) || exit 1
+		touch "$TIMEFILE"
+	fi
+	rm $TMP
+	exit 0
+else
+	echo "-- Cloning  $WHAT  from git"
+	git clone --recursive "$FROM" "$WHAT" || exit 1
+	touch "$TIMEFILE"
+	exit 0
+fi
+exit 1
