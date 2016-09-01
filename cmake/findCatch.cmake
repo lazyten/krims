@@ -34,14 +34,14 @@
 option(AUTOCHECKOUT_MISSING_REPOS "Automatically checkout missing repositories" OFF)
 set_property(DIRECTORY PROPERTY EP_STEP_TARGETS configure build test)
 
+#
+# -------
+#
+
 # The name for the catch target.
 # Note that just "catch" cannot be used since rapidcheck (which is usually
 # checked out as well) uses this.
 set(catch_TARGET "catch_hdr")
-
-#
-# -------
-#
 
 if (TARGET "${catch_TARGET}")
 	message(STATUS "Found target catch, assume catch already configured for build.")

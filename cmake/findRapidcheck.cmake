@@ -33,11 +33,13 @@
 # Options and properties required
 #
 option(AUTOCHECKOUT_MISSING_REPOS "Automatically checkout missing repositories" OFF)
-set(BUILD_EXTERNAL_RAPIDCHECK off) # Unset building rapidcheck in this scope
 
 #
 # -------
 #
+
+# Unset building rapidcheck in this scope
+set(BUILD_EXTERNAL_RAPIDCHECK off)
 
 set(rapidcheck_TARGET "rapidcheck")
 if (TARGET "${rapidcheck_TARGET}")
