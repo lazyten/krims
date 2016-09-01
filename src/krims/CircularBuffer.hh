@@ -339,23 +339,17 @@ public:
   const_iterator end() const { return cend(); }
 
   const_iterator cbegin() const {
-#ifdef KRIMS_HAVE_CXX14
-    return circular_begin<typename container_type::const_iterator>(
-          std::cbegin(m_storage), std::cend(m_storage), m_first.position());
-#else
+    // Use std::cbegin() and std::cend() once more recent
+    // c++ standard libraries are more widespread.
     return circular_begin<typename container_type::const_iterator>(
           m_storage.cbegin(), m_storage.cend(), m_first.position());
-#endif
   }
 
   const_iterator cend() const {
-#ifdef KRIMS_HAVE_CXX14
-    return circular_end<typename container_type::const_iterator>(
-          std::cbegin(m_storage), std::cend(m_storage), m_first.position());
-#else
+    // Use std::cbegin() and std::cend() once more recent
+    // c++ standard libraries are more widespread.
     return circular_end<typename container_type::const_iterator>(
           m_storage.cbegin(), m_storage.cend(), m_first.position());
-#endif
   }
   ///@}
 
