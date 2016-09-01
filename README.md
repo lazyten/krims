@@ -40,6 +40,7 @@ parts of the library.
 - [``Subscribable`` base class and ``SubscriptionPointer``](#subscribable-base-class-and-subscriptionpointer)
 - [Useful type properties and type transformations](#useful-type-properties-and-type-transformations)
 - [``ParameterMap``: A hierachical dictionary for managing data of arbitrary type.](#parametermap-a-hierachical-dictionary-for-managing-data-of-arbitrary-type)
+- [Circular buffer with maximum size](#circular-buffer-with-maximum-size)
 - [Useful helper functions to deal with tuples](#useful-helper-functions-to-deal-with-tuples)
 
 ### CMake module ``DebugReleaseBuild``
