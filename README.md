@@ -247,3 +247,56 @@ auto error = map.at<std::string>("an integer");
   and allow different parts of the program to transparently
   manage parameters or references to results of computations.
 - An example is located at [examples/ParameterMap_demo](examples/ParameterMap_demo)
+
+### Useful helper functions to deal with tuples
+- The header [``<krims/TupleUtils.hh>``](src/krims/TupleUtils.hh)
+  provides a number of utility functions
+  which ease the use of ``std::tuple`` objects.
+- The ``apply`` function allows to call a functor, lambda or ``std::function``
+  object using the elements of a tuple as the parameters to the call.
+  In other words
+```cpp
+auto add_lambda = [] (double x, int y) { return x+y; };
+auto tuple = std::make_tuple(3.1415,42);
+
+double res = krims::apply(add_lambda, tuple);
+// res is 45.1415
+```
+  calls the lambda ``add_lambda`` with the arguments ``3.1415`` and ``42``.
+- ``tuple_for_each`` calls a functor, lambda or ``std::function``
+  for each element of a tuple in turn, i.e. for a tuple with 6
+  elements the function is called 6 times with one of the tuple elements
+  as the argument.
+  The function should therefore be generic in the types of the tuple elements.
+- ``tuple_map`` is similar to ``tuple_for_each``:
+  It applies a functor, lambda or ``std::function`` object
+  to each tuple element and stores the returned values in a tuple, which
+  is returned.
+  In other words
+```cpp
+auto add3 = [] (double x) { return x+3; };
+auto tuple = std::make_tuple(3.1415,42);
+auto res = krims::tuple_for_each(add3,tuple);
+// res is std::tuple<double,double>{6.1415,45.0}
+```
+  and
+```cpp
+auto add3 = [] (double x) { return x+3; };
+auto tuple = std::make_tuple(3.1415,42);
+auto res = std::make_tuple(add3(std::get<0>(tuple)), add3(std::get<1>(tuple)))
+// res is std::tuple<double,double>{6.1415,45.0}
+```
+  are equivalent. A binary version which calls a function with 2 arguments
+  on each pair of elements from two tuples also exists.
+```cpp
+auto add = [] (double x, double y) { return x+y; };
+auto tuple1 = std::make_tuple(3, 5.6);
+auto tuple2 = std::make_tuple(1.5, 2);
+auto res = krims::tuple_map(add,tuple1,tuple2);
+// res is std::tuple<double,double>{4.5,7.6}
+```
+- The code is implemented differently for the various ``C++``
+  standards, making best use of the features the standard libraries
+  as well as the language offers in these versions of the standard.
+- For ``C++11`` only tuples with 4 elements or less are supported.
+  From ``C++14`` onwards there is no restriction any more.
