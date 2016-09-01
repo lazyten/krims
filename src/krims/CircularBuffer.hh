@@ -339,15 +339,11 @@ public:
   const_iterator end() const { return cend(); }
 
   const_iterator cbegin() const {
-    // Use std::cbegin() and std::cend() once more recent
-    // c++ standard libraries are more widespread.
     return circular_begin<typename container_type::const_iterator>(
           m_storage.cbegin(), m_storage.cend(), m_first.position());
   }
 
   const_iterator cend() const {
-    // Use std::cbegin() and std::cend() once more recent
-    // c++ standard libraries are more widespread.
     return circular_end<typename container_type::const_iterator>(
           m_storage.cbegin(), m_storage.cend(), m_first.position());
   }
