@@ -29,43 +29,20 @@ if (BUILD_EXTERNAL_RAPIDCHECK)
 		message(FATAL_ERROR "Could not find rapidcheck at expected place. Try a manual git checkout.")
 	endif()
 
-	# Set flags such that rapidcheck tests are built.
+	# Set option such that rapidcheck tests are built.
 	set(RC_ENABLE_TESTS ON CACHE BOOL "Build RapidCheck tests")
 
-	# Add the rapidcheck subdirectory
+	# Change compiler flags (CMAKE_CXX_FLAGS) to make fresh build config
+	set(CMAKE_CXX_FLAGS_STORED_TMP ${CMAKE_CXX_FLAGS})
+	set(CMAKE_CXX_FLAGS "")
+	#enable_if_compiles(CMAKE_CXX_FLAGS "-Wno-gnu-zero-variadic-macro-arguments")
+
+	# Add the rapidcheck subdirectory and configure its built.
 	add_subdirectory(rapidcheck)
 
-	#
-	# Adjust compiler flags
-	#
-
-	# Set some compiler options to make rapidcheck compile
-	enable_if_compiles(KRIMS_RAPIDCHECK_EXTRA_FLAGS "-Wno-gnu-zero-variadic-macro-arguments")
-	#enable_if_compiles(KRIMS_RAPIDCHECK_EXTRA_FLAGS "-Wno-error=pedantic")
-	enable_if_compiles(KRIMS_RAPIDCHECK_EXTRA_FLAGS "-Wno-pedantic")
-	set(KRIMS_RAPIDCHECK_EXTRA_FLAGS "${KRIMS_RAPIDCHECK_EXTRA_FLAGS} ${CMAKE_CXX_FLAGS_RELEASE}")
-
-	# Activate extra flags for all potential rapidcheck targets.
-	foreach(_potential_target
-			rapidcheck
-			rapidcheck_tests
-			rapidcheck_test_utils
-			rapidcheck_boost_tests
-			rapidcheck_gmock_tests
-			boost_test_integration
-			database
-			counter
-			gtest_integration
-			classify
-			mapparser
-	)
-		if(TARGET ${_potential_target})
-			set_target_properties(${_potential_target} PROPERTIES COMPILE_FLAGS "${KRIMS_RAPIDCHECK_EXTRA_FLAGS}")
-		endif()
-	endforeach()
-
-	# unset the extra flags
-	unset(KRIMS_RAPIDCHECK_EXTRA_FLAGS)
+	# undo the changes to the compiler flags:
+	set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS_STORED_TMP})
+	unset(CMAKE_CXX_FLAGS_STORED_TMP)
 
 #	#
 #	# Install rapidcheck
