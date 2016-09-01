@@ -80,8 +80,7 @@ drb_target_link_libraries(ALL mylib dependency1 dependency2)
 - If ``NAME`` or ``VERSION`` are not provided, the current project name and version are used.
 
 ### The exception system
-- Available via the header ``<krims/ExceptionSystem.hh>``,
-  which is located at [src/krims/ExceptionSystem.hh](src/krims/ExceptionSystem.hh)
+- Available via the header [``<krims/ExceptionSystem.hh>``](src/krims/ExceptionSystem.hh).
 - The idea is to allow for very easy error checking, by the means of assertions.
 - Whenever an assertion fails the program is (by default) aborted.
   For tests this can be changed, such that an exception is thrown instead.
@@ -117,8 +116,7 @@ double get(size_t i) {
 ```
 
 ### Performing floating point comparisons
-- Available via the header ``<krims/NumComp.hh>``,
-  which is available at [src/krims/NumComp.hh](src/krims/NumComp.hh).
+- Available via the header [``<krims/NumComp.hh>``](src/krims/NumComp.hh).
 - This set of classes easily perform error-tolerant comparison
   of floating point types or ``std::complex<T>`` types.
 - For example
@@ -187,9 +185,9 @@ int main() {
   Debug version of the library.
 - Note that the classes are *not* yet thread-safe.
 - The implementation is provided it the headers
-  [src/krims/Subscribable.hh](src/krims/Subscribable.hh)
+  [``<krims/Subscribable.hh>``](src/krims/Subscribable.hh)
   and
-  [src/krims/SubscriptionPointer.hh](src/krims/SubscriptionPointer.hh).
+  [``krims/SubscriptionPointer.hh``](src/krims/SubscriptionPointer.hh).
 - This class provides an alternative to the smart ``std::shared_ptr``
   of C++11. Especially in cases where large amounts of data
   (like big matrices) need to be accessed from various places
@@ -197,10 +195,9 @@ int main() {
 - The ParameterMap (see below) has full support
   for storing arbitrary subscribable objects by reference.
 
-### Useful type properties and type transformations (``TypeUtils.hh``)
+### Useful type properties and type transformations
 - Some utility classes aiding with SFINAE or type conversion
-  are available via the header ``<krims/TypeUtils.hh>``
-  (located at [src/krims/TypeUtils.hh](src/krims/TypeUtils.hh))
+  are available via the header [``<krims/TypeUtils.hh>``](src/krims/TypeUtils.hh)
 - ``RealTypeOf`` extracts the real type of a complex number
   of is the identity to a normal float
 - ``IsCheaplyCopyable`` determines whether data of this type
@@ -239,21 +236,21 @@ auto this_is_15 = map.at<int>("an integer");
 // Error, will abort program in Debug mode
 auto error = map.at<std::string>("an integer");
 ```
-- The ``ParameterMap`` has preliminary support for hierachical storage:
+- The ``ParameterMap`` has preliminary support for hierarchical storage:
   Keys which contain a slash ``/`` are interpreted like a UNIX path.
   Using the ``submap`` function, one can navigate into a subpath,
   which offers the same interface as the original map.
   This way one can selectively shadow parts of the stored data
   and allow different parts of the program to transparently
   manage parameters or references to results of computations.
-- An example is located at [examples/ParameterMap_demo](examples/ParameterMap_demo)
+- An example is located at [examples/ParameterMap_demo](examples/ParameterMap_demo).
 
 ### Useful helper functions to deal with tuples
 - The header [``<krims/TupleUtils.hh>``](src/krims/TupleUtils.hh)
   provides a number of utility functions
   which ease the use of ``std::tuple`` objects.
 - The ``apply`` function allows to call a functor, lambda or ``std::function``
-  object using the elements of a tuple as the parameters to the call.
+  object using the elements of a tuple as the parameters to the call
   In other words
 ```cpp
 auto add_lambda = [] (double x, int y) { return x+y; };
