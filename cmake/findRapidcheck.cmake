@@ -33,13 +33,13 @@
 # Options and properties required
 #
 option(AUTOCHECKOUT_MISSING_REPOS "Automatically checkout missing repositories" OFF)
-set(BUILD_EXTERNAL_RAPIDCHECK bool off
-	cache internal
-	"Should the rapidcheck folder in the external project dir be build.")
 
 #
 # -------
 #
+
+# Unset building rapidcheck in this scope
+set(BUILD_EXTERNAL_RAPIDCHECK off)
 
 set(rapidcheck_TARGET "rapidcheck")
 if (TARGET "${rapidcheck_TARGET}")

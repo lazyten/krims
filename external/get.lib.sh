@@ -46,7 +46,8 @@ if [ -f "$WHAT/$CHECKFILE" ]; then
 		echo "-- Updating  $WHAT  from git"
 		(
 			cd "$WHAT"
-			git pull
+			git pull && \
+			git submodule update --init --recursive
 		) || exit 1
 		touch "$TIMEFILE"
 	fi
