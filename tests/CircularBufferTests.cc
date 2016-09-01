@@ -216,7 +216,7 @@ void exectute_random_test() {
   // Generate command sequence and execute random state test
   auto genCommands = rc::state::gen::execOneOfWithArgs<Commands...>;
   state::check(model, sut, genCommands());
-};
+}
 
 }  // namespace circular_buffer_tests
 
@@ -429,7 +429,7 @@ TEST_CASE("Circular Iterator and Circular Buffer", "[circular_buffer]") {
 
       // Access with const iterators
       i = 0;
-      for (auto it = std::cbegin(buf); it != std::cend(buf); ++it, ++i) {
+      for (auto it = buf.cbegin(); it != buf.cend(); ++it, ++i) {
         RC_ASSERT(*it == v[i]);
       }
       RC_ASSERT(i == v.size());
