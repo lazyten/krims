@@ -254,6 +254,22 @@ auto error = map.at<std::string>("an integer");
   manage parameters or references to results of computations.
 - An example is located at [examples/ParameterMap_demo](examples/ParameterMap_demo).
 
+### Circular buffer with maximum size
+- [``<krims/CircularBuffer.hh>``](src/krims/CircularBuffer.hh) contains two classes
+  ``CircularIterator`` and ``CircularBuffer``.
+- The first class iterates over a range in a circular fashion. I.e. if one reaches
+  the end of the range, the iterator detects this and wraps over to restart at the
+  begining. The same in the other direction.
+- The functions ``circular_begin`` and ``circular_end`` are available to construct
+  suitable ``CircularIterator``s in order to iterate over pretty much any container
+  circularly.
+- ``CircularBuffer`` provides a circular buffer implementation with a maximal size.
+  It may contain less elements, but not more.
+  If the maximal size is 5 and one pushes a 6th element to the buffer, the first
+  is deleted automatically.
+- ``CircularBuffer`` is very helpful to store e.g. a history of the ``N`` last steps
+  in an iterative algorithm.
+
 ### Useful helper functions to deal with tuples
 - The header [``<krims/TupleUtils.hh>``](src/krims/TupleUtils.hh)
   provides a number of utility functions
