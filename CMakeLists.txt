@@ -71,9 +71,6 @@ include(cmake/setup_optional.cmake)
 ##########################################################################
 # Pass on to subdirectories:
 
-# The external dependencies compiled along this project
-add_subdirectory(external)
-
 # The src directory does most of the work: Here the library is build and
 # installation is configured.
 add_subdirectory(src)
@@ -91,3 +88,6 @@ endif()
 ##########################################################################
 # Finally install package:
 include(cmake/install_modules_and_packages.cmake)
+
+# and print a closing message
+message("#\n# Configuring ${PROJECT_NAME} done")
