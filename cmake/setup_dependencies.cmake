@@ -45,12 +45,6 @@ set(KRIMS_DEFINITIONS_RELEASE "")
 ############################
 #-- rapidcheck and catch --#
 ############################
-# Switch off building external rapidcheck by default.
-# (Needs to be done here such that in the current scope by default
-# this value is off, even if krims is build as a subproject to
-# another project where this variable was set to ON.)
-set(BUILD_EXTERNAL_RAPIDCHECK off)
-
 if (KRIMS_ENABLE_TESTS)
 	# We need to setup rapidcheck and catch for the tests:
 	include(cmake/findRapidcheck.cmake)
