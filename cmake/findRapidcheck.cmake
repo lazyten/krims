@@ -19,13 +19,15 @@
 ##
 ## ---------------------------------------------------------------------
 
-# Finds and sets up rapidcheck under the target name stored in
+# Finds and sets up rapidcheck under the target name stored in the variable
 #     rapidcheck_TARGET
-# such that just linking against it as a dependency does everything 
+# such that just linking against it as a dependency does everything
 # automatically.
 #
-# In case the rapidcheck library is not found and AUTOCHECKOUT_MISSING_LIBS is set to
-# on, rapidcheck is automatically checked out and built.
+# In case the rapidcheck library is not found and AUTOCHECKOUT_MISSING_LIBS is
+# set to ON, rapidcheck is automatically checked out into the external
+# subdirectory and BUILD_EXTERNAL_RAPIDCHECK is set to ON.
+#
 # Otherwise a fatal error is produced.
 #
 
@@ -37,9 +39,6 @@ option(AUTOCHECKOUT_MISSING_REPOS "Automatically checkout missing repositories" 
 #
 # -------
 #
-
-# Unset building rapidcheck in this scope
-set(BUILD_EXTERNAL_RAPIDCHECK off)
 
 set(rapidcheck_TARGET "rapidcheck")
 if (TARGET "${rapidcheck_TARGET}")
@@ -61,7 +60,6 @@ if ("${rapidcheck_DIR}" STREQUAL "rapidcheck_DIR-NOTFOUND")
 			message(FATAL_ERROR "Getting rapidcheck from git failed with error: ${RES}")
 		endif()
 
-		# Print message and return
 		set(BUILD_EXTERNAL_RAPIDCHECK on)
 		return()
 	endif()
