@@ -45,9 +45,7 @@ option(KRIMS_ENABLE_EXAMPLES "Build krims examples" ON)
 # enable the new version feature introduced in cmake 3.0.0
 cmake_policy(SET CMP0048 NEW)
 project(krims VERSION 0.0.0)
-message("\n#")
-message("# Configuring ${PROJECT_NAME}")
-message("#")
+message("\n# Configuring ${PROJECT_NAME}\n#")
 
 # Global include directories for this project:
 include_directories("${PROJECT_SOURCE_DIR}/src")  # for default sources
@@ -90,4 +88,4 @@ endif()
 include(cmake/install_modules_and_packages.cmake)
 
 # and print a closing message
-message("#\n# Configuring ${PROJECT_NAME} done")
+message("#\n# Configuring ${PROJECT_NAME} done\n")
