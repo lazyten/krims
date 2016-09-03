@@ -92,8 +92,8 @@ checkout_repo () {
 	fi
 
 	echo "-- Cloning  $I_WHAT${I_EXTRA}  from git"
-	if ! is_host_up "$I_FROM"; then
-		echo "   No network ... failing." >&2
+	if ! is_url_available "$I_FROM"; then
+		echo "   Could not reach url \"$I_FROM\" ... failing." >&2
 		return 1
 	fi
 
