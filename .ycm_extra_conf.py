@@ -35,6 +35,7 @@ flags = [
     '-isystem', './external/rapidcheck/ext/catch/include',
     '-isystem', './build/external/catch/src/catchFromGit/include',
     '-isystem', '../catch/include',
+    '-isystem', '../rapidcheck/ext/catch/include',
 ]
 
 def DirectoryOfThisScript():
