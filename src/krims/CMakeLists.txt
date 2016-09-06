@@ -23,9 +23,10 @@
 # set the source files.
 #
 set(KRIMS_SOURCES
+	version.cc
 	ExceptionSystem/exception_defs.cc
 	ExceptionSystem/ExceptionBase.cc
-	version.cc
+	ParameterMap.cc
 )
 
 # Dump the current version as an include file.

@@ -34,7 +34,7 @@ flags = [
     '-isystem', './external/rapidcheck/include',
     '-isystem', './external/rapidcheck/ext/catch/include',
     '-isystem', './build/external/catch/src/catchFromGit/include',
-    '-isystem', '../catch/include',
+    '-isystem', '../rapidcheck/include',
     '-isystem', '../rapidcheck/ext/catch/include',
 ]
 

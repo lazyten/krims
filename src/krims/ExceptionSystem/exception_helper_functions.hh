@@ -19,6 +19,7 @@
 
 #pragma once
 #include "Exceptions.hh"
+#include <type_traits>
 
 // Note: These functions are deliberately chosen to go into the global
 //       namespace, such that they are easily available from everywhere.
@@ -34,10 +35,13 @@
  * <li> The upper bound plus one
  * </ol>
  */
-template <typename T>
-inline void assert_range(T start, T number, T end) {
+template <typename T, typename U, typename V>
+inline void assert_range(T start, U number, V end) {
+#ifdef DEBUG
+  typedef typename std::common_type<T, U, V>::type ct;
   assert_dbg((start <= number) && (number < end),
-             ::krims::ExcOutsideRange<T>(number, start, end));
+             ::krims::ExcOutsideRange<ct>(number, start, end));
+#endif
 }
 
 /**
@@ -50,9 +54,12 @@ inline void assert_range(T start, T number, T end) {
  * <li> rhs number
  * </ol>
  */
-template <typename T>
-inline void assert_greater_equal(T lhs, T rhs) {
-  assert_dbg(lhs <= rhs, ::krims::ExcTooLarge<T>(lhs, rhs));
+template <typename T, typename U>
+inline void assert_greater_equal(T lhs, U rhs) {
+#ifdef DEBUG
+  typedef typename std::common_type<T, U>::type ct;
+  assert_dbg(lhs <= rhs, ::krims::ExcTooLarge<ct>(lhs, rhs));
+#endif
 }
 
 /**
@@ -65,9 +72,12 @@ inline void assert_greater_equal(T lhs, T rhs) {
  * <li> rhs number
  * </ol>
  */
-template <typename T>
-inline void assert_greater(T lhs, T rhs) {
-  assert_dbg(lhs < rhs, ::krims::ExcTooLargeOrEqual<T>(lhs, rhs));
+template <typename T, typename U>
+inline void assert_greater(T lhs, U rhs) {
+#ifdef DEBUG
+  typedef typename std::common_type<T, U>::type ct;
+  assert_dbg(lhs < rhs, ::krims::ExcTooLargeOrEqual<ct>(lhs, rhs));
+#endif
 }
 
 /**
@@ -79,9 +89,12 @@ inline void assert_greater(T lhs, T rhs) {
  * <li> rhs number
  * </ol>
  */
-template <typename T>
-inline void assert_equal(T lhs, T rhs) {
-  assert_dbg(lhs == rhs, ::krims::ExcNotEqual<T>(lhs, rhs));
+template <typename T, typename U>
+inline void assert_equal(T lhs, U rhs) {
+#ifdef DEBUG
+  typedef typename std::common_type<T, U>::type ct;
+  assert_dbg(lhs == rhs, ::krims::ExcNotEqual<ct>(lhs, rhs));
+#endif
 }
 
 /**
