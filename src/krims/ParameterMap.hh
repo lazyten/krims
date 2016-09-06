@@ -283,27 +283,26 @@ public:
            std::end(*m_container_ptr);
   }
 
-  /** Get a submap starting pointing at location loc
+  /** \brief Get a submap starting pointing at a different location.
    *
-   * TODO expand and clarify docs here!
+   * The ParameterMap allows the hierarchical organisation of data
+   * in the form of UNIX paths. So the key "bla/blubber/foo" actually
+   * emplaces a value in the path "/bla/blubber/foo". If one obtains
+   * a submap at location "/bla", the same key is now available under
+   * the path "/blubber/foo", whereas "/bla/blubber/foo" no longer exists.
+   *
+   * All supplied paths are subject to the standard UNIX path normalisation
+   * in other words "/bla/../bla/blubber/./foo" is equivalent to
+   * "/bla/blubber/foo". The leading "/" may be avoided. Hence "bla/blubber/foo"
+   * is in turn equal to the aforementioned paths and yields the same
+   * entry.
+   *
+   * Escaping a submap via ".." is not possible. This means that the submap
+   * at location "bla" does still not contain a key "../bla/blubber/foo".
+   * But it does contain a key "../blubber/foo", since the leading ".."
+   * has no effect (we are at the root of the ParameterMap)
    * */
-  ParameterMap submap(const std::string& location) const {
-    // TODO This is a very crude implementation of the required functionality
-    // It would be more sensible to have a different Type for this, which stores
-    // a reference to the actual guy or so. But maybe we get away fine if we do
-    // not allow propagation up (e.g. ..)
-
-    // Clean the location path first:
-    std::string newlocation = make_full_key(location);
-
-    // Add a tailing "/" if not yet there
-    if (newlocation.back() != '/') newlocation += "/";
-
-    // Use a special constructor, which makes the resulting ParameterMap object
-    // share
-    // the map string->EntryValue, but stand at a different location
-    return ParameterMap{m_container_ptr, newlocation};
-  }
+  ParameterMap submap(const std::string& location) const;
 
   // TODO alias names, i.e. link one name to a different one.
   //      but be careful not to get a cyclic graph.
@@ -313,18 +312,10 @@ private:
   ParameterMap(std::shared_ptr<inner_map_type> map, std::string newlocation)
         : m_container_ptr{map}, m_location{newlocation} {}
 
-  /** Make the actual container key from a key supplied by the user */
-  std::string make_full_key(const std::string& key) const {
-    // Prepend location
-    std::string res = m_location + key;
-
-    // TODO Perform path cleanup, i.e. remove duplicate /
-    // and deal with special things like ./. and ../
-    //
-    // Maybe disallow propagation up, i.e. /blubber/blibber/../ or any
-    // paths containing ".." See submap function for details.
-    return res;
-  }
+  /** Make the actual container key from a key supplied by the user
+   *  Care is taken such that we cannot escape the subtree.
+   * */
+  std::string make_full_key(const std::string& key) const;
 
   std::shared_ptr<inner_map_type> m_container_ptr;
 
@@ -402,12 +393,6 @@ PointerWrapper<const T> ParameterMap::EntryValue::get_ptr() const {
 //
 // ParameterMap
 //
-ParameterMap& ParameterMap::operator=(const ParameterMap& other) {
-  m_location = other.m_location;
-  m_container_ptr = std::make_shared<inner_map_type>(*other.m_container_ptr);
-  return *this;
-}
-
 template <typename T>
 T& ParameterMap::at(const std::string& key) {
   assert_dbg(exists(key), ExcUnknownKey(key));

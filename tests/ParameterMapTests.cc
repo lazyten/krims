@@ -191,6 +191,43 @@ TEST_CASE("ParameterMap tests", "[parametermap]") {
   // ---------------------------------------------------------------
   //
 
+  SECTION("Check basic path transformations") {
+    // Add data to map.
+    ParameterMap m{};
+    m.update("one/two/three", "3");
+    m.update("three/two/one", 4);
+    m.update("", "test");
+
+    // check it is there:
+    REQUIRE(m.at<std::string>("one/two/three") == "3");
+    REQUIRE(m.at<int>("three/two/one") == 4);
+    REQUIRE(m.at<std::string>("") == "test");
+
+    // Check the path normalisation:
+    REQUIRE(m.at<std::string>("/one/two/three") == "3");
+    REQUIRE(m.at<std::string>("/one/two//three") == "3");
+    REQUIRE(m.at<int>("three/./two/one") == 4);
+    REQUIRE(m.at<int>("three/./two/./one") == 4);
+    REQUIRE(m.at<std::string>("one/two/three/") == "3");
+    REQUIRE(m.at<int>("three/two/one/.") == 4);
+    REQUIRE(m.at<std::string>("/one/./two/////three") == "3");
+    REQUIRE(m.at<int>("/././/three///two/./one/") == 4);
+    REQUIRE(m.at<int>("three/two/../two/one") == 4);
+    REQUIRE(m.at<int>("../../../three/two/one") == 4);
+    REQUIRE(m.at<int>("/../../../one/../three/two/one") == 4);
+
+    REQUIRE(m.at<std::string>("/") == "test");
+    REQUIRE(m.at<std::string>(".") == "test");
+    REQUIRE(m.at<std::string>("/../") == "test");
+    REQUIRE(m.at<std::string>("/../.") == "test");
+    REQUIRE(m.at<std::string>("/.././") == "test");
+    REQUIRE(m.at<std::string>(".././") == "test");
+  }
+
+  //
+  // ---------------------------------------------------------------
+  //
+
   SECTION("Check that data can be erased") {
     // Add data to map.
     ParameterMap m{};
@@ -204,7 +241,7 @@ TEST_CASE("ParameterMap tests", "[parametermap]") {
     REQUIRE(m.exists("dum"));
 
     // remove a few:
-    m.erase("i");
+    m.erase("/i/././");
     m.erase("dum");
 
     // check they are there (or not)
@@ -219,12 +256,16 @@ TEST_CASE("ParameterMap tests", "[parametermap]") {
 
   SECTION("Check submap functionality") {
     // Add data to map.
-    ParameterMap m{
-          {"tree/sub", s}, {"tree/i", i}, {"dum", dum}, {"tree/value", 9}};
+    ParameterMap m{{"tree/sub", s},
+                   {"tree/i", i},
+                   {"dum", dum},
+                   {"tree/value", 9},
+                   {"tree", "root"}};
 
     // check it is there:
     REQUIRE(m.exists("tree/sub"));
     REQUIRE(m.exists("tree/i"));
+    REQUIRE(m.exists("tree"));
     REQUIRE(m.exists("tree/value"));
     REQUIRE(m.exists("dum"));
 
@@ -237,17 +278,28 @@ TEST_CASE("ParameterMap tests", "[parametermap]") {
     REQUIRE(sub.exists("sub"));
     REQUIRE(sub.exists("i"));
     REQUIRE(sub.exists("value"));
+    REQUIRE(sub.exists("/"));
 
     // Check value is appropriate:
     REQUIRE(sub.at<std::string>("sub") == s);
     REQUIRE(sub.at<int>("i") == i);
     REQUIRE(sub.at<int>("value") == 9);
+    REQUIRE(sub.at<std::string>("/") == "root");
+    REQUIRE(sub.at<std::string>("..") == "root");
+    REQUIRE(sub.at<std::string>("/../.") == "root");
+    REQUIRE(sub.at<std::string>(".././") == "root");
 
     // Check adding a new value in the submap:
     sub.update("neu", 1.23);
     sub.update("value", 10);
     REQUIRE(m.at<double>("tree/neu") == 1.23);
     REQUIRE(m.at<int>("tree/value") == 10);
+
+    // Check path normalisation for submap:
+    ParameterMap sub2 = m.submap("/./tree/.");
+    REQUIRE(sub2.at<std::string>("sub") == s);
+    REQUIRE(sub2.at<int>("i") == i);
+    REQUIRE(sub2.at<int>("value") == 10);
   }
 
   //
