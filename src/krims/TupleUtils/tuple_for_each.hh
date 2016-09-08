@@ -85,28 +85,28 @@ constexpr void tuple_for_each(UnOp&& op, Tuple&& t) {
 //@{
 /** \brief Apply a unary operator to all elements of a tuple in turn. */
 template <typename UnOp>
-constexpr void tuple_for_each(UnOp&&, std::tuple<>) {}
+void tuple_for_each(UnOp&&, std::tuple<>) {}
 
 template <typename UnOp, typename E>
-constexpr void tuple_for_each(UnOp&& op, std::tuple<E>& t) {
+void tuple_for_each(UnOp&& op, std::tuple<E>& t) {
   op(std::get<0>(t));
 }
 
 template <typename UnOp, typename E0, typename E1>
-constexpr void tuple_for_each(UnOp&& op, std::tuple<E0, E1>& t) {
+void tuple_for_each(UnOp&& op, std::tuple<E0, E1>& t) {
   op(std::get<0>(t));
   op(std::get<1>(t));
 }
 
 template <typename UnOp, typename E0, typename E1, typename E2>
-constexpr void tuple_for_each(UnOp&& op, std::tuple<E0, E1, E2>& t) {
+void tuple_for_each(UnOp&& op, std::tuple<E0, E1, E2>& t) {
   op(std::get<0>(t));
   op(std::get<1>(t));
   op(std::get<2>(t));
 }
 
 template <typename UnOp, typename E0, typename E1, typename E2, typename E3>
-constexpr void tuple_for_each(UnOp&& op, std::tuple<E0, E1, E2, E3>& t) {
+void tuple_for_each(UnOp&& op, std::tuple<E0, E1, E2, E3>& t) {
   op(std::get<0>(t));
   op(std::get<1>(t));
   op(std::get<2>(t));
@@ -114,25 +114,25 @@ constexpr void tuple_for_each(UnOp&& op, std::tuple<E0, E1, E2, E3>& t) {
 }
 
 template <typename UnOp, typename E>
-constexpr void tuple_for_each(UnOp&& op, const std::tuple<E>& t) {
+void tuple_for_each(UnOp&& op, const std::tuple<E>& t) {
   op(std::get<0>(t));
 }
 
 template <typename UnOp, typename E0, typename E1>
-constexpr void tuple_for_each(UnOp&& op, const std::tuple<E0, E1>& t) {
+void tuple_for_each(UnOp&& op, const std::tuple<E0, E1>& t) {
   op(std::get<0>(t));
   op(std::get<1>(t));
 }
 
 template <typename UnOp, typename E0, typename E1, typename E2>
-constexpr void tuple_for_each(UnOp&& op, const std::tuple<E0, E1, E2>& t) {
+void tuple_for_each(UnOp&& op, const std::tuple<E0, E1, E2>& t) {
   op(std::get<0>(t));
   op(std::get<1>(t));
   op(std::get<2>(t));
 }
 
 template <typename UnOp, typename E0, typename E1, typename E2, typename E3>
-constexpr void tuple_for_each(UnOp&& op, const std::tuple<E0, E1, E2, E3>& t) {
+void tuple_for_each(UnOp&& op, const std::tuple<E0, E1, E2, E3>& t) {
   op(std::get<0>(t));
   op(std::get<1>(t));
   op(std::get<2>(t));
