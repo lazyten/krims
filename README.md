@@ -103,6 +103,8 @@ drb_target_link_libraries(ALL mylib dependency1 dependency2)
 - Helper macros to quickly define Exceptions are available.
   See [src/krims/ExceptionSystem/Exceptions.hh](src/krims/ExceptionSystem/Exceptions.hh)
   for predefined examples.
+- See [examples/ExceptionSystem_demo/main.cc](examples/ExceptionSystem_demo/main.cc)
+  for an example program, which triggers some exceptions.
 
 #### Example code
 ```cpp

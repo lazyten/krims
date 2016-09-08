@@ -20,41 +20,47 @@
 ## ---------------------------------------------------------------------
 
 #
-# Setup build type for examples
-#
-if (CMAKE_BUILD_TYPE MATCHES "Release")
-	set(EXAMPLES_BUILD_TYPE "RELEASE")
-else()
-	set(EXAMPLES_BUILD_TYPE "DEBUG")
-endif()
-
-#
 # macro to setup an example target
 #
-macro(setup_example_target TARGET)
+function(setup_example_target TARGET)
+	# usually the examples are built and linked against RELEASE
+	# if this version is available
+	# Supply PREFER_DEBUG as ARGV1 if you want to have the opposite
+	# preference
+
+	# Select build type for example target:
+	if ("${ARGV1}" STREQUAL "PREFER_DEBUG" AND CMAKE_BUILD_TYPE MATCHES "Debug")
+		set(EXAMPLE_BUILD_TYPE "DEBUG")
+	elseif(CMAKE_BUILD_TYPE MATCHES "Release")
+		set(EXAMPLE_BUILD_TYPE "RELEASE")
+	else()
+		set(EXAMPLE_BUILD_TYPE "DEBUG")
+	endif()
+
 	set_target_properties(
 		${TARGET}
 		PROPERTIES
 		#${CMAKE_EXE_LINKER_FLAGS} are added
-		LINK_FLAGS "${CMAKE_EXE_LINKER_FLAGS_${EXAMPLES_BUILD_TYPE}}"
+		LINK_FLAGS "${CMAKE_EXE_LINKER_FLAGS_${EXAMPLE_BUILD_TYPE}}"
 		LINKER_LANGUAGE "CXX"
 		#${CMAKE_CXX_FLAGS} are added automaticaly
-		COMPILE_FLAGS "${CMAKE_CXX_FLAGS_${EXAMPLES_BUILD_TYPE}}"
-		COMPILE_DEFINITIONS "${EXAMPLES_BUILD_TYPE}"
+		COMPILE_FLAGS "${CMAKE_CXX_FLAGS_${EXAMPLE_BUILD_TYPE}}"
+		COMPILE_DEFINITIONS "${EXAMPLE_BUILD_TYPE}"
 	)
 
 	# setup definitions.
-	target_compile_definitions(${TARGET} PRIVATE "${KRIMS_DEFINITIONS};${KRIMS_DEFINITIONS_${EXAMPLES_BUILD_TYPE}}")
+	target_compile_definitions(${TARGET} PRIVATE "${KRIMS_DEFINITIONS};${KRIMS_DEFINITIONS_${EXAMPLE_BUILD_TYPE}}")
 
 	# link it with the appropriate krims library target
 	target_link_libraries(${TARGET}
-		${krims_${EXAMPLES_BUILD_TYPE}_TARGET}
+		${krims_${EXAMPLE_BUILD_TYPE}_TARGET}
 		${KRIMS_DEPENDENCIES}
-		${KRIMS_DEPENDENCIES_${EXAMPLES_BUILD_TYPE}}
+		${KRIMS_DEPENDENCIES_${EXAMPLE_BUILD_TYPE}}
 	)
-endmacro()
+endfunction()
 
 #
 # Include subdirectories:
 #
 add_subdirectory(ParameterMap_demo)
+add_subdirectory(ExceptionSystem_demo)
