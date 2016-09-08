@@ -83,6 +83,7 @@ script:
   - cmake -DCMAKE_CXX_COMPILER=${CXX_COMPILER} -DCMAKE_C_COMPILER=${CC_COMPILER}
            -DCMAKE_BUILD_TYPE=DebugRelease ${EXTRA_OPTS}
            -DRC_ENABLE_TESTS=OFF -DAUTOCHECKOUT_MISSING_REPOS=ON
+           -DKRIMS_ENABLE_EXPERIMENTAL=ON
            -GNinja ..
   - cmake --build  . -- -j ${CORES}
   - if [ "${TESTCASE}" ]; then ctest --output-on-failure -R ${TESTCASE}; else true; fi
