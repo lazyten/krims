@@ -23,30 +23,24 @@ include(CheckCXXCompilerFlag)
 
 macro(determine_supported_cxx_standards)
 	# macro to check for the highest fully supported c++ standard.
-	# Sets the cache variables:
-	#       DRB_HAS_CXX11_SUPPORT
-	#       DRB_HAS_CXX14_SUPPORT
-	#       DRB_HAS_CXX17_SUPPORT
-	# to ON or OFF respectively and also
-	#       DRB_HIGHEST_CXX_SUPPORT
-	# to the plain values (98,11,14,17).
+	# Sets the cache variable DRB_HIGHEST_CXX_SUPPORT to the plain
+	# plain values (98,11,14,17).
 	#
-	# Note that the macro does not enforce any standard.
+	# Note that the macro does not enforce any particular standard.
 	#
+	set(DRB_HIGHEST_CXX_SUPPORT 98 CACHE INTERNAL "The highest c++ standard supported.")
 	if (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
 		# All of gcc supports 98
 		set(DRB_HIGHEST_CXX_SUPPORT 98)
 
 		if (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER "4.8.1" OR
 				CMAKE_CXX_COMPILER_VERSION VERSION_EQUAL "4.8.1")
-			set(DRB_HAS_CXX11_SUPPORT ON CACHE INTERNAL "Did DRB detect c++11 support.")
-			set(DRB_HIGHEST_CXX_SUPPORT 11 CACHE INTERNAL "The highest c++ standard supported.")
+			set(DRB_HIGHEST_CXX_SUPPORT 11)
 		endif()
 
 		if (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER "5.0" OR
 				CMAKE_CXX_COMPILER_VERSION VERSION_EQUAL "5.0")
-			set(DRB_HAS_CXX14_SUPPORT ON CACHE INTERNAL "Did DRB detect c++14 support.")
-			set(DRB_HIGHEST_CXX_SUPPORT 14 CACHE INTERNAL "The highest c++ standard supported.")
+			set(DRB_HIGHEST_CXX_SUPPORT 14)
 		endif()
 
 		# TODO Extend once c++17 is ready
@@ -56,26 +50,27 @@ macro(determine_supported_cxx_standards)
 
 		if (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER "3.3" OR
 				CMAKE_CXX_COMPILER_VERSION VERSION_EQUAL "3.3")
-			set(DRB_HAS_CXX11_SUPPORT ON CACHE INTERNAL "Did DRB detect c++11 support.")
-			set(DRB_HIGHEST_CXX_SUPPORT 11 CACHE INTERNAL "The highest c++ standard supported.")
+			set(DRB_HIGHEST_CXX_SUPPORT 11)
 		endif()
 
 		if (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER "3.4" OR
 				CMAKE_CXX_COMPILER_VERSION VERSION_EQUAL "3.4")
-			set(DRB_HAS_CXX14_SUPPORT ON CACHE INTERNAL "Did DRB detect c++14 support.")
-			set(DRB_HIGHEST_CXX_SUPPORT 14 CACHE INTERNAL "The highest c++ standard supported.")
+			set(DRB_HIGHEST_CXX_SUPPORT 14)
 		endif()
 
 		# TODO Extend once c++17 is ready
 	else()
 		message(WARNING "Determining maximum supported C++ version is not supported for compiler ${CMAKE_CXX_COMPILER_ID} yet. \
 Going with C++98.")
-		set(DRB_HIGHEST_CXX_SUPPORT 98)
 	endif()
 endmacro(determine_supported_cxx_standards)
 
 macro(use_cxx_standard STANDARD)
 	# macro to enforce a particular c++ standard (only needed for cmake < 3.1)
+	#
+	# sets the variable
+	#	CMAKE_CXX_STANDARD
+	# to the plain value STANDARD (98,11,14 or 17)
 	#
 	if (CMAKE_VERSION VERSION_LESS "3.1")
 		if (STANDARD VERSION_LESS "11")
@@ -101,6 +96,11 @@ macro(use_cxx_standard STANDARD)
 		# Add it to the list of flags.
 		set (CMAKE_CXX_FLAGS "-std=${FLAG} ${CMAKE_CXX_FLAGS}")
 		unset(FLAG)
+
+		# set the CMAKE_CXX_STANDARD variable
+		# (even though unused in this CMake version)
+		set(CMAKE_CXX_STANDARD ${STANDARD}
+			CACHE "The C++ standard we use for this build.")
 	else()
 		# set the standard and enforce it:
 		set(CMAKE_CXX_STANDARD ${STANDARD})
@@ -128,9 +128,17 @@ endmacro(enable_if_compiles)
 
 macro(DRB_SETUP_COMPILER_FLAGS CXX_STANDARD)
 	# Determine the compiler type and load corresponding flags.
-	# Enforce a c++ standard above CXX_STANDARD. 
-	# 
+	# Enforce a c++ standard above CXX_STANDARD.
+	#
+	# The macro takes DRB_MAXIMUM_CXX_STANDARD into account and does not go
+	# beyond this c++ standard even though the compiler supports it.
+	# If DRB_MAXIMUM_CXX_STANDARD < CXX_STANDARD an error is thrown.
+	# This option is hence useful to define an upper CXX standard for testing
+	# code with a new compiler but an old standard even though a higher
+	# standard is supported.
+	#
 	# sets the following variables
+	#	CMAKE_CXX_STANDARD			The precise c++ standard enforced.
 	#       CMAKE_CXX_FLAGS				Flags for the c++ compiler, all builds
 	#	CMAKE_CXX_FLAGS_DEBUG			Extra flags for the debug build
 	#	CMAKE_CXX_FLAGS_RELEASE			Extra flags for the release build
@@ -146,24 +154,43 @@ macro(DRB_SETUP_COMPILER_FLAGS CXX_STANDARD)
 	#	CMAKE_EXE_LINKER_FLAGS			Flags for linking executables, all builds
 	#	CMAKE_EXE_LINKER_FLAGS_DEBUG		Extra flags for the debug build
 	#	CMAKE_EXE_LINKER_FLAGS_RELEASE		Extra flags for the release build
-	#
-	#	DRB_HAS_CXX11_SUPPORT			Do we have full c++11 support?
-	#	DRB_HAS_CXX14_SUPPORT			Do we have full c++14 support?
-	#	DRB_HAS_CXX17_SUPPORT			Do we have full c++17 support?
 
 	# check that drb has been initialised
 	if(NOT DRB_INITIALISED)
 		message(FATAL_ERROR "You have to call drb_init before any other DebugReleaseBuild function.")
 	endif()
 
-	# check what standards are supported and enforce the highest,
-	# but at least the one provided by the user
+	# check what standards are supported
 	determine_supported_cxx_standards()
+
+	# If DRB_MAXIMUM_CXX_STANDARD is present, enforce a lower standard
+	# than supported:
+	if(DEFINED DRB_MAXIMUM_CXX_STANDARD)
+		if (DRB_MAXIMUM_CXX_STANDARD VERSION_LESS CXX_STANDARD)
+			message(FATAL_ERROR "The maximal C++ standard \
+DRB_MAXIMUM_CXX_STANDARD(==${DRB_MAXIMUM_CXX_STANDARD}) is below \
+CXX_STANDARD(==${CXX_STANDARD}).")
+		endif()
+		if(DRB_MAXIMUM_CXX_STANDARD VERSION_LESS DRB_HIGHEST_CXX_SUPPORT)
+			set(DRB_HIGHEST_CXX_SUPPORT ${DRB_MAXIMUM_CXX_STANDARD})
+		endif()
+	endif()
+
+	# enforce the highest standard we are ok with:
 	if (DRB_HIGHEST_CXX_SUPPORT VERSION_GREATER CXX_STANDARD)
 		use_cxx_standard(${DRB_HIGHEST_CXX_SUPPORT})
 	else()
 		use_cxx_standard(${CXX_STANDARD})
 	endif()
+
+	# TODO set these for downstream compatibility:
+	if (NOT CMAKE_CXX_STANDARD VERSION_LESS 11)
+		set(DRB_HAS_CXX11_SUPPORT ON CACHE INTERNAL "Detected c++11 support.")
+	endif()
+	if (NOT CMAKE_CXX_STANDARD VERSION_LESS 14)
+		set(DRB_HAS_CXX14_SUPPORT ON CACHE INTERNAL "Detected c++14 support.")
+	endif()
+	# end compatibility.
 
 	if (CMAKE_CXX_COMPILER_ID MATCHES "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 		# We have a known "standard" compiler
