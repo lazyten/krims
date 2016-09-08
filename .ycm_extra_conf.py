@@ -36,6 +36,7 @@ flags = [
     '-isystem', './build/external/catch/src/catchFromGit/include',
     '-isystem', '../rapidcheck/include',
     '-isystem', '../rapidcheck/ext/catch/include',
+    '-isystem', '/usr/lib/ycmd/clang_includes',
 ]
 
 def DirectoryOfThisScript():
