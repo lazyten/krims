@@ -109,10 +109,9 @@ void ExceptionBase::print_stacktrace(std::ostream& out) const {
   int initframe = 0;
   for (; initframe < m_n_stacktrace_frames; ++initframe) {
     if (std::strstr(stacktrace[initframe], "krims") &&
-        std::strstr(stacktrace[initframe], "exceptions") &&
         std::strstr(stacktrace[initframe], "ExceptionBase") &&
         std::strstr(stacktrace[initframe], "add_exc_data")) {
-      // The current frame contains krims, exceptions and add_exc_data,
+      // The current frame contains krims, ExceptionBase and add_exc_data,
       // ie. it is the one corresponding to adding exception data.
       // So the next is the frame we are interested in.
       ++initframe;
