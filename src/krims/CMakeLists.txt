@@ -28,6 +28,7 @@ set(KRIMS_SOURCES
 	ExceptionSystem/ExceptionBase.cc
 	ExceptionSystem/exception_defs.cc
 	ParameterMap.cc
+	NumComp/NumCompConstants.cc
 )
 
 # Dump the current version as an include file.

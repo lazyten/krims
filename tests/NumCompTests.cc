@@ -27,6 +27,33 @@ namespace tests {
 using namespace rc;
 
 TEST_CASE("NumComp tests", "[NumComp]") {
+  SECTION("Test NumCompConstantsChangeSafe") {
+    // Set some failure action and some tolerance
+    NumCompConstants::default_failure_action = NumCompActionType::ThrowVerbose;
+    NumCompConstants::default_tolerance_factor = 1e3;
+
+    // ChangeSafe inside a region:
+    {
+      CHECK(NumCompConstants::default_tolerance_factor == 1e3);
+      NumCompConstantsChangeSafe newtol(1e4);
+      CHECK(NumCompConstants::default_tolerance_factor == 1e4);
+    }  // newtol goes out of scope
+    CHECK(NumCompConstants::default_tolerance_factor == 1e3);
+
+    // Nested ChangeSafe
+    {
+      CHECK(NumCompConstants::default_tolerance_factor == 1e3);
+      NumCompConstantsChangeSafe newtol(1e4);
+      CHECK(NumCompConstants::default_tolerance_factor == 1e4);
+      {
+        NumCompConstantsChangeSafe newertol(1e2);
+        CHECK(NumCompConstants::default_tolerance_factor == 1e2);
+      }
+      CHECK(NumCompConstants::default_tolerance_factor == 1e4);
+    }  // newtol goes out of scope
+    CHECK(NumCompConstants::default_tolerance_factor == 1e3);
+  }  // Test NumCompConstantsChangeSafe
+
   SECTION("Test is_equal with extremely sloppy tolerance") {
     // If numerical comparison fails, throw an exception.
     NumCompConstants::default_failure_action = NumCompActionType::ThrowVerbose;
@@ -82,6 +109,15 @@ TEST_CASE("NumComp tests", "[NumComp]") {
 
     REQUIRE(100.000000 == numcomp(100.000001).tolerance(1e-8));
     REQUIRE(10.0 == numcomp(10.01).tolerance(1e-3));
+
+    // Test some different types:
+    REQUIRE(10.0f == numcomp(10.01).tolerance(1e-3));
+    REQUIRE(std::complex<double>(1., 2.) ==
+            numcomp(std::complex<double>(1.000001, 1.99999999999))
+                  .tolerance(1e-6));
+    REQUIRE(std::complex<float>(1., 2.) ==
+            numcomp(std::complex<double>(1.000001, 1.99999999999))
+                  .tolerance(1e-6));
   }  // SECTION Test is_equal with extremely sloppy tolerance
 
 }  // TEST_CASE

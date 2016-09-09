@@ -17,8 +17,11 @@
 // along with krims. If not, see <http://www.gnu.org/licenses/>.
 //
 
-#pragma once
-#include "NumComp/NumComp.hh"
-#include "NumComp/NumCompConstants.hh"
-#include "NumComp/NumCompConstantsChangeSafe.hh"
-#include "NumComp/NumCompException.hh"
+#include "NumCompConstants.hh"
+
+namespace krims {
+double NumCompConstants::default_tolerance_factor = 100.;
+NumCompActionType NumCompConstants::default_failure_action =
+      NumCompActionType::Return;
+
+}  // namespace krims
