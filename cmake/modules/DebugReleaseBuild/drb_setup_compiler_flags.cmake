@@ -166,7 +166,7 @@ macro(DRB_SETUP_COMPILER_FLAGS CXX_STANDARD)
 	# If DRB_MAXIMUM_CXX_STANDARD is present and not set to "auto",
 	# enforce a lower standard than supported:
 	if(DEFINED DRB_MAXIMUM_CXX_STANDARD
-			AND NOT "${DRB_MAXIMUM_CXX_STANDARD}" STREQUAL "auto" )
+			AND NOT "${DRB_MAXIMUM_CXX_STANDARD}" STREQUAL "highest" )
 
 		if (DRB_MAXIMUM_CXX_STANDARD VERSION_LESS CXX_STANDARD)
 			message(FATAL_ERROR "The maximal C++ standard \
@@ -181,7 +181,7 @@ CXX_STANDARD(==${CXX_STANDARD}).")
 	# Promote DRB_MAXIMUM_CXX_STANDARD to cache
 	set(DRB_MAXIMUM_CXX_STANDARD "${DRB_HIGHEST_CXX_SUPPORT}" CACHE
 		STRING "The maximal C++ standard DebugReleaseBuild makes use of. \
-Set to \"auto\" to let DRB determine the value automatically.")
+Set to \"highest\" to let DRB use the highest available C++ standard (default).")
 
 	# enforce the highest standard we are ok with:
 	if (DRB_HIGHEST_CXX_SUPPORT VERSION_GREATER CXX_STANDARD)
