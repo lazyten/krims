@@ -24,8 +24,9 @@
 #
 set(KRIMS_SOURCES
 	version.cc
-	ExceptionSystem/exception_defs.cc
+	ExceptionSystem/backtrace.cc
 	ExceptionSystem/ExceptionBase.cc
+	ExceptionSystem/exception_defs.cc
 	ParameterMap.cc
 )
 

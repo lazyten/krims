@@ -18,6 +18,7 @@
 //
 
 #include "ExceptionBase.hh"
+#include "backtrace.hh"
 
 #include <cstdlib>
 #include <cstring>
@@ -102,8 +103,12 @@ void ExceptionBase::print_stacktrace(std::ostream& out) const {
   out << std::endl;
   out << "Backtrace:" << std::endl;
   out << "----------" << std::endl;
-  out << "#   file  functionname  @  address" << std::endl;
-  out << "----------------------------------" << std::endl << std::endl;
+#ifdef KRIMS_ADDR2LINE_AVAILABLE
+  out << "#   function  @     file    :  linenr" << std::endl;
+#else
+  out << "#   function  @  executable :  address" << std::endl;
+#endif
+  out << "--------------------------------------" << std::endl << std::endl;
 
   // Skip the frames we are not interested in:
   int initframe = 0;
@@ -120,7 +125,7 @@ void ExceptionBase::print_stacktrace(std::ostream& out) const {
   }
 
   for (int frame = initframe; frame < m_n_stacktrace_frames; ++frame) {
-    out << "#" << frame - initframe << "  ";
+    out << "#" << frame - initframe;
 
     const std::string stacktrace_entry(stacktrace[frame]);
     // The stacktrace frames are in the format
@@ -146,8 +151,10 @@ void ExceptionBase::print_stacktrace(std::ostream& out) const {
     const std::string offset =
           stacktrace_entry.substr(pos_plus + 1, pos_bracketcl - pos_plus - 1);
 
-    // print the file name:
-    out << file;
+    // Convert stacktrace address to string
+    std::stringstream ss;
+    ss << m_raw_stacktrace[frame];
+    const std::string addr = ss.str();
 
 #ifdef KRIMS_HAVE_LIBSTDCXX_DEMANGLER
     // try to demangle the function name:
@@ -168,8 +175,26 @@ void ExceptionBase::print_stacktrace(std::ostream& out) const {
     out << "  " << functionname;
 #endif
 
-    // print the raw address:
-    out << " @ " << m_raw_stacktrace[frame];
+#ifdef KRIMS_ADDR2LINE_AVAILABLE
+    // Allocate memory for addr2line call:
+    const size_t maxlen = 4096;
+    char* codefile = new char[maxlen];
+    char* number = new char[maxlen];
+
+    // call and interpret:
+    int ret = krims::addr2line(file.c_str(), addr.c_str(), maxlen, codefile,
+                               number);
+    if (ret != -1) {
+      out << "  @  " << codefile << "  :  " << number;
+    }
+
+    // Free allocated memory
+    delete[] number;
+    delete[] codefile;
+#else
+    // print the executable name and raw address
+    out << "  @  " << file << "  :  " << addr;
+#endif
 
     // finish the line:
     out << std::endl;
@@ -178,11 +203,12 @@ void ExceptionBase::print_stacktrace(std::ostream& out) const {
     if (functionname == "main") break;
   }
 
-  // TODO: have this hint?
+#ifndef KRIMS_ADDR2LINE_AVAILABLE
   out << std::endl
-      << "Hint: Use \"addr2line -e <file> <address>\" to get "
-         "line number in BT."
+      << "Hint: Use \"addr2line -e <executable> <address>\" to get "
+         "file and line number in backtrace."
       << std::endl;
+#endif
 
   // Free the memory for the above.
   free(stacktrace);
