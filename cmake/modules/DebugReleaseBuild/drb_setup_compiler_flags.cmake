@@ -163,9 +163,11 @@ macro(DRB_SETUP_COMPILER_FLAGS CXX_STANDARD)
 	# check what standards are supported
 	determine_supported_cxx_standards()
 
-	# If DRB_MAXIMUM_CXX_STANDARD is present, enforce a lower standard
-	# than supported:
-	if(DEFINED DRB_MAXIMUM_CXX_STANDARD)
+	# If DRB_MAXIMUM_CXX_STANDARD is present and not set to "auto",
+	# enforce a lower standard than supported:
+	if(DEFINED DRB_MAXIMUM_CXX_STANDARD
+			AND NOT "${DRB_MAXIMUM_CXX_STANDARD}" STREQUAL "auto" )
+
 		if (DRB_MAXIMUM_CXX_STANDARD VERSION_LESS CXX_STANDARD)
 			message(FATAL_ERROR "The maximal C++ standard \
 DRB_MAXIMUM_CXX_STANDARD(==${DRB_MAXIMUM_CXX_STANDARD}) is below \
@@ -174,7 +176,12 @@ CXX_STANDARD(==${CXX_STANDARD}).")
 		if(DRB_MAXIMUM_CXX_STANDARD VERSION_LESS DRB_HIGHEST_CXX_SUPPORT)
 			set(DRB_HIGHEST_CXX_SUPPORT ${DRB_MAXIMUM_CXX_STANDARD})
 		endif()
-	endif()
+	else()
+
+	# Promote DRB_MAXIMUM_CXX_STANDARD to cache
+	set(DRB_MAXIMUM_CXX_STANDARD "${DRB_HIGHEST_CXX_SUPPORT}" CACHE
+		STRING "The maximal C++ standard DebugReleaseBuild makes use of. \
+Set to \"auto\" to let DRB determine the value automatically.")
 
 	# enforce the highest standard we are ok with:
 	if (DRB_HIGHEST_CXX_SUPPORT VERSION_GREATER CXX_STANDARD)
@@ -190,7 +197,7 @@ CXX_STANDARD(==${CXX_STANDARD}).")
 	if (NOT CMAKE_CXX_STANDARD VERSION_LESS 14)
 		set(DRB_HAS_CXX14_SUPPORT ON CACHE INTERNAL "Detected c++14 support.")
 	endif()
-	# end compatibility.
+	# TODO end compatibility.
 
 	if (CMAKE_CXX_COMPILER_ID MATCHES "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 		# We have a known "standard" compiler
