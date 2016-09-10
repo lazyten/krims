@@ -27,32 +27,90 @@ namespace tests {
 using namespace rc;
 
 TEST_CASE("NumComp tests", "[NumComp]") {
-  SECTION("Test NumCompConstantsChangeSafe") {
+  SECTION("Test NumCompConstants::CacheChange") {
     // Set some failure action and some tolerance
     NumCompConstants::default_failure_action = NumCompActionType::ThrowVerbose;
     NumCompConstants::default_tolerance_factor = 1e3;
 
-    // ChangeSafe inside a region:
+    // change inside a region:
     {
       CHECK(NumCompConstants::default_tolerance_factor == 1e3);
-      NumCompConstantsChangeSafe newtol(1e4);
+      CHECK(NumCompConstants::default_failure_action ==
+            NumCompActionType::ThrowVerbose);
+      auto cache_change = NumCompConstants::change_temporary(1e4);
       CHECK(NumCompConstants::default_tolerance_factor == 1e4);
     }  // newtol goes out of scope
     CHECK(NumCompConstants::default_tolerance_factor == 1e3);
+    CHECK(NumCompConstants::default_failure_action ==
+          NumCompActionType::ThrowVerbose);
 
-    // Nested ChangeSafe
+    // Nested change
     {
       CHECK(NumCompConstants::default_tolerance_factor == 1e3);
-      NumCompConstantsChangeSafe newtol(1e4);
+      CHECK(NumCompConstants::default_failure_action ==
+            NumCompActionType::ThrowVerbose);
+      auto cache_change = NumCompConstants::change_temporary(1e4);
       CHECK(NumCompConstants::default_tolerance_factor == 1e4);
+      CHECK(NumCompConstants::default_failure_action ==
+            NumCompActionType::ThrowVerbose);
       {
-        NumCompConstantsChangeSafe newertol(1e2);
+        auto cache_change = NumCompConstants::change_temporary(1e2);
         CHECK(NumCompConstants::default_tolerance_factor == 1e2);
+        CHECK(NumCompConstants::default_failure_action ==
+              NumCompActionType::ThrowVerbose);
       }
       CHECK(NumCompConstants::default_tolerance_factor == 1e4);
+      CHECK(NumCompConstants::default_failure_action ==
+            NumCompActionType::ThrowVerbose);
     }  // newtol goes out of scope
     CHECK(NumCompConstants::default_tolerance_factor == 1e3);
-  }  // Test NumCompConstantsChangeSafe
+    CHECK(NumCompConstants::default_failure_action ==
+          NumCompActionType::ThrowVerbose);
+
+    // change action type inside a region:
+    {
+      CHECK(NumCompConstants::default_tolerance_factor == 1e3);
+      CHECK(NumCompConstants::default_failure_action ==
+            NumCompActionType::ThrowVerbose);
+      auto cache_change =
+            NumCompConstants::change_temporary(NumCompActionType::Return);
+      CHECK(NumCompConstants::default_tolerance_factor == 1e3);
+      CHECK(NumCompConstants::default_failure_action ==
+            NumCompActionType::Return);
+    }  // newtol goes out of scope
+    CHECK(NumCompConstants::default_tolerance_factor == 1e3);
+    CHECK(NumCompConstants::default_failure_action ==
+          NumCompActionType::ThrowVerbose);
+
+    // change both inside a region:
+    {
+      CHECK(NumCompConstants::default_tolerance_factor == 1e3);
+      CHECK(NumCompConstants::default_failure_action ==
+            NumCompActionType::ThrowVerbose);
+      auto cache_change =
+            NumCompConstants::change_temporary(1e5, NumCompActionType::Return);
+      CHECK(NumCompConstants::default_tolerance_factor == 1e5);
+      CHECK(NumCompConstants::default_failure_action ==
+            NumCompActionType::Return);
+      {
+        auto cache_change = NumCompConstants::change_temporary(
+              1e7, NumCompActionType::ThrowNormal);
+        CHECK(NumCompConstants::default_tolerance_factor == 1e7);
+        CHECK(NumCompConstants::default_failure_action ==
+              NumCompActionType::ThrowNormal);
+      }
+      CHECK(NumCompConstants::default_tolerance_factor == 1e5);
+      CHECK(NumCompConstants::default_failure_action ==
+            NumCompActionType::Return);
+    }  // newtol goes out of scope
+    CHECK(NumCompConstants::default_tolerance_factor == 1e3);
+    CHECK(NumCompConstants::default_failure_action ==
+          NumCompActionType::ThrowVerbose);
+  }  // Test NumCompConstants::CacheChange
+
+  //
+  // -----------------------------------------------
+  //
 
   SECTION("Test is_equal with extremely sloppy tolerance") {
     // If numerical comparison fails, throw an exception.
