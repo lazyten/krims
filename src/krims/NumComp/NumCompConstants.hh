@@ -79,6 +79,75 @@ struct NumCompConstants {
 
   /** The default failure action */
   static NumCompActionType default_failure_action;
-};
+
+  /** An inner struct to temporarily change the NumCompConstants.
+   *  Once the class goes out of scope and is destroyed, the original
+   *  settings are restored */
+  struct CacheChange {
+  public:
+    /** Change both the default failure action as well as the tolerance factor
+     * until the class goes out of scope*/
+    CacheChange(double tolerance_factor, NumCompActionType failure_action)
+          : m_do_restore{true},
+            m_orig_default_tolerance_factor(default_tolerance_factor),
+            m_orig_default_failure_action(default_failure_action) {
+      default_tolerance_factor = tolerance_factor;
+      default_failure_action = failure_action;
+    }
+
+    /** Restore original settings */
+    ~CacheChange() {
+      if (!m_do_restore) return;
+      default_failure_action = m_orig_default_failure_action;
+      default_tolerance_factor = m_orig_default_tolerance_factor;
+    }
+
+    // Disallow copying the class around:
+    CacheChange(const CacheChange&) = delete;
+    CacheChange& operator=(const CacheChange&) = delete;
+
+    // Moving is allowed, though:
+    CacheChange(CacheChange&& other)
+          : m_do_restore{other.m_do_restore},
+            m_orig_default_tolerance_factor{
+                  other.m_orig_default_tolerance_factor},
+            m_orig_default_failure_action{other.m_orig_default_failure_action} {
+      other.m_do_restore = false;
+    }
+
+    CacheChange& operator=(CacheChange&& other) {
+      m_do_restore = other.m_do_restore;
+      m_orig_default_failure_action = other.m_orig_default_failure_action;
+      m_orig_default_tolerance_factor = other.m_orig_default_tolerance_factor;
+      other.m_do_restore = false;
+      return *this;
+    }
+
+  private:
+    bool m_do_restore = true;
+    double m_orig_default_tolerance_factor;
+    NumCompActionType m_orig_default_failure_action;
+  };  // class CacheChange
+
+  /** Temporarily change the tolerance factor until the guarding CacheChange
+   * class goes out of scope.
+   *  Do not use this function to permanently change the default tolerance
+   * factor. For this use the static members above directly.
+   */
+  static CacheChange change_temporary(
+        double tolerance_factor,
+        NumCompActionType failure_action = default_failure_action) {
+    return CacheChange{tolerance_factor, failure_action};
+  }
+
+  /** Temporarily change the failure action until the guarding CacheChange
+   * class goes out of scope.
+   *  Do not use this function to permanently change the default failure action.
+   * For this use the static members above directly.
+   */
+  static CacheChange change_temporary(NumCompActionType failure_action) {
+    return CacheChange{default_tolerance_factor, failure_action};
+  }
+};  // class NumCompConstants
 
 }  // namespace krims

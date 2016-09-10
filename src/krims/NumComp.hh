@@ -20,5 +20,5 @@
 #pragma once
 #include "NumComp/NumComp.hh"
 #include "NumComp/NumCompConstants.hh"
-#include "NumComp/NumCompConstantsChangeSafe.hh"
 #include "NumComp/NumCompException.hh"
+#include "NumComp/NumEqual.hh"
