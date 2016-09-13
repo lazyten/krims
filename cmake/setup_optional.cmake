@@ -21,10 +21,10 @@
 
 # adds entries to these things
 #
-# 	KRIMS_DEPENDENCIES			everyone needs these libraries
-# 	KRIMS_DEPENDENCIES_DEBUG		debug mode needs these extras
-# 	KRIMS_DEPENDENCIES_RELEASE		release mode needs these extras
-# 	KRIMS_DEPENDENCIES_TEST			tests need these extra libraries
+#       KRIMS_DEPENDENCIES			everyone needs these libraries
+#       KRIMS_DEPENDENCIES_DEBUG		debug mode needs these extras
+#       KRIMS_DEPENDENCIES_RELEASE		release mode needs these extras
+#       KRIMS_DEPENDENCIES_TEST			tests need these extra libraries
 #
 #       KRIMS_DEFINITIONS			definitions for all compilation
 #       KRIMS_DEFINITIONS_DEBUG			definitions for debug mode
@@ -64,7 +64,7 @@ endif()
 ########################
 #
 # Check whether stacktrace information is available for the exception
-# system. We expect the interface of glibc. 
+# system. We expect the interface of glibc.
 # If it is than we also add the -rdynamic flag since this is required
 # if one wants meaningful backtraces.
 #
@@ -91,7 +91,7 @@ endif()
 # Check for demangling symbols from within the program.
 # We expect the interface from the libstdc++
 #
-# The test example is taken from 
+# The test example is taken from
 #   http://gcc.gnu.org/onlinedocs/libstdc++/18_support/howto.html#6
 #
 if(KRIMS_HAVE_GLIBC_STACKTRACE)

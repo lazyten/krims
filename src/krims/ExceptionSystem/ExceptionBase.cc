@@ -18,55 +18,42 @@
 //
 
 #include "ExceptionBase.hh"
-#include "backtrace.hh"
-
 #include <cstdlib>
 #include <cstring>
+#include <iomanip>
 #include <iostream>
 #include <sstream>
-
-#ifdef KRIMS_HAVE_GLIBC_STACKTRACE
-#include <execinfo.h>
-#endif
-
-#ifdef KRIMS_HAVE_LIBSTDCXX_DEMANGLER
-#include <cxxabi.h>
-#endif
 
 namespace krims {
 
 ExceptionBase::ExceptionBase()
-      : m_name(""),
-        m_file(""),
+      : m_name("?"),
+        m_file("?"),
         m_line(0),
-        m_function(""),
-        m_failed_condition(""),
-        m_n_stacktrace_frames(0),
+        m_function("?"),
+        m_failed_condition("?"),
+        m_backtrace{},
         m_what_str("") {}
 
 void ExceptionBase::add_exc_data(const char* file, int line,
                                  const char* function,
                                  const char* failed_condition,
-                                 const char* exception_name) {
+                                 const char* exception_name,
+                                 bool use_expensive) {
   m_name = exception_name;
   m_file = file;
   m_line = line;
   m_function = function;
   m_failed_condition = failed_condition;
 
-#ifdef KRIMS_HAVE_GLIBC_STACKTRACE
-  // If the system supports it, get a stacktrace how we got here
-  // We defer the symbol lookup via backtrace_symbols() since
-  // this loads external libraries which can take up to seconds
-  // on some machines.
-  // See generate_stacktrace() for the place where this is done.
-  m_n_stacktrace_frames = backtrace(m_raw_stacktrace, 25);
-#endif
+  m_backtrace.obtain_backtrace(use_expensive);
 }
 
 const char* ExceptionBase::what() const noexcept {
   // if string is empty: build it.
-  if (m_what_str == "") m_what_str = generate_message();
+  if (m_what_str == "") {
+    m_what_str = generate_message();
+  }
 
   // TODO: Is this noexcept???
   return m_what_str.c_str();
@@ -89,130 +76,48 @@ void ExceptionBase::print_exc_data(std::ostream& out) const noexcept {
 }
 
 void ExceptionBase::print_stacktrace(std::ostream& out) const {
-  // return if no stracktrace frames
-  if (m_n_stacktrace_frames <= 0) return;
+  // If we have no backtrace, print nothing.
+  if (m_backtrace.frames().size() == 0) return;
 
-#ifdef KRIMS_HAVE_GLIBC_STACKTRACE
-  // We have deferred the symbol lookup to this point to avoid costly
-  // runtime penalties due to linkage of external libraries by
-  // backtrace_symbols.
-  char** stacktrace =
-        backtrace_symbols(m_raw_stacktrace, m_n_stacktrace_frames);
+  // Determine length of longest function name:
+  size_t maxfunclen = 8;  // length of string "function"
+  for (const auto& frame : m_backtrace.frames()) {
+    maxfunclen = std::max(maxfunclen, frame.function_name.length());
+  }
 
-  // if there is a stackframe stored, print it
+  // Print heading of the backtrace table:
   out << std::endl;
   out << "Backtrace:" << std::endl;
   out << "----------" << std::endl;
-#ifdef KRIMS_ADDR2LINE_AVAILABLE
-  out << "#   function  @     file    :  linenr" << std::endl;
-#else
-  out << "#   function  @  executable :  address" << std::endl;
-#endif
+  out << "## " << std::setw(maxfunclen) << std::left << "function" << std::right
+      << " @ ";
+  if (m_backtrace.determine_file_line()) {
+    out << "    file    :  linenr" << std::endl;
+  } else {
+    out << " executable :  address" << std::endl;
+  }
   out << "--------------------------------------" << std::endl << std::endl;
 
-  // Skip the frames we are not interested in:
-  int initframe = 0;
-  for (; initframe < m_n_stacktrace_frames; ++initframe) {
-    if (std::strstr(stacktrace[initframe], "krims") &&
-        std::strstr(stacktrace[initframe], "ExceptionBase") &&
-        std::strstr(stacktrace[initframe], "add_exc_data")) {
-      // The current frame contains krims, ExceptionBase and add_exc_data,
-      // ie. it is the one corresponding to adding exception data.
-      // So the next is the frame we are interested in.
-      ++initframe;
-      break;
-    }
-  }
+  for (size_t i = 0; i < m_backtrace.frames().size(); ++i) {
+    const Backtrace::Frame& frame = m_backtrace.frames()[i];
 
-  for (int frame = initframe; frame < m_n_stacktrace_frames; ++frame) {
-    out << "#" << frame - initframe;
+    out << std::setw(2) << i << " " << std::setw(maxfunclen) << std::left
+        << frame.function_name << std::right << " @ ";
 
-    const std::string stacktrace_entry(stacktrace[frame]);
-    // The stacktrace frames are in the format
-    //     filename(functionname+offset) [address]
-    // Try to extract the functionname
-    const size_t pos_bracket = stacktrace_entry.find("(");
-    const size_t pos_bracketcl = stacktrace_entry.find(")");
-    const size_t pos_plus = stacktrace_entry.find("+");
-
-    // If functionname+offset is the empty string, then the user omitted the
-    // flag -rdynamic on compilation. Warn him and continue:
-    if (pos_bracketcl == pos_bracket + 1) {
-      out << stacktrace_entry << "   (add flag \"-rdynamic\" on linking "
-                                 "to improve stacktrace)"
-          << std::endl;
-      continue;
-    }
-
-    // Split up the stacktrace string:
-    const std::string functionname =
-          stacktrace_entry.substr(pos_bracket + 1, pos_plus - pos_bracket - 1);
-    const std::string file = stacktrace_entry.substr(0, pos_bracket);
-    const std::string offset =
-          stacktrace_entry.substr(pos_plus + 1, pos_bracketcl - pos_plus - 1);
-
-    // Convert stacktrace address to string
-    std::stringstream ss;
-    ss << m_raw_stacktrace[frame];
-    const std::string addr = ss.str();
-
-#ifdef KRIMS_HAVE_LIBSTDCXX_DEMANGLER
-    // try to demangle the function name:
-    int status;
-    char* p = abi::__cxa_demangle(functionname.c_str(), 0, 0, &status);
-
-    if (status == 0) {
-      // all well
-      out << "  " << p;
+    if (m_backtrace.determine_file_line()) {
+      out << frame.codefile << "  :  " << frame.line_number;
     } else {
-      out << "  " << functionname;
+      out << frame.executable_name << "  :  " << frame.address;
     }
-
-    // Free the allocated char*
-    free(p);
-#else
-    // output using the original function name:
-    out << "  " << functionname;
-#endif
-
-#ifdef KRIMS_ADDR2LINE_AVAILABLE
-    // Allocate memory for addr2line call:
-    const size_t maxlen = 4096;
-    char* codefile = new char[maxlen];
-    char* number = new char[maxlen];
-
-    // call and interpret:
-    int ret = krims::addr2line(file.c_str(), addr.c_str(), maxlen, codefile,
-                               number);
-    if (ret != -1) {
-      out << "  @  " << codefile << "  :  " << number;
-    }
-
-    // Free allocated memory
-    delete[] number;
-    delete[] codefile;
-#else
-    // print the executable name and raw address
-    out << "  @  " << file << "  :  " << addr;
-#endif
-
-    // finish the line:
     out << std::endl;
-
-    // stop once we are in main()
-    if (functionname == "main") break;
   }
 
-#ifndef KRIMS_ADDR2LINE_AVAILABLE
-  out << std::endl
-      << "Hint: Use \"addr2line -e <executable> <address>\" to get "
-         "file and line number in backtrace."
-      << std::endl;
-#endif
-
-  // Free the memory for the above.
-  free(stacktrace);
-#endif
+  if (!m_backtrace.determine_file_line()) {
+    out << std::endl
+        << "Hint: Use \"addr2line -e <executable> <address>\" to get "
+           "file and line number in backtrace."
+        << std::endl;
+  }
 }
 
 std::string ExceptionBase::generate_message() const noexcept {
