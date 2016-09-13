@@ -49,8 +49,8 @@ public:
    * \param subscriber_id Id used for the subscription.
    * */
   explicit SubscriptionPointer(const std::string& subscriber_id)
-        : m_subscriber_id_ptr(new std::string(subscriber_id)),
-          m_subscribed_obj_ptr(nullptr) {}
+        : m_subscribed_obj_ptr(nullptr),
+          m_subscriber_id_ptr(new std::string(subscriber_id)) {}
 
   /** Create a Subscription pointer from a Subscribable Class and an
    * identifier
@@ -72,8 +72,13 @@ public:
 
   /** Copy constructor */
   SubscriptionPointer(const SubscriptionPointer& other)
-        : m_subscriber_id_ptr(new std::string(*(other.m_subscriber_id_ptr))),
-          m_subscribed_obj_ptr(nullptr) {
+        : m_subscribed_obj_ptr(nullptr),
+#ifdef DEBUG
+          m_subscriber_id_ptr(new std::string(*(other.m_subscriber_id_ptr))) {
+#else
+          // Avoid allocation in RELEASE mode, just copy the shared pointer:
+          m_subscriber_id_ptr(other.m_subscriber_id_ptr) {
+#endif
 
     // Register the subscription
     register_at(other.m_subscribed_obj_ptr);
@@ -81,8 +86,13 @@ public:
 
   /** Move constructor */
   SubscriptionPointer(SubscriptionPointer&& other)
-        : m_subscriber_id_ptr(new std::string(*other.m_subscriber_id_ptr)),
-          m_subscribed_obj_ptr(nullptr) {
+        : m_subscribed_obj_ptr(nullptr),
+#ifdef DEBUG
+          m_subscriber_id_ptr(new std::string(*other.m_subscriber_id_ptr)) {
+#else
+          // Avoid the allocation in RELEASE mode, just move the shared pointer:
+          m_subscriber_id_ptr(std::move(other.m_subscriber_id_ptr)) {
+#endif
     // Register us:
     register_at(other.m_subscribed_obj_ptr);
 
@@ -126,6 +136,7 @@ public:
 private:
   /** Register at the given object */
   void register_at(T* object_ptr) {
+#ifdef DEBUG
     if (m_subscribed_obj_ptr) {
       // Unregister subscription of this pointer from old object
       m_subscribed_obj_ptr->unsubscribe(m_subscriber_id_ptr);
@@ -137,11 +148,14 @@ private:
       object_ptr->subscribe(m_subscriber_id_ptr);
       m_subscribed_obj_ptr = object_ptr;
     }
+#else
+    // Since we have no subscribing/unsubscribing business to do:
+    m_subscribed_obj_ptr = object_ptr;
+#endif
   }
 
-  // Use a unique_ptr of string here.
-  std::shared_ptr<const std::string> m_subscriber_id_ptr;
   T* m_subscribed_obj_ptr;
+  std::shared_ptr<const std::string> m_subscriber_id_ptr;
 };
 
 // TODO improve subscribable - subscription system and remove

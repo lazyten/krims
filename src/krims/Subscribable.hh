@@ -40,9 +40,11 @@ class SubscriptionPointer;
  * mode
  */
 class Subscribable {
+#ifdef DEBUG
   // Declare SubscriptionPointer as friend.
   template <typename T>
   friend class ::krims::SubscriptionPointer;
+#endif
 
 public:
   /** A swap function for Subscribables */
@@ -153,14 +155,14 @@ public:
   }
 
 protected:
+#ifdef DEBUG
   /** Assert that this has no subscriptions made to it.
    * If this is not the case, than abort the program via
    * assert_abort.
    *
-   * @note In RELEASE mode this function does nothing.
+   * @note In RELEASE mode this function does not exist.
    */
   void assert_no_subscriptions() const {
-#ifdef DEBUG
     if (m_subscribers.size() > 0) {
       // build the string of subscribing objects
       std::stringstream s;
@@ -176,10 +178,11 @@ protected:
       assert_abort(false,
                    ExcStillUsed(m_classname, m_subscribers.size(), s.str()));
     }
-#endif
   }
+#endif
 
 private:
+#ifdef DEBUG
   //
   // Deal with subscriptions:
   //
@@ -189,10 +192,9 @@ private:
    * @param id Reference to the same string object which was used upon
    *           subscription
    *
-   * @note only has an effect if we are in DEBUG mode
+   * @note Does only exist in DEBUG mode
    * */
   void unsubscribe(const std::shared_ptr<const std::string>& id_ptr) const {
-#ifdef DEBUG
     for (auto it = std::begin(m_subscribers); it != std::end(m_subscribers);
          ++it) {
       // check if the pointers agree
@@ -202,7 +204,6 @@ private:
       }
     }
     assert_dbg(false, ExcUnknownSubscriberId(*id_ptr, m_classname));
-#endif
   }
 
   /** Get a subscription
@@ -210,20 +211,17 @@ private:
    * @param id The id to print if the subscription is not removed properly
    *           before deletion
    *
-   * @note only has an effect if we are in DEBUG mode
+   * @note Does only exist in DEBUG mode
    * */
   void subscribe(const std::shared_ptr<const std::string>& id_ptr) const {
-#ifdef DEBUG
     m_subscribers.push_front(id_ptr);
 
     // Set classname here, since this is actually executed by the
     // precise object we subscribe to and not the generic Subscribable
     // class. So here we have the "proper" type available in this.
     m_classname = std::string(typeid(*this).name());
-#endif
   }
 
-#ifdef DEBUG
   /** List to contain the pointer of string object, which are passed
    *  on subscription.
    *

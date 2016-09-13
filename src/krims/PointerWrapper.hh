@@ -144,6 +144,27 @@ public:
     }
   }
 
+  /** Make a subscription pointer out of the PointerWrapper
+   *
+   * \note This operation may be called implicitly, which does not hurt
+   * since T is a subscribable type anyways.
+   */
+  operator SubscriptionPointer<T>() const {
+    if (!m_contains_shared_ptr) {
+      // we contain a subscription pointer, so return a
+      // copy of it
+      return m_subscr_ptr;
+    } else if (m_shared_ptr == nullptr) {
+      // We contain no valid shared pointer either
+      // ... return subscription to nullptr:
+      return SubscriptionPointer<T>("PointerWrapper");
+    } else {
+      // Here we have a valid object to point to
+      // Subscribe to it:
+      return SubscriptionPointer<T>("PointerWrapper", *m_shared_ptr);
+    }
+  }
+
   /** Does this wrapper contain a shared pointer (true) or a
    *  subscription pointer (false)
    *
