@@ -17,7 +17,7 @@
 // along with krims. If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "backtrace.hh"
+#include "addr2line.hh"
 #include <cstdlib>
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -49,7 +49,7 @@ int addr2line(const char* execname, const char* addr, const size_t maxlen,
     // Call addr2line
     if (execlp("addr2line", "addr2line", addr, "-e", execname,
                reinterpret_cast<void*>(NULL)) == -1) {
-      abort();
+      std::abort();
     }
   }
 
@@ -70,11 +70,17 @@ int addr2line(const char* execname, const char* addr, const size_t maxlen,
   // Wait for addr2line to be done
   if (waitpid(pid, NULL, 0) != pid) {
     // error wrong pid exited ... no way we can recover
-    abort();
+    std::abort();
   }
 
-  // Split at ":"
-  char* colon = strstr(codefile, ":");
+  // Ignore tailing newline:
+  char* newline = strchr(codefile, '\n');
+  if (newline) {
+    *newline = 0;
+  }
+
+  // Find first colon and split there:
+  char* colon = strchr(codefile, ':');
   if (colon == NULL) {
     // ":" not found, use everything for codefile.
     return 0;

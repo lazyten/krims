@@ -18,6 +18,7 @@
 //
 
 #pragma once
+#include "Backtrace.hh"
 #include <exception>
 #include <ostream>
 #include <string>
@@ -39,11 +40,26 @@ public:
   /** Default destructor */
   virtual ~ExceptionBase() noexcept = default;
 
-  /** Add enhancing exception data */
+  /** \brief Add enhancing exception data
+   *
+   * \param file   The file where the exception occurred
+   * \param function The function where the exception occurred
+   * \param failed_condition The condition which failed and gave rise to the
+   *                         exception
+   * \param exception_name The name of the exception
+   * \param use_expensive Whether expensive methods to gather additional data
+   * should be used (Only enable this in non-performance critical cases, e.g.
+   * when the exception will actually be shown to the user in the end and the
+   * program is then aborted.)
+   * */
   void add_exc_data(const char* file, int line, const char* function,
-                    const char* failed_condition, const char* exception_name);
+                    const char* failed_condition, const char* exception_name,
+                    bool use_expensive = false);
 
+  /** The c-string which describes briefly what happened */
   const char* what() const noexcept;
+
+  /** The name of the exception */
   const char* name() const;
 
   /** Print exception-specific extra information to the outstream */
@@ -53,9 +69,11 @@ public:
   void print_stacktrace(std::ostream& out) const;
 
 protected:
-  //! build the what string of this exception
+  /**  build the what string of this exception
+   */
   virtual std::string generate_message() const noexcept;
 
+  /** Print the internal exception data */
   virtual void print_exc_data(std::ostream& out) const noexcept;
 
   //! The name of the exception
@@ -73,20 +91,10 @@ protected:
   //! The failed condition as a string.
   const char* m_failed_condition;
 
-  /**
-   * The number of stacktrace frames that are stored in the previous variable.
-   * Zero if the system does not support stack traces.
-   */
-  int m_n_stacktrace_frames;
-
-#ifdef KRIMS_HAVE_GLIBC_STACKTRACE
-  /**
-   *   array of pointers that contains the raw stack trace
-   */
-  void* m_raw_stacktrace[25];
-#endif
-
 private:
+  //! The class which will determine the backtrace.
+  Backtrace m_backtrace;
+
   //! The what of the exception
   mutable std::string m_what_str;
 };

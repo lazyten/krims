@@ -51,32 +51,6 @@ private:
 //
 // Assert Macros
 //
-/** Assert a condition and if it fails (evaluates to false), generate an
- * exception (the 2nd argument). Deal with this exception as the current
- * value of assert_dbg_effect indicates.
- *
- * @note Active in DEBUG mode only.
- */
-#ifdef DEBUG
-#define assert_dbg(cond, exception)                                            \
-  {                                                                            \
-    if (!(cond)) {                                                             \
-      auto __exc__cept = exception;                                            \
-      __exc__cept.add_exc_data(__FILE__, __LINE__, __PRETTY_FUNCTION__, #cond, \
-                               #exception);                                    \
-      if (krims::AssertDbgEffect::get() == krims::ExceptionEffect::ABORT) {    \
-        std::cerr << __exc__cept.what() << std::endl;                          \
-        std::abort();                                                          \
-      } else {                                                                 \
-        throw __exc__cept;                                                     \
-      }                                                                        \
-    }                                                                          \
-  }
-#else
-#define assert_dbg(cond, exc) \
-  {}
-#endif
-
 /** Assert a condition and if it evaluates to false, throw the exception
  *  given as the second argument.
  *
@@ -87,10 +61,15 @@ private:
     if (!(cond)) {                                                             \
       auto __exc__cept = exception;                                            \
       __exc__cept.add_exc_data(__FILE__, __LINE__, __PRETTY_FUNCTION__, #cond, \
-                               #exception);                                    \
+                               #exception, false);                             \
       throw __exc__cept;                                                       \
     }                                                                          \
   }
+// add_exc_data's last argument specifies whether we are ok with using expensive
+// methods to determine extra data for the exception. False means no (in this
+// case we throw, so the exception could be internally caught by the program,
+// which
+// means that expensive methods add extra runtime cost)
 
 /** This macro is used for actual errors that should always abort the program.
  *
@@ -101,11 +80,33 @@ private:
     if (!(cond)) {                                                             \
       auto __exc__cept = exception;                                            \
       __exc__cept.add_exc_data(__FILE__, __LINE__, __PRETTY_FUNCTION__, #cond, \
-                               #exception);                                    \
+                               #exception, true);                              \
       std::cerr << __exc__cept.what() << std::endl;                            \
       std::abort();                                                            \
     }                                                                          \
   }
+
+/** Assert a condition and if it fails (evaluates to false), generate an
+ * exception (the 2nd argument). Deal with this exception as the current
+ * value of assert_dbg_effect indicates.
+ *
+ * @note Active in DEBUG mode only.
+ */
+#ifdef DEBUG
+#define assert_dbg(cond, exception)                                         \
+  {                                                                         \
+    if (!(cond)) {                                                          \
+      if (krims::AssertDbgEffect::get() == krims::ExceptionEffect::ABORT) { \
+        assert_abort(cond, exception);                                      \
+      } else {                                                              \
+        assert_throw(cond, exception);                                      \
+      }                                                                     \
+    }                                                                       \
+  }
+#else
+#define assert_dbg(cond, exc) \
+  {}
+#endif
 
 //
 // DefException Macros
