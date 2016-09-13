@@ -85,6 +85,10 @@ void ExceptionBase::print_stacktrace(std::ostream& out) const {
     maxfunclen = std::max(maxfunclen, frame.function_name.length());
   }
 
+  // If the Function is longer than 80 columns than just print them as is
+  // (otherwise we get too much empty space)
+  if (maxfunclen > 80) maxfunclen = 8;
+
   // Print heading of the backtrace table:
   out << std::endl;
   out << "Backtrace:" << std::endl;
