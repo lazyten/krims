@@ -201,12 +201,15 @@ Set to \"highest\" to let DRB use the highest available C++ standard (default)."
 
 	if (CMAKE_CXX_COMPILER_ID MATCHES "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 		# We have a known "standard" compiler
-		include("${DRB_DIR}/compilers/standard.cmake")
+		include("${DRB_DIR}/compiler_flags/standard.cmake")
 	else()
 		message(WARNING "Untested compiler: ${CMAKE_CXX_COMPILER_ID}, you are on your own.")
 		message(WARNING "Currently we only support clang and gnu compilers.")
 
 		# Try to fall back to the standard
-		include("${DRB_DIR}/compilers/standard.cmake")
+		include("${DRB_DIR}/compiler_flags/standard.cmake")
 	endif()
+
+	# Setup compiler flags for special compile options (if desired and available)
+	include("${DRB_DIR}/compiler_flags/sanitise.cmake")
 endmacro(DRB_SETUP_COMPILER_FLAGS)
