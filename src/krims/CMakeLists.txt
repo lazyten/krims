@@ -29,6 +29,7 @@ set(KRIMS_SOURCES
 	ExceptionSystem/ExceptionBase.cc
 	ExceptionSystem/exception_defs.cc
 	ParameterMap.cc
+	NumComp/NumCompException.cc
 	NumComp/NumCompConstants.cc
 )
 

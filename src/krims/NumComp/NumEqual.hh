@@ -28,7 +28,11 @@ namespace krims {
 /** \brief Functor to check that two values are numerically equal --- generic
  * case (which is an empty class)*/
 template <typename T, typename U, typename Enable = void>
-struct NumEqual {};  // no implementation of operator()
+struct NumEqual {
+  static_assert(!std::is_same<Enable, void>::value,
+                "NumEqual has not been specialised for these types.");
+  // no implementation of operator()
+};
 
 /** \brief Functor to check that two floating point values are numerically equal
  */
@@ -99,9 +103,8 @@ operator()(const T& lhs, const U& rhs) const {
     // compared to the tolerance else it does relative comparsion
 
     const common_type absdiff = abs(lhs - rhs);
-    const common_type maxone = std::max({static_cast<common_type>(1),
-                                         static_cast<common_type>(abs(lhs)),
-                                         static_cast<common_type>(abs(rhs))});
+    const common_type maxside = std::max<common_type>(abs(lhs), abs(rhs));
+    const common_type maxone = std::max<common_type>(1, maxside);
     const bool equal = absdiff <= m_tolerance * maxone;
 
     // Alternative to control tolerance for absolute comparison (absErr)
@@ -142,7 +145,7 @@ operator()(const std::complex<T>& lhs, const std::complex<U>& rhs) const {
     // If we get through both we return the combined result.
     part = "Imaginary part";
     return real_equal && is_equal(lhs.imag(), rhs.imag());
-  } catch (NumCompException<common_real_type>& e) {
+  } catch (NumCompExceptionBase& e) {
     // If we get here failure_action is some kind of Throw
     // So we rethrow what we caught.
     std::stringstream ss;

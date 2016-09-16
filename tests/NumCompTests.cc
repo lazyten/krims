@@ -121,8 +121,7 @@ TEST_CASE("NumComp tests", "[NumComp]") {
 
     // Note: The cast to void is to "fake-use" the comparsion result, which is
     // not of interest in this case
-    REQUIRE_THROWS_AS((void)(10.000 == numcomp(10.001)),
-                      NumCompException<double>);
+    REQUIRE_THROWS_AS((void)(10.000 == numcomp(10.001)), NumCompExceptionBase);
 
     try {
       (void)(10.000 ==
@@ -164,6 +163,11 @@ TEST_CASE("NumComp tests", "[NumComp]") {
             1e4 * std::numeric_limits<double>::epsilon());
       CHECK(e.error == Approx(0.0000001));
     }
+
+    REQUIRE_THROWS_AS(
+          (void)(0. ==
+                 numcomp(0.0000001).tolerance(NumCompAccuracyLevel::Extreme)),
+          NumCompExceptionBase);
 
     REQUIRE(100.000000 == numcomp(100.000001).tolerance(1e-8));
     REQUIRE(10.0 == numcomp(10.01).tolerance(1e-3));
