@@ -51,6 +51,9 @@ public:
     return *this;
   }
 
+  /** Return the actual current tolerance level */
+  error_type tolerance() const { return m_tolerance; }
+
   NumComp& failure_action(const NumCompActionType failure_action) {
     m_failure_action = failure_action;
     return *this;
