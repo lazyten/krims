@@ -20,7 +20,7 @@
 #pragma once
 #include "Exceptions.hh"
 #include "exception_defs.hh"
-#include <type_traits>
+#include "krims/TypeUtils.hh"
 
 // Note: no krims namespace, since these are all macros anyway
 
@@ -108,6 +108,22 @@
     }                                                              \
   }
 
+namespace krims {
+template <typename T>
+bool isfinite(T t) {
+  return std::isfinite(t);
+}
+
+template <typename T>
+bool isfinite(std::complex<T> t) {
+  return std::isfinite(t.real()) && std::isfinite(t.imag());
+}
+}  // krims
+
 /** Assert that a value is finite */
 #define assert_finite(value) \
-  { assert_dbg(std::isfinite(value), ::krims::ExcNumberNotFinite(value)) }
+  { assert_dbg(::krims::isfinite(value), ::krims::ExcNumberNotFinite(value)) }
+
+/** Assert that a value is non-zero */
+#define assert_nonzero(value) \
+  { assert_dbg(value != static_cast<decltype(value)>(0), ::krims::ExcZero()) }
