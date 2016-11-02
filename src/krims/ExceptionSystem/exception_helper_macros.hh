@@ -127,3 +127,16 @@ bool isfinite(std::complex<T> t) {
 /** Assert that a value is non-zero */
 #define assert_nonzero(value) \
   { assert_dbg(value != static_cast<decltype(value)>(0), ::krims::ExcZero()) }
+
+/** \brief Assert a condition which checks whether this part of the code
+ * has been sufficiently tested. If false ExcNotSufficientlyTested
+ * is raised (in Debug mode) unless the preprocessor macro IGNORE_UNTESTED
+ * has been defined.
+ **/
+#ifdef IGNORE_UNTESTED
+#define assert_sufficiently_tested(condition) \
+  {}
+#else
+#define assert_sufficiently_tested(condition) \
+  { assert_dbg(condition, ::krims::ExcNotSufficientlyTested()); }
+#endif
