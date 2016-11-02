@@ -28,6 +28,7 @@ set(KRIMS_TESTS_SOURCES
 	ParameterMapTests.cc
 	CircularBufferTests.cc
 	TupleUtilsTests.cc
+	argsortTests.cc
 	NumCompTests.cc
 	main.cc
 )
