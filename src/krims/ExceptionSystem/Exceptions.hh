@@ -118,11 +118,23 @@ DefException2(ExcNotEqual, T, T, << "Number " << arg1 << " must be equal to "
  * to do or because it was not needed.
  *
  * This should not be used to indicate that something is missing and should
- * be implemented if neccessary.
+ * be implemented if necessary.
  */
 DefExceptionMsg(ExcNotImplemented,
                 "This functionality has not been implemented yet. "
                 "Feel free to take a look and implement it.");
+
+/**
+ * Exception denoting a function or functionality has not been properly tested.
+ *
+ * This should not be used to indicate that something has been implemented,
+ * but one is not confident whether it actually works as it should.
+ */
+DefExceptionMsg(ExcNotSufficientlyTested,
+                "This functionality has been implemented, but not yet "
+                "sufficiently tested to be confident about it. You are on your "
+                "own if you use it (In order to disable this exception #define "
+                "IGNORE_UNTESTED in your code.");
 
 /**
  * This exception is used if some object is found uninitialized.
@@ -133,7 +145,7 @@ DefExceptionMsg(ExcNotInitialised,
 /**
  * The object is in a state not suitable for this operation.
  */
-DefException1(ExcInvalidState, char *,
+DefException1(ExcInvalidState, char*,
               << "The object you attempt to use is not in a valid state: "
               << arg1);
 
@@ -155,7 +167,7 @@ DefExceptionMsg(ExcInternalError,
  * The calling of this function was deliberately disabled for some reason (which
  * is given here).
  */
-DefException1(ExcDisabled, char *,
+DefException1(ExcDisabled, char*,
               << "The method you attempt to call has been disabled: " << arg1);
 
 /**
@@ -183,7 +195,7 @@ DefExceptionMsg(ExcIO, "An input/output error has occurred.");
  * The constructor takes a single argument of type <tt>char*</tt> naming the
  * file.
  */
-DefException1(ExcFileNotOpen, char *, << "Could not open file " << arg1);
+DefException1(ExcFileNotOpen, char*, << "Could not open file " << arg1);
 
 }  // namespace exceptions
 
