@@ -23,6 +23,7 @@
 # The sources for the test executable
 #
 set(KRIMS_TESTS_SOURCES
+	TypeUtilsTests.cc
 	ExceptionTests.cc
 	SubscriptionTests.cc
 	ParameterMapTests.cc

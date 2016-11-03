@@ -36,7 +36,7 @@ struct IsComplexNumber : public std::false_type {};
 template <typename T>
 struct IsComplexNumber<T, VoidType<typename T::value_type>>
       : public std::integral_constant<
-              bool, std::is_arithmetic<T>::value &&
+              bool, std::is_arithmetic<typename T::value_type>::value &&
                           std::is_same<std::complex<typename T::value_type>,
                                        T>::value> {};
 //@}
