@@ -415,7 +415,7 @@ T& ParameterMap::at(const std::string& key, T& default_value) {
     return default_value;
   } else {
     // Key found, return mapped value
-    return itkey->second;
+    return itkey->second.get<T>();
   }
 }
 
