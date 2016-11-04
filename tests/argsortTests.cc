@@ -51,6 +51,11 @@ TEST_CASE("argsort function", "[argsort]") {
       for (size_t i = 0; i < argsort_res.size(); ++i) {
         RC_ASSERT(array[argsort_res[i]] == sorted[i]);
       }
+
+      // Check the sorting is correct
+      for (size_t i = 0; i + 1 < sorted.size(); ++i) {
+        RC_ASSERT(array[argsort_res[i]] < array[argsort_res[i + 1]]);
+      }
     };
     REQUIRE(check("Argsort with default comparator", test));
   }  // Test argsort with default comparator
@@ -81,6 +86,11 @@ TEST_CASE("argsort function", "[argsort]") {
       // The sorted array should be recovered using the argsort indices
       for (size_t i = 0; i < argsort_res.size(); ++i) {
         RC_ASSERT(array[argsort_res[i]] == sorted[i]);
+      }
+
+      // Check the sorting is correct
+      for (size_t i = 0; i + 1 < sorted.size(); ++i) {
+        RC_ASSERT(array[argsort_res[i]] > array[argsort_res[i + 1]]);
       }
     };
     REQUIRE(check("Argsort with greater as comparator", test));
