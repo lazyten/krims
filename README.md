@@ -215,6 +215,8 @@ int main() {
   of is the identity to a normal float
 - ``IsCheaplyCopyable`` determines whether data of this type
   is considered to be cheaply copyable.
+  One can manually flag a class as cheaply copyable by deriving it off
+  the marker interface [``CheaplyCopyable_i``](src/krims/TypeUtils/CheaplyCopyable_i.hh).
 
 ### ``ParameterMap``: A hierachical dictionary for managing data of arbitrary type.
 - The ParameterMap allows to store and access data of an arbitrary type
