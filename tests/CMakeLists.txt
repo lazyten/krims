@@ -28,6 +28,7 @@ set(KRIMS_TESTS_SOURCES
 	SubscriptionTests.cc
 	ParameterMapTests.cc
 	CircularIteratorTests.cc
+	DereferenceIteratorTests.cc
 	CircularBufferTests.cc
 	TupleUtilsTests.cc
 	argsortTests.cc
