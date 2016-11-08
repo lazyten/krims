@@ -91,15 +91,15 @@ class PointerWrapper<T, typename std::enable_if<
 public:
   /** Construct PointerWrapper from subscription pointer */
   PointerWrapper(const SubscriptionPointer<T> ptr)
-        : m_subscr_ptr{std::move(ptr)},
-          m_shared_ptr{nullptr},
-          m_contains_shared_ptr{false} {}
+        : m_contains_shared_ptr{false},
+          m_subscr_ptr{std::move(ptr)},
+          m_shared_ptr{nullptr} {}
 
   /** Construct PointerWrapper from shared pointer */
   PointerWrapper(const std::shared_ptr<T> ptr)
-        : m_subscr_ptr{"PointerWrapper"},
-          m_shared_ptr{std::move(ptr)},
-          m_contains_shared_ptr{true} {}
+        : m_contains_shared_ptr{true},
+          m_subscr_ptr{"PointerWrapper"},
+          m_shared_ptr{std::move(ptr)} {}
 
   /** \brief Check if this object is empty or not */
   explicit operator bool() const { return get() != nullptr; }
@@ -176,14 +176,14 @@ public:
   bool is_shared_ptr() const { return m_contains_shared_ptr; }
 
 private:
+  //! Does this class contain a shared pointer?
+  const bool m_contains_shared_ptr;
+
   //! The stored subscription pointer (or a nullptr)
   const SubscriptionPointer<T> m_subscr_ptr;
 
   //! The stored shared pointer (or a nullptr)
   const std::shared_ptr<T> m_shared_ptr;
-
-  //! Does this class contain a shared pointer?
-  const bool m_contains_shared_ptr;
 };
 
 //

@@ -40,6 +40,7 @@ parts of the library.
 - [``Subscribable`` base class and ``SubscriptionPointer``](#subscribable-base-class-and-subscriptionpointer)
 - [Useful type properties and type transformations](#useful-type-properties-and-type-transformations)
 - [``ParameterMap``: A hierachical dictionary for managing data of arbitrary type.](#parametermap-a-hierachical-dictionary-for-managing-data-of-arbitrary-type)
+- [Iterator utils](#iterator-utils)
 - [Circular buffer with maximum size](#circular-buffer-with-maximum-size)
 - [Useful helper functions to deal with tuples](#useful-helper-functions-to-deal-with-tuples)
 
@@ -214,6 +215,8 @@ int main() {
   of is the identity to a normal float
 - ``IsCheaplyCopyable`` determines whether data of this type
   is considered to be cheaply copyable.
+  One can manually flag a class as cheaply copyable by deriving it off
+  the marker interface [``CheaplyCopyable_i``](src/krims/TypeUtils/CheaplyCopyable_i.hh).
 
 ### ``ParameterMap``: A hierachical dictionary for managing data of arbitrary type.
 - The ParameterMap allows to store and access data of an arbitrary type
@@ -257,17 +260,24 @@ auto error = map.at<std::string>("an integer");
   manage parameters or references to results of computations.
 - An example is located at [examples/ParameterMap_demo](examples/ParameterMap_demo).
 
-### Circular buffer with maximum size
-- [``<krims/CircularBuffer.hh>``](src/krims/CircularBuffer.hh) contains two classes
-  ``CircularIterator`` and ``CircularBuffer``.
-- The first class iterates over a range in a circular fashion. I.e. if one reaches
+### Iterator utils
+- [``krims/IteratorUtils.hh``](src/krims/IteratorUtils.hh) includes classes for
+  wrapping iterators.
+- E.g. [``CircularIterator``](src/krims/IteratorUtils/CircularIterator.hh) implements
+  an iterator to iterate over a range in a circular fashion. I.e. if one reaches
   the end of the range, the iterator detects this and wraps over to restart at the
   begining. The same in the other direction.
 - The functions ``circular_begin`` and ``circular_end`` are available to construct
   suitable ``CircularIterator``s in order to iterate over pretty much any container
   circularly.
-- ``CircularBuffer`` provides a circular buffer implementation with a maximal size.
-  It may contain less elements, but not more.
+- Furthermore [``DereferenceIterator``](src/krims/IteratorUtils/DereferenceIterator.hh)
+  provides a mechanism to easily iterate over a container with pointers to some objects,
+  yielding directly the objects instead of the pointers.
+
+### Circular buffer with maximum size
+- [``<krims/CircularBuffer.hh>``](src/krims/CircularBuffer.hh) contains 
+  the class ``CircularBuffer``, which provides a circular buffer implementation with
+  a maximal size. It may contain less elements, but not more.
   If the maximal size is 5 and one pushes a 6th element to the buffer, the first
   is deleted automatically.
 - ``CircularBuffer`` is very helpful to store e.g. a history of the ``N`` last steps
