@@ -18,6 +18,7 @@
 //
 
 #pragma once
+#include "CheaplyCopyable_i.hh"
 #include "IsComplexNumber.hh"
 #include <string>
 
@@ -34,10 +35,17 @@ template <typename T>
 struct IsCheaplyCopyable
       : public std::integral_constant<
               bool,
-              std::is_arithmetic<T>::value || std::is_enum<T>::value ||
-                    std::is_same<std::string,
-                                 typename std::remove_cv<T>::type>::value ||
-                    IsComplexNumber<T>::value> {};
+              // The class is explicitly marked as cheaply copyable
+              std::is_base_of<CheaplyCopyable_i, T>::value
+                    //
+                    || std::is_arithmetic<T>::value
+                    //
+                    || std::is_enum<T>::value
+                    //
+                    || std::is_same<std::string,
+                                    typename std::remove_cv<T>::type>::value
+                    //
+                    || IsComplexNumber<T>::value> {};
 //@}
 
 }  // namespace krims
