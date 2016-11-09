@@ -48,7 +48,7 @@ public:
         : m_shared_ptr{std::move(ptr)} {}
 
   /** Implicitly convert from a different inner type */
-  template <typename U, typename = EnableIfPtrConvertibleT<U, T>>
+  template <typename U, typename = enable_if_ptr_convertible_t<U, T>>
   RCPWrapper(const RCPWrapper<U>& pw) : m_shared_ptr{pw.m_shared_ptr} {}
 
   /** Copy constructor */
@@ -119,7 +119,7 @@ public:
           m_shared_ptr{std::move(ptr)} {}
 
   /** Implicitly convert from a different inner type */
-  template <typename U, typename = EnableIfPtrConvertibleT<U, T>>
+  template <typename U, typename = enable_if_ptr_convertible_t<U, T>>
   RCPWrapper(const RCPWrapper<U>& pw)
         : m_contains_shared_ptr{pw.m_contains_shared_ptr},
           m_subscr_ptr{pw.m_subscr_ptr},
