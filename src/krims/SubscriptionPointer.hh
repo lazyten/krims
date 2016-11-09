@@ -19,6 +19,7 @@
 
 #pragma once
 #include "Subscribable.hh"
+#include "TypeUtils/EnableIfLibrary.hh"
 #include <memory>
 #include <string>
 #include <type_traits>
@@ -35,6 +36,9 @@ class SubscriptionPointer {
                 "T must be a child class of Subscribable");
 
 public:
+  /** The template parameter T, i.e. the type of the managed object */
+  typedef T element_type;
+
   /** A swap function for Subscription pointers */
   friend void swap(SubscriptionPointer& first, SubscriptionPointer& second) {
     using std::swap;
@@ -82,6 +86,15 @@ public:
 
     // Register the subscription
     register_at(other.m_subscribed_obj_ptr);
+  }
+
+  /** \brief Implicit conversion from a different element type */
+  template <typename U, typename = EnableIfPtrConvertibleT<U, T>>
+  SubscriptionPointer(const SubscriptionPointer<U>& other)
+        : m_subscribed_obj_ptr(nullptr),
+          m_subscriber_id_ptr(new std::string(other.subscriber_id())) {
+    // Register the subscription (here the ptr conversion happens)
+    register_at(other.get());
   }
 
   /** Move constructor */
