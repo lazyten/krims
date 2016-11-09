@@ -44,7 +44,8 @@ public:
   /** \name Constructors */
   ///@{
   /** Construct RCPWrapper from shared pointer */
-  RCPWrapper(const std::shared_ptr<T> ptr) : m_shared_ptr{std::move(ptr)} {}
+  explicit RCPWrapper(const std::shared_ptr<T> ptr)
+        : m_shared_ptr{std::move(ptr)} {}
 
   /** Implicitly convert from a different inner type */
   template <typename U, typename = EnableIfPtrConvertibleT<U, T>>
@@ -103,13 +104,13 @@ public:
   /** \name Constructors */
   ///@{
   /** Construct RCPWrapper from subscription pointer */
-  RCPWrapper(const SubscriptionPointer<T> ptr)
+  explicit RCPWrapper(const SubscriptionPointer<T> ptr)
         : m_contains_shared_ptr{false},
           m_subscr_ptr{std::move(ptr)},
           m_shared_ptr{nullptr} {}
 
   /** Construct RCPWrapper from shared pointer */
-  RCPWrapper(const std::shared_ptr<T> ptr)
+  explicit RCPWrapper(const std::shared_ptr<T> ptr)
         : m_contains_shared_ptr{true},
           m_subscr_ptr{"RCPWrapper"},
           m_shared_ptr{std::move(ptr)} {}
