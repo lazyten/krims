@@ -47,6 +47,12 @@ struct SimpleSubscribable : public Subscribable {
   }
 };
 
+/** A derived subscribable class */
+struct SimpleSubscribableChild : public SimpleSubscribable {
+  explicit SimpleSubscribableChild(int d) : SimpleSubscribable(d) {}
+  SimpleSubscribableChild() = default;
+};
+
 //
 // System under test (sut) and model
 //
@@ -1124,6 +1130,50 @@ TEST_CASE("Subscription and SubscriptionPointer system", "[subscription]") {
       REQUIRE(sub1->data == 42);
       REQUIRE(sub3->data == 5);
       REQUIRE(s_assigned.data == 5);
+    }
+
+    //
+    // ---------------------------------------------------------------
+    //
+
+    SECTION("Implicitly converting subcsriptions") {
+      // Create an s_assigned
+      SimpleSubscribableChild s_assigned;
+      s_assigned.data = 1;
+
+      // Subscribe to it once:
+      auto sub_child = make_subscription(s_assigned, "sub_child");
+
+      // Assign with implicit conversion
+      sub1 = sub_child;
+
+      REQUIRE(s_assigned.data == 1);
+      REQUIRE(s.data == 42);
+      REQUIRE(sub1->data == 1);
+      REQUIRE(sub_child->data == 1);
+
+#ifdef DEBUG
+      // Check number of subscriptions:
+      CHECK(s.n_subscriptions() == 1);
+      CHECK(s.subscribers()[0] == "sub2");
+
+      // Require the copy to be subscribed by
+      // no one
+      REQUIRE(s_assigned.n_subscriptions() == 2);
+      REQUIRE(s_assigned.subscribers()[0] == "sub_child");
+      REQUIRE(s_assigned.subscribers()[1] == "sub_child");
+#endif
+      // Alter the data
+      s_assigned.data = 5;
+
+      // check consistency
+      REQUIRE(sub1->data == 5);
+      REQUIRE(sub2->data == 42);
+      REQUIRE(sub_child->data == 5);
+      REQUIRE(s_assigned.data == 5);
+
+      // Release sub1 (no error on destruction of s_assigned)
+      sub1.reset();
     }
   }  // Basic checks about subscribables
 
