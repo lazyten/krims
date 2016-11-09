@@ -63,6 +63,8 @@ TEST_CASE("RCPWrapperTests", "[RCPWrapper]") {
     RCPWrapper<SimpleSubscribableChild> subwrap(ssub);
     RCPWrapper<SimpleSubscribableChild> ptrwrap(sshared);
 
+    REQUIRE(subwrap.is_shared_ptr() == false);
+    REQUIRE(ptrwrap.is_shared_ptr() == true);
     REQUIRE(subwrap->data == 1);
     REQUIRE(ptrwrap->data == 5);
 
@@ -70,6 +72,19 @@ TEST_CASE("RCPWrapperTests", "[RCPWrapper]") {
     RCPWrapper<SimpleSubscribable> basewrap(subwrap);
     REQUIRE(basewrap->data == 1);
   }  // RCPWrapper from SubscriptionPointer
+
+  SECTION("RCPWrapper copy constructor") {
+    RCPWrapper<SimpleSubscribableChild> subwrap(ssub);
+    RCPWrapper<SimpleSubscribableChild> ptrwrap(sshared);
+
+    // Copy constructor
+    RCPWrapper<SimpleSubscribableChild> subwrap2(subwrap);
+    RCPWrapper<SimpleSubscribableChild> ptrwrap2(ptrwrap);
+    REQUIRE(subwrap2.is_shared_ptr() == false);
+    REQUIRE(ptrwrap2.is_shared_ptr() == true);
+    REQUIRE(subwrap2->data == 1);
+    REQUIRE(ptrwrap2->data == 5);
+  }  // RCPWrapper copy constructor
 
   SECTION("Conversion from RCPWrapper to shared and subscription pointer") {
     // Conversion to subscription pointer
@@ -100,7 +115,7 @@ TEST_CASE("RCPWrapperTests", "[RCPWrapper]") {
     REQUIRE(sshared->n_subscriptions() == 1);
     REQUIRE(sshared->subscribers()[0] == "RCPWrapper");
 #endif
-  }  // RCPWrapper from SubscriptionPointer
+  }  // RCPWrapper from shared and subscription pointers
 
 }  // TEST_CASE
 }  // namespace test
