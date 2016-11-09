@@ -50,6 +50,9 @@ public:
   /** Implicitly convert from a different inner type */
   template <typename U, typename = EnableIfPtrConvertibleT<U, T>>
   RCPWrapper(const RCPWrapper<U>& pw) : m_shared_ptr{pw.m_shared_ptr} {}
+
+  /** Copy constructor */
+  RCPWrapper(const RCPWrapper& pw) : m_shared_ptr{pw.m_shared_ptr} {}
   ///@}
 
   /** \brief Check if this object is empty or not */
@@ -118,6 +121,12 @@ public:
   /** Implicitly convert from a different inner type */
   template <typename U, typename = EnableIfPtrConvertibleT<U, T>>
   RCPWrapper(const RCPWrapper<U>& pw)
+        : m_contains_shared_ptr{pw.m_contains_shared_ptr},
+          m_subscr_ptr{pw.m_subscr_ptr},
+          m_shared_ptr{pw.m_shared_ptr} {}
+
+  /** Copy constructor */
+  RCPWrapper(const RCPWrapper& pw)
         : m_contains_shared_ptr{pw.m_contains_shared_ptr},
           m_subscr_ptr{pw.m_subscr_ptr},
           m_shared_ptr{pw.m_shared_ptr} {}
