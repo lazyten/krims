@@ -23,7 +23,23 @@ namespace krims {
 
 /** Enables only if From* can be implicitly converted to To* */
 template <typename From, typename To>
-using EnableIfPtrConvertibleT =
+using enable_if_ptr_convertible_t =
       typename std::enable_if<std::is_convertible<From*, To*>::value>::type;
+
+/** Enable the method only if the condition is satisfied and T and U are the
+  * same type */
+template <bool Cond, typename T, typename U>
+using enable_if_cond_same_t =
+      typename std::enable_if<Cond && std::is_same<T, U>::value>::type;
+
+/** Enable the method only if the condition is satisfied and T can be
+  * implicitly converted into U */
+template <bool Cond, typename T, typename U>
+using enable_if_cond_convertible_t =
+      typename std::enable_if<Cond && std::is_convertible<T, U>::value>::type;
+
+/** Convenience using statement */
+template <bool Cond, typename T = void>
+using enable_if_t = typename std::enable_if<Cond, T>::type;
 
 }  // namespace krims
