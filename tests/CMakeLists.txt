@@ -26,6 +26,7 @@ set(KRIMS_TESTS_SOURCES
 	TypeUtilsTests.cc
 	ExceptionTests.cc
 	SubscriptionTests.cc
+	RCPWrapperTests.cc
 	ParameterMapTests.cc
 	CircularIteratorTests.cc
 	DereferenceIteratorTests.cc

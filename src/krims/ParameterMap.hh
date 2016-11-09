@@ -19,7 +19,7 @@
 
 #pragma once
 #include "ExceptionSystem.hh"
-#include "PointerWrapper.hh"
+#include "RCPWrapper.hh"
 #include "SubscriptionPointer.hh"
 #include "TypeUtils.hh"
 #include <map>
@@ -81,9 +81,15 @@ public:
      * This includes std::string and all relevant numeric types (integers,
      * floating point numbers, complex numbers)
      **/
-    template <typename T, typename std::enable_if<IsCheaplyCopyable<T>::value,
-                                                  int>::type = 0>
+    template <typename T,
+              typename std::enable_if<!std::is_reference<T>::value &&
+                                            IsCheaplyCopyable<T>::value,
+                                      int>::type = 0>
     EntryValue(T t) {
+      // Note about the enable_if:
+      //   - We need to make sure that T is the actual type (and not a
+      //     reference)
+      //   - T should be cheap to copy
       copy_in<T>(t);
     }
 
@@ -102,13 +108,23 @@ public:
                                       int>::type = 0>
     EntryValue(T& t);
 
+    /** Make an EntryValue from an rvalue reference */
+    template <typename T, typename = typename std::enable_if<
+                                !std::is_reference<T>::value &&
+                                !IsCheaplyCopyable<T>::value>::type>
+    EntryValue(T&& t) : EntryValue{std::make_shared<T>(std::move(t))} {}
+    // Note about the enable_if:
+    //   - We need to make sure that T is the actual type (and not a
+    //     reference)
+    //   - T should not be cheap to copy (else first constructor applies)
+
     /** Obtain a non-const pointer to the internal object */
     template <typename T>
-    PointerWrapper<T> get_ptr();
+    RCPWrapper<T> get_ptr();
 
     /** Obtain a const pointer to the internal object */
     template <typename T>
-    PointerWrapper<const T> get_ptr() const;
+    RCPWrapper<const T> get_ptr() const;
 
     /** Obtain a reference to the internal object */
     template <typename T>
@@ -170,31 +186,17 @@ public:
 
   /** \name Modifiers */
   ///@{
-  /** \brief Insert or update using a shared pointer */
-  template <typename T>
-  void update(const std::string& key, std::shared_ptr<T> object_ptr) {
-    (*m_container_ptr)[make_full_key(key)] = EntryValue{std::move(object_ptr)};
-  }
-
-  /** Insert or update using a Subscribable object */
-  template <typename T,
-            typename std::enable_if<std::is_base_of<Subscribable, T>::value,
-                                    int>::type = 0>
-  void update(const std::string& key, T& t) {
-    (*m_container_ptr)[make_full_key(key)] = EntryValue{t};
-  }
-
-  /** Insert or update using an object which can be cheaply copied */
-  template <typename T,
-            typename std::enable_if<IsCheaplyCopyable<T>::value, int>::type = 0>
-  void update(const std::string& key, T t) {
-    (*m_container_ptr)[make_full_key(key)] = EntryValue{std::move(t)};
-  }
-
-  /** Insert or update using a const char*, which behaves as if it was a string
+  /** \brief Insert or update a key.
+   *
+   * All objects which can be implicitly converted to an EntryValue can be used.
+   * This includes:
+   *   - Cheaply copyable types (numbers, std::string, enums)
+   *   - RValue references
+   *   - LValue references of subscribable objects
+   *   - Shared pointers
    */
-  void update(const std::string& key, const char* s) {
-    (*m_container_ptr)[make_full_key(key)] = EntryValue{s};
+  void update(const std::string& key, EntryValue e) {
+    (*m_container_ptr)[make_full_key(key)] = std::move(e);
   }
 
   /** \brief Update many entries using an initialiser list
@@ -255,7 +257,7 @@ public:
 
   /** \brief Return the pointer to the value of a specific key.
    *
-   * The returned object is a PointerWrapper, meaning that it internally
+   * The returned object is a RCPWrapper, meaning that it internally
    * may contain a shared pointer, but it may also contain a
    * SubscriptionPointer. It can be used as if it was a normal pointer,
    * but in order to extract the actual shared_ptr out of it an explicit
@@ -266,14 +268,14 @@ public:
    * Use the contains_shared_ptr() function to check this.
    */
   template <typename T>
-  PointerWrapper<T> at_ptr(const std::string& key);
+  RCPWrapper<T> at_ptr(const std::string& key);
 
   /** Return the pointer to the value of a specific key. (const version)
    *
    * See non-const version for details
    */
   template <typename T>
-  PointerWrapper<const T> at_ptr(const std::string& key) const;
+  RCPWrapper<const T> at_ptr(const std::string& key) const;
 
   // TODO find, iterators
 
@@ -334,7 +336,7 @@ private:
 template <typename T>
 ParameterMap::EntryValue::EntryValue(std::shared_ptr<T> t_ptr) {
   // see copy_in and m_object_ptr_ptr comments for details why this is done
-  m_object_ptr_ptr = std::make_shared<PointerWrapper<T>>(std::move(t_ptr));
+  m_object_ptr_ptr = std::make_shared<RCPWrapper<T>>(std::move(t_ptr));
 #ifdef DEBUG
   m_type_name = std::string(typeid(T).name());
 #endif
@@ -346,7 +348,7 @@ ParameterMap::EntryValue::EntryValue(T& t) {
   SubscriptionPointer<T> t_ptr = make_subscription(t, "EntryValue");
 
   // see copy_in and m_object_ptr_ptr comments for details why this is done
-  m_object_ptr_ptr = std::make_shared<PointerWrapper<T>>(std::move(t_ptr));
+  m_object_ptr_ptr = std::make_shared<RCPWrapper<T>>(std::move(t_ptr));
 
 #ifdef DEBUG
   m_type_name = std::string(typeid(T).name());
@@ -358,9 +360,9 @@ void ParameterMap::EntryValue::copy_in(T t) {
   // Make a shared pointer out of T:
   auto t_ptr = std::make_shared<T>(std::move(t));
 
-  // Now enwrap the t_ptr inside a PointerWrapper and make
+  // Now enwrap the t_ptr inside a RCPWrapper and make
   // a shared_ptr to the Wrapper, then set it
-  m_object_ptr_ptr = std::make_shared<PointerWrapper<T>>(t_ptr);
+  m_object_ptr_ptr = std::make_shared<RCPWrapper<T>>(t_ptr);
 
 #ifdef DEBUG
   // Keep an eye on the type name
@@ -369,25 +371,25 @@ void ParameterMap::EntryValue::copy_in(T t) {
 }
 
 template <typename T>
-PointerWrapper<T> ParameterMap::EntryValue::get_ptr() {
+RCPWrapper<T> ParameterMap::EntryValue::get_ptr() {
   assert_dbg(m_type_name == std::string(typeid(T).name()),
              ExcWrongTypeRequested(std::string(typeid(T).name()), m_type_name));
   assert_dbg(!empty(), ExcInvalidPointer());
 
-  // We need to cast and then dereference to get the PointerWrapper of the
+  // We need to cast and then dereference to get the RCPWrapper of the
   // appropriate type out.
-  return *std::static_pointer_cast<PointerWrapper<T>>(m_object_ptr_ptr);
+  return *std::static_pointer_cast<RCPWrapper<T>>(m_object_ptr_ptr);
 }
 
 template <typename T>
-PointerWrapper<const T> ParameterMap::EntryValue::get_ptr() const {
+RCPWrapper<const T> ParameterMap::EntryValue::get_ptr() const {
   assert_dbg(m_type_name == std::string(typeid(T).name()),
              ExcWrongTypeRequested(std::string(typeid(T).name()), m_type_name));
   assert_dbg(!empty(), ExcInvalidPointer());
 
-  // We need to cast and then dereference to get the PointerWrapper of the
+  // We need to cast and then dereference to get the RCPWrapper of the
   // appropriate type out.
-  return *std::static_pointer_cast<PointerWrapper<const T>>(m_object_ptr_ptr);
+  return *std::static_pointer_cast<RCPWrapper<const T>>(m_object_ptr_ptr);
 }
 
 //
@@ -433,14 +435,14 @@ const T& ParameterMap::at(const std::string& key,
 }
 
 template <typename T>
-PointerWrapper<T> ParameterMap::at_ptr(const std::string& key) {
+RCPWrapper<T> ParameterMap::at_ptr(const std::string& key) {
   assert_dbg(exists(key), ExcUnknownKey(key));
   EntryValue& e = m_container_ptr->at(make_full_key(key));
   return e.get_ptr<T>();
 }
 
 template <typename T>
-PointerWrapper<const T> ParameterMap::at_ptr(const std::string& key) const {
+RCPWrapper<const T> ParameterMap::at_ptr(const std::string& key) const {
   assert_dbg(exists(key), ExcUnknownKey(key));
   const EntryValue& e = m_container_ptr->at(make_full_key(key));
   return e.get_ptr<T>();

@@ -38,11 +38,18 @@ namespace krims {
  * The primary template defined here may only take a shared pointer.
  **/
 template <typename T, typename = void>
-class PointerWrapper {
+class RCPWrapper {
   // Implementation for std::false_type, i.e. we don't have a subscribable
 public:
-  /** Construct PointerWrapper from shared pointer */
-  PointerWrapper(const std::shared_ptr<T> ptr) : m_shared_ptr{std::move(ptr)} {}
+  /** \name Constructors */
+  ///@{
+  /** Construct RCPWrapper from shared pointer */
+  RCPWrapper(const std::shared_ptr<T> ptr) : m_shared_ptr{std::move(ptr)} {}
+
+  /** Implicitly convert from a different inner type */
+  template <typename U, typename = EnableIfPtrConvertibleT<U, T>>
+  RCPWrapper(const RCPWrapper<U>& pw) : m_shared_ptr{pw.m_shared_ptr} {}
+  ///@}
 
   /** \brief Check if this object is empty or not */
   explicit operator bool() const { return m_shared_ptr != nullptr; }
@@ -62,7 +69,7 @@ public:
     return m_shared_ptr.get();
   }
 
-  /** Make a shared_ptr out of the PointerWrapper
+  /** Make a shared_ptr out of the RCPWrapper
    *
    * \note This version might be called implicitly, which does not
    * hurt since this guy effectively is a shared_ptr.
@@ -85,21 +92,35 @@ private:
  * may take both a std::shared_ptr as well as a SubscriptionPointer<T>.
  **/
 template <typename T>
-class PointerWrapper<T, typename std::enable_if<
-                              std::is_base_of<Subscribable, T>::value>::type> {
+class RCPWrapper<T, typename std::enable_if<
+                          std::is_base_of<Subscribable, T>::value>::type> {
   // Implementation for std::true_type, i.e. we have a subscribable T
 public:
-  /** Construct PointerWrapper from subscription pointer */
-  PointerWrapper(const SubscriptionPointer<T> ptr)
+  // Make other RCPWrappers friends
+  template <typename U, typename>
+  friend class RCPWrapper;
+
+  /** \name Constructors */
+  ///@{
+  /** Construct RCPWrapper from subscription pointer */
+  RCPWrapper(const SubscriptionPointer<T> ptr)
         : m_contains_shared_ptr{false},
           m_subscr_ptr{std::move(ptr)},
           m_shared_ptr{nullptr} {}
 
-  /** Construct PointerWrapper from shared pointer */
-  PointerWrapper(const std::shared_ptr<T> ptr)
+  /** Construct RCPWrapper from shared pointer */
+  RCPWrapper(const std::shared_ptr<T> ptr)
         : m_contains_shared_ptr{true},
-          m_subscr_ptr{"PointerWrapper"},
+          m_subscr_ptr{"RCPWrapper"},
           m_shared_ptr{std::move(ptr)} {}
+
+  /** Implicitly convert from a different inner type */
+  template <typename U, typename = EnableIfPtrConvertibleT<U, T>>
+  RCPWrapper(const RCPWrapper<U>& pw)
+        : m_contains_shared_ptr{pw.m_contains_shared_ptr},
+          m_subscr_ptr{pw.m_subscr_ptr},
+          m_shared_ptr{pw.m_shared_ptr} {}
+  ///@}
 
   /** \brief Check if this object is empty or not */
   explicit operator bool() const { return get() != nullptr; }
@@ -122,7 +143,7 @@ public:
     return get();
   }
 
-  /** Explicitly make a shared_ptr out of the PointerWrapper
+  /** Explicitly make a shared_ptr out of the RCPWrapper
    *
    * \note This operation is only allowed in Release mode or if this wrapper
    *       actually contains a shared pointer.*/
@@ -135,7 +156,7 @@ public:
       assert_dbg(
             false,
             ExcDisabled(
-                  "Casting a PointerWrapper to a shared pointer which does not "
+                  "Casting a RCPWrapper to a shared pointer which does not "
                   "contain a shared ptr internally implies a copying of the "
                   "full data and is hence disabled. Perform an explicit copy "
                   "instead by dereferencing the result of the get() function "
@@ -144,7 +165,7 @@ public:
     }
   }
 
-  /** Make a subscription pointer out of the PointerWrapper
+  /** Make a subscription pointer out of the RCPWrapper
    *
    * \note This operation may be called implicitly, which does not hurt
    * since T is a subscribable type anyways.
@@ -157,11 +178,11 @@ public:
     } else if (m_shared_ptr == nullptr) {
       // We contain no valid shared pointer either
       // ... return subscription to nullptr:
-      return SubscriptionPointer<T>("PointerWrapper");
+      return SubscriptionPointer<T>("RCPWrapper");
     } else {
       // Here we have a valid object to point to
       // Subscribe to it:
-      return SubscriptionPointer<T>("PointerWrapper", *m_shared_ptr);
+      return SubscriptionPointer<T>("RCPWrapper", *m_shared_ptr);
     }
   }
 
@@ -189,45 +210,43 @@ private:
 //
 // == and != comparison operators:
 //
-/** Compare if the PointerWrapper point to the same object */
+/** Compare if the RCPWrapper point to the same object */
 template <typename T>
-inline bool operator==(const PointerWrapper<T>& lhs,
-                       const PointerWrapper<T>& rhs) {
+inline bool operator==(const RCPWrapper<T>& lhs, const RCPWrapper<T>& rhs) {
   return lhs.get() == rhs.get();
 }
 
-/** Compare if the PointerWrappers do not point to the same object */
+/** Compare if the RCPWrappers do not point to the same object */
 template <typename T>
-inline bool operator!=(const PointerWrapper<T>& lhs,
-                       const PointerWrapper<T>& rhs) {
+inline bool operator!=(const RCPWrapper<T>& lhs, const RCPWrapper<T>& rhs) {
   return !operator==(lhs, rhs);
 }
 
-/** Compare if the PointerWrapper points to no object, i.e. stores a
+/** Compare if the RCPWrapper points to no object, i.e. stores a
  * nullptr */
 template <typename T>
-inline bool operator==(const PointerWrapper<T>& lhs, std::nullptr_t) {
+inline bool operator==(const RCPWrapper<T>& lhs, std::nullptr_t) {
   return lhs.get() == nullptr;
 }
 
-/** Compare if the PointerWrapper pointer points to no object, i.e. stores a
+/** Compare if the RCPWrapper pointer points to no object, i.e. stores a
  * nullptr */
 template <typename T>
-inline bool operator==(std::nullptr_t, const PointerWrapper<T>& rhs) {
+inline bool operator==(std::nullptr_t, const RCPWrapper<T>& rhs) {
   return rhs == nullptr;
 }
 
-/** Compare if the PointerWrapper pointer does not point to no object, i.e.
+/** Compare if the RCPWrapper pointer does not point to no object, i.e.
  * stores no nullptr */
 template <typename T>
-inline bool operator!=(const PointerWrapper<T>& lhs, std::nullptr_t) {
+inline bool operator!=(const RCPWrapper<T>& lhs, std::nullptr_t) {
   return !operator==(lhs, nullptr);
 }
 
-/** Compare if the PointerWrapper pointer does not point to no object, i.e.
+/** Compare if the RCPWrapper pointer does not point to no object, i.e.
  * stores no nullptr */
 template <typename T>
-inline bool operator!=(std::nullptr_t, const PointerWrapper<T>& rhs) {
+inline bool operator!=(std::nullptr_t, const RCPWrapper<T>& rhs) {
   return !operator==(nullptr, rhs);
 }
 
