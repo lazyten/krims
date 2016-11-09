@@ -102,6 +102,10 @@ public:
     template <typename T>
     EntryValue(std::shared_ptr<T> t_ptr);
 
+    /** \brief Make an EntryValue from an RCPWrapper */
+    template <typename T>
+    EntryValue(RCPWrapper<T> t_ptr);
+
     /** Make an EntryValue from a Subscribable object */
     template <typename T,
               typename std::enable_if<std::is_base_of<Subscribable, T>::value,
@@ -335,6 +339,15 @@ private:
 //
 template <typename T>
 ParameterMap::EntryValue::EntryValue(std::shared_ptr<T> t_ptr) {
+  // see copy_in and m_object_ptr_ptr comments for details why this is done
+  m_object_ptr_ptr = std::make_shared<RCPWrapper<T>>(std::move(t_ptr));
+#ifdef DEBUG
+  m_type_name = std::string(typeid(T).name());
+#endif
+}
+
+template <typename T>
+ParameterMap::EntryValue::EntryValue(RCPWrapper<T> t_ptr) {
   // see copy_in and m_object_ptr_ptr comments for details why this is done
   m_object_ptr_ptr = std::make_shared<RCPWrapper<T>>(std::move(t_ptr));
 #ifdef DEBUG

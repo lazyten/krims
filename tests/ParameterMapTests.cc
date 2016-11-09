@@ -103,7 +103,7 @@ TEST_CASE("ParameterMap tests", "[parametermap]") {
     m.update_copy("integer", i);
     m.update("dum", dum);
 
-    PointerWrapper<std::string> sptr = m.at_ptr<std::string>("string");
+    RCPWrapper<std::string> sptr = m.at_ptr<std::string>("string");
     REQUIRE(sptr.is_shared_ptr());
     REQUIRE(*sptr == s);
     REQUIRE(*static_cast<std::shared_ptr<std::string>>(sptr) == s);
@@ -111,7 +111,7 @@ TEST_CASE("ParameterMap tests", "[parametermap]") {
     std::shared_ptr<int> iptr = m.at_ptr<int>("integer");
     REQUIRE(*iptr == i);
 
-    PointerWrapper<DummySubscribable<double>> dumptr =
+    RCPWrapper<DummySubscribable<double>> dumptr =
           m.at_ptr<DummySubscribable<double>>("dum");
     REQUIRE_THROWS_AS(
           auto s =
@@ -136,6 +136,23 @@ TEST_CASE("ParameterMap tests", "[parametermap]") {
     REQUIRE(m.at<double>("noref") == 3.141592);
     REQUIRE(m.at<std::string>("word") == "some");
     REQUIRE(m.at<DummySubscribable<double>>("dum") == dum);
+  }
+
+  //
+  // ---------------------------------------------------------------
+  //
+
+  SECTION("Test update for various pointer types.") {
+    ParameterMap m;
+    auto dptr = std::make_shared<double>(3.4);
+    auto sptr = make_subscription(dum, "dum");
+    RCPWrapper<DummySubscribable<double>> rcpwrap(sptr);
+
+    m.update("double", dptr);
+    m.update("rcp", rcpwrap);
+
+    REQUIRE(m.at<double>("double") == *dptr);
+    REQUIRE(m.at<DummySubscribable<double>>("rcp") == dum);
   }
 
   //
