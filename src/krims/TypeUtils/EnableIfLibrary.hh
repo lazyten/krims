@@ -20,12 +20,6 @@
 #pragma once
 #include <type_traits>
 namespace krims {
-
-/** Enables only if From* can be implicitly converted to To* */
-template <typename From, typename To>
-using enable_if_ptr_convertible_t =
-      typename std::enable_if<std::is_convertible<From*, To*>::value>::type;
-
 /** Enable the method only if the condition is satisfied and T and U are the
   * same type */
 template <bool Cond, typename T, typename U>

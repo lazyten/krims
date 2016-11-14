@@ -22,6 +22,7 @@
 // Include this header to get the krims type utils
 // for transforming types or asserting properties of types.
 
+#include "TypeUtils/EnableIfLibrary.hh"
 #include "TypeUtils/IsCheaplyCopyable.hh"
 #include "TypeUtils/IsComplexNumber.hh"
 #include "TypeUtils/RealTypeOf.hh"
