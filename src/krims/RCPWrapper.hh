@@ -43,16 +43,25 @@ class RCPWrapper {
 public:
   /** \name Constructors */
   ///@{
+  /** Default constructor: Construct RCPWrapper containing nullptr*/
+  RCPWrapper() : m_shared_ptr{nullptr} {}
+
   /** Construct RCPWrapper from shared pointer */
   explicit RCPWrapper(const std::shared_ptr<T> ptr)
         : m_shared_ptr{std::move(ptr)} {}
 
   /** Implicitly convert from a different inner type */
-  template <typename U, typename = enable_if_ptr_convertible_t<U, T>>
+  template <typename U,
+            typename = enable_if_t<std::is_convertible<U*, T*>::value>>
   RCPWrapper(const RCPWrapper<U>& pw) : m_shared_ptr{pw.m_shared_ptr} {}
 
   /** Copy constructor */
   RCPWrapper(const RCPWrapper& pw) : m_shared_ptr{pw.m_shared_ptr} {}
+
+  RCPWrapper(RCPWrapper&&) = default;
+  RCPWrapper& operator=(RCPWrapper&&) = default;
+  RCPWrapper& operator=(const RCPWrapper&) = default;
+  ~RCPWrapper() = default;
   ///@}
 
   /** \brief Check if this object is empty or not */
@@ -106,6 +115,12 @@ public:
 
   /** \name Constructors */
   ///@{
+  /** Default constructor: Construct RCPWrapper containing nullptr */
+  RCPWrapper()
+        : m_contains_shared_ptr{false},
+          m_subscr_ptr{nullptr},
+          m_shared_ptr{nullptr} {}
+
   /** Construct RCPWrapper from subscription pointer */
   explicit RCPWrapper(const SubscriptionPointer<T> ptr)
         : m_contains_shared_ptr{false},
@@ -119,7 +134,8 @@ public:
           m_shared_ptr{std::move(ptr)} {}
 
   /** Implicitly convert from a different inner type */
-  template <typename U, typename = enable_if_ptr_convertible_t<U, T>>
+  template <typename U,
+            typename = enable_if_t<std::is_convertible<U*, T*>::value>>
   RCPWrapper(const RCPWrapper<U>& pw)
         : m_contains_shared_ptr{pw.m_contains_shared_ptr},
           m_subscr_ptr{pw.m_subscr_ptr},
@@ -130,6 +146,11 @@ public:
         : m_contains_shared_ptr{pw.m_contains_shared_ptr},
           m_subscr_ptr{pw.m_subscr_ptr},
           m_shared_ptr{pw.m_shared_ptr} {}
+
+  RCPWrapper(RCPWrapper&&) = default;
+  RCPWrapper& operator=(RCPWrapper&&) = default;
+  RCPWrapper& operator=(const RCPWrapper&) = default;
+  ~RCPWrapper() = default;
   ///@}
 
   /** \brief Check if this object is empty or not */

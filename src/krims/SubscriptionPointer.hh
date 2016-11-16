@@ -89,7 +89,8 @@ public:
   }
 
   /** \brief Implicit conversion from a different element type */
-  template <typename U, typename = enable_if_ptr_convertible_t<U, T>>
+  template <typename U,
+            typename = enable_if_t<std::is_convertible<U*, T*>::value>>
   SubscriptionPointer(const SubscriptionPointer<U>& other)
         : m_subscribed_obj_ptr(nullptr),
           m_subscriber_id_ptr(new std::string(other.subscriber_id())) {
