@@ -43,11 +43,11 @@ ParameterMap make_map() {
   // This one the one hand avoids expensive copies, but on the other hand
   // makes sure that the referenced object actually exist until the map
   // is no longer needed.
-  return ParameterMap{{"blubber", 1},
-                      {"eins", "zwei"},
-                      {"pi", 3.141592},
-                      {"a", aptr},
-                      {"always", "never"}};
+  return {{"blubber", 1},
+          {"eins", "zwei"},
+          {"pi", 3.141592},
+          {"a", aptr},
+          {"always", "never"}};
 
   // E.g. in this case the object referenced by *aptr will remain alive until
   // the ParameterMap is destroyed, since this is guaranteed by the managed
