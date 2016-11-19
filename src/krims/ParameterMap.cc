@@ -27,7 +27,7 @@ ParameterMap& ParameterMap::operator=(const ParameterMap& other) {
   return *this;
 }
 
-ParameterMap ParameterMap::submap(const std::string& location) const {
+ParameterMap ParameterMap::submap(const std::string& location) {
   // Clean the location path first:
   std::string newlocation = make_full_key(location);
 
@@ -36,6 +36,15 @@ ParameterMap ParameterMap::submap(const std::string& location) const {
 
   // Use a special constructor, which makes the resulting ParameterMap object
   // share the map string->EntryValue, but start at a different location
+  return ParameterMap{m_container_ptr, newlocation};
+}
+
+const ParameterMap ParameterMap::submap(const std::string& location) const {
+  // Normalise path:
+  std::string newlocation = make_full_key(location);
+  if (newlocation.back() != '/') newlocation += "/";
+
+  // Construct new map, but starting at a different location
   return ParameterMap{m_container_ptr, newlocation};
 }
 

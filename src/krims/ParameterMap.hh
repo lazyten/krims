@@ -308,7 +308,10 @@ public:
    * But it does contain a key "../blubber/foo", since the leading ".."
    * has no effect (we are at the root of the ParameterMap)
    * */
-  ParameterMap submap(const std::string& location) const;
+  ParameterMap submap(const std::string& location);
+
+  /** Get a const submap */
+  const ParameterMap submap(const std::string& location) const;
 
   // TODO alias names, i.e. link one name to a different one.
   //      but be careful not to get a cyclic graph.
