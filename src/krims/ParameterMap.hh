@@ -108,7 +108,8 @@ public:
 
     /** Make an EntryValue from a Subscribable object */
     template <typename T,
-              typename std::enable_if<std::is_base_of<Subscribable, T>::value,
+              typename std::enable_if<std::is_base_of<Subscribable, T>::value &&
+                                            !IsCheaplyCopyable<T>::value,
                                       int>::type = 0>
     EntryValue(T& t);
 
@@ -358,8 +359,10 @@ ParameterMap::EntryValue::EntryValue(RCPWrapper<T> t_ptr) {
 #endif
 }
 
-template <typename T, typename std::enable_if<
-                            std::is_base_of<Subscribable, T>::value, int>::type>
+template <typename T,
+          typename std::enable_if<std::is_base_of<Subscribable, T>::value &&
+                                        !IsCheaplyCopyable<T>::value,
+                                  int>::type>
 ParameterMap::EntryValue::EntryValue(T& t) {
   SubscriptionPointer<T> t_ptr = make_subscription(t, "EntryValue");
 
