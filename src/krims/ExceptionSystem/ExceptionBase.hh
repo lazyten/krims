@@ -62,6 +62,9 @@ public:
   /** The name of the exception */
   const char* name() const;
 
+  /** The result of print_extra's print call */
+  const std::string extra() const;
+
   /** Print exception-specific extra information to the outstream */
   virtual void print_extra(std::ostream& out) const noexcept;
 
