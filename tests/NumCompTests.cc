@@ -169,6 +169,10 @@ TEST_CASE("NumComp tests", "[NumComp]") {
                  numcomp(0.0000001).tolerance(NumCompAccuracyLevel::Extreme)),
           NumCompExceptionBase);
 
+    REQUIRE_THROWS_AS((void)(0. == numcomp(0.0000001).tolerance(1e-10)),
+                      NumCompExceptionBase);
+    REQUIRE(0. == numcomp(0.0000001).tolerance(1e-4));
+
     REQUIRE(100.000000 == numcomp(100.000001).tolerance(1e-8));
     REQUIRE(10.0 == numcomp(10.01).tolerance(1e-3));
 
