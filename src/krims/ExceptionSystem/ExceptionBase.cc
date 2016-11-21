@@ -61,6 +61,12 @@ const char* ExceptionBase::what() const noexcept {
 
 const char* ExceptionBase::name() const { return m_name; }
 
+const std::string ExceptionBase::extra() const {
+  std::stringstream ss;
+  print_extra(ss);
+  return ss.str();
+}
+
 void ExceptionBase::print_extra(std::ostream& out) const noexcept {
   out << "(none)";
 }
