@@ -18,6 +18,7 @@
 //
 
 #include "Backtrace.hh"
+#include "krims/demangle.hh"
 #include <sstream>
 
 #ifdef KRIMS_HAVE_GLIBC_STACKTRACE
@@ -72,25 +73,6 @@ void Backtrace::obtain_backtrace(const bool use_expensive) {
 }
 
 #ifdef KRIMS_HAVE_GLIBC_STACKTRACE
-char* Backtrace::demangle(const char* mangled_name) const {
-#ifdef KRIMS_HAVE_LIBSTDCXX_DEMANGLER
-  // try to demangle the function name:
-  int status;
-  char* p = abi::__cxa_demangle(mangled_name, 0, 0, &status);
-
-  if (status == 0) {
-    return p;
-  } else {
-    return NULL;
-  }
-#else
-  char* ret = static_cast<char*>(malloc(strlen(mangled_name)));
-  if (ret == NULL) return NULL;
-  strcpy(ret, mangled_name);
-  return ret;
-#endif
-}
-
 void Backtrace::split_backtrace_string(const char* symbol, Frame& frame) const {
   // The stacktrace frames are in the format
   //     executable(functionname+offset) [address]
@@ -132,20 +114,12 @@ void Backtrace::split_backtrace_string(const char* symbol, Frame& frame) const {
   if (pos_bracketop != NULL && pos_plus != NULL && pos_bracketop < pos_plus) {
     const size_t len = pos_plus - pos_bracketop - 1;
     frame.function_name = std::string(pos_bracketop + 1, len);
-
-    // Try to demangle the function name:
-    char* demangled = demangle(frame.function_name.c_str());
-    if (demangled != NULL) {
-      frame.function_name = std::string(demangled);
-
-      // Free the storage allocated in the demangle function:
-      free(demangled);
-    }
+    frame.function_name = demangled_string(frame.function_name);
   }
 }
 
-void Backtrace::determine_file_line(const char* executable_name,
-                                    const char* address, Frame& frame) const {
+void Backtrace::determine_file_line(const char* executable_name, const char* address,
+                                    Frame& frame) const {
 #ifndef KRIMS_ADDR2LINE_AVAILABLE
   // Nothing we can do: addr2line is not available:
   return;
@@ -163,8 +137,7 @@ void Backtrace::determine_file_line(const char* executable_name,
   char* number = new char[maxlen];
 
   // call and interpret:
-  int ret =
-        krims::addr2line(executable_name, address, maxlen, codefile, number);
+  int ret = krims::addr2line(executable_name, address, maxlen, codefile, number);
 
   if (ret == 0) {
     // All well, set values
@@ -227,8 +200,7 @@ void Backtrace::parse_backtrace() const {
 
     split_backtrace_string(stacktrace[raw_i], frame);
     if (m_determine_file_line) {
-      determine_file_line(frame.executable_name.c_str(), frame.address.c_str(),
-                          frame);
+      determine_file_line(frame.executable_name.c_str(), frame.address.c_str(), frame);
     }
 
     // Stop processing the frames once we are in main():
