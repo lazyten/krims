@@ -24,6 +24,7 @@
 #
 set(KRIMS_SOURCES
 	version.cc
+	demangle.cc
 	ExceptionSystem/addr2line.cc
 	ExceptionSystem/Backtrace.cc
 	ExceptionSystem/ExceptionBase.cc

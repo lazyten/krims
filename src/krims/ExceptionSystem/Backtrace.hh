@@ -95,16 +95,6 @@ public:
 
 private:
 #ifdef KRIMS_HAVE_GLIBC_STACKTRACE
-  /** \brief Demangle a function name
-   *
-   * \param mangled_name    The mangled name of the function
-   * \returns  The demangled name of the function. The char is allocatted by
-   *           malloc and should be freed after use.
-   *
-   *           If something goes wrong the function returns NULL.
-   * */
-  char* demangle(const char* mangled_name) const;
-
   /** Parse a string from backtrace_symbols representing a backtrace line
    *  into a Backtrace::Frame */
   void split_backtrace_string(const char* symbol, Frame& frame) const;

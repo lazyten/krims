@@ -22,6 +22,7 @@
 #include "RCPWrapper.hh"
 #include "SubscriptionPointer.hh"
 #include "TypeUtils.hh"
+#include "demangle.hh"
 #include <map>
 #include <memory>
 #include <string>
@@ -53,8 +54,8 @@ public:
   //
   /** Exception to indicate that a wrong type was requested */
   DefException2(ExcWrongTypeRequested, std::string, std::string,
-                << "Requested invalid type " << arg1 << " from ParameterMap."
-                << " The value has type " << arg2 << ".");
+                << "Requested invalid type '" << arg1 << "' from ParameterMap."
+                << " The value has type '" << arg2 << "'.");
 
   /** Exception thrown if a key is not valid */
   DefException1(ExcUnknownKey, std::string, << "The key " << arg1
@@ -392,7 +393,8 @@ void ParameterMap::EntryValue::copy_in(T t) {
 template <typename T>
 RCPWrapper<T> ParameterMap::EntryValue::get_ptr() {
   assert_dbg(m_type_name == std::string(typeid(T).name()),
-             ExcWrongTypeRequested(std::string(typeid(T).name()), m_type_name));
+             ExcWrongTypeRequested(real_typename<T>(),
+                                   demangled_string(m_type_name)));
   assert_dbg(!empty(), ExcInvalidPointer());
 
   // We need to cast and then dereference to get the RCPWrapper of the
@@ -403,7 +405,8 @@ RCPWrapper<T> ParameterMap::EntryValue::get_ptr() {
 template <typename T>
 RCPWrapper<const T> ParameterMap::EntryValue::get_ptr() const {
   assert_dbg(m_type_name == std::string(typeid(T).name()),
-             ExcWrongTypeRequested(std::string(typeid(T).name()), m_type_name));
+             ExcWrongTypeRequested(real_typename<T>(),
+                                   demangled_string(m_type_name)));
   assert_dbg(!empty(), ExcInvalidPointer());
 
   // We need to cast and then dereference to get the RCPWrapper of the
