@@ -35,7 +35,7 @@ class SubscriptionPointer {
   static_assert(std::is_base_of<Subscribable, T>::value,
                 "T must be a child class of Subscribable");
 
-public:
+ public:
   /** The template parameter T, i.e. the type of the managed object */
   typedef T element_type;
 
@@ -89,8 +89,7 @@ public:
   }
 
   /** \brief Implicit conversion from a different element type */
-  template <typename U,
-            typename = enable_if_t<std::is_convertible<U*, T*>::value>>
+  template <typename U, typename = enable_if_t<std::is_convertible<U*, T*>::value>>
   SubscriptionPointer(const SubscriptionPointer<U>& other)
         : m_subscribed_obj_ptr(nullptr),
           m_subscriber_id_ptr(new std::string(other.subscriber_id())) {
@@ -147,7 +146,7 @@ public:
   /** Obtain the subscriber id provided upon construction. */
   const std::string& subscriber_id() const { return *m_subscriber_id_ptr; }
 
-private:
+ private:
   /** Register at the given object */
   void register_at(T* object_ptr) {
 #ifdef DEBUG
@@ -195,8 +194,8 @@ private:
  * which hold a subscription to said object.
  */
 template <typename T>
-inline SubscriptionPointer<T> make_subscription(
-      T& object, const std::string& subscriber_id) {
+inline SubscriptionPointer<T> make_subscription(T& object,
+                                                const std::string& subscriber_id) {
   return SubscriptionPointer<T>(subscriber_id, object);
 }
 

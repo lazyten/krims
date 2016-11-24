@@ -84,7 +84,7 @@ struct NumCompConstants {
    *  Once the class goes out of scope and is destroyed, the original
    *  settings are restored */
   struct CacheChange {
-  public:
+   public:
     /** Change both the default failure action as well as the tolerance factor
      * until the class goes out of scope*/
     CacheChange(double tolerance_factor, NumCompActionType failure_action)
@@ -109,8 +109,7 @@ struct NumCompConstants {
     // Moving is allowed, though:
     CacheChange(CacheChange&& other)
           : m_do_restore{other.m_do_restore},
-            m_orig_default_tolerance_factor{
-                  other.m_orig_default_tolerance_factor},
+            m_orig_default_tolerance_factor{other.m_orig_default_tolerance_factor},
             m_orig_default_failure_action{other.m_orig_default_failure_action} {
       other.m_do_restore = false;
     }
@@ -123,7 +122,7 @@ struct NumCompConstants {
       return *this;
     }
 
-  private:
+   private:
     bool m_do_restore = true;
     double m_orig_default_tolerance_factor;
     NumCompActionType m_orig_default_failure_action;

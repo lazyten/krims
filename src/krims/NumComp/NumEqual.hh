@@ -37,9 +37,8 @@ struct NumEqual {
 /** \brief Functor to check that two floating point values are numerically equal
  */
 template <typename T, typename U>
-struct NumEqual<
-      T, U, typename std::enable_if<std::is_floating_point<T>::value &&
-                                    std::is_floating_point<U>::value>::type> {
+struct NumEqual<T, U, typename std::enable_if<std::is_floating_point<T>::value &&
+                                              std::is_floating_point<U>::value>::type> {
   typedef const T& first_argument_type;
   typedef const U& second_argument_type;
   typedef bool result_type;
@@ -51,7 +50,7 @@ struct NumEqual<
 
   bool operator()(const T& lhs, const U& rhs) const;
 
-private:
+ private:
   const common_type m_tolerance;
   const NumCompActionType m_failure_action;
 };
@@ -59,23 +58,21 @@ private:
 /** \brief Functor to check that two complex numbers are numerically equal
  */
 template <typename T, typename U>
-struct NumEqual<
-      std::complex<T>, std::complex<U>,
-      typename std::enable_if<std::is_floating_point<T>::value &&
-                              std::is_floating_point<U>::value>::type> {
+struct NumEqual<std::complex<T>, std::complex<U>,
+                typename std::enable_if<std::is_floating_point<T>::value &&
+                                        std::is_floating_point<U>::value>::type> {
   typedef const std::complex<T>& first_argument_type;
   typedef const std::complex<U>& second_argument_type;
   typedef bool result_type;
 
   typedef typename std::common_type<T, U>::type common_real_type;
 
-  NumEqual(const common_real_type tolerance,
-           const NumCompActionType failure_action)
+  NumEqual(const common_real_type tolerance, const NumCompActionType failure_action)
         : m_tolerance(tolerance), m_failure_action(failure_action) {}
 
   bool operator()(const std::complex<T>& lhs, const std::complex<U>& rhs) const;
 
-private:
+ private:
   const common_real_type m_tolerance;
   const NumCompActionType m_failure_action;
 };
@@ -85,9 +82,8 @@ private:
 //
 
 template <typename T, typename U>
-bool NumEqual<T, U,
-              typename std::enable_if<std::is_floating_point<T>::value &&
-                                      std::is_floating_point<U>::value>::type>::
+bool NumEqual<T, U, typename std::enable_if<std::is_floating_point<T>::value &&
+                                            std::is_floating_point<U>::value>::type>::
 operator()(const T& lhs, const U& rhs) const {
   using std::abs;
 

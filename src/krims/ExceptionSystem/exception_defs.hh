@@ -38,13 +38,13 @@ enum class ExceptionEffect : char { THROW, ABORT };
  * change this behaviour try the set() function.
  * */
 class AssertDbgEffect {
-public:
+ public:
   static void set(ExceptionEffect effect) { m_eff = effect; }
   static void set_abort() { set(ExceptionEffect::ABORT); }
   static void set_throw() { set(ExceptionEffect::THROW); }
   static ExceptionEffect get() { return m_eff; }
 
-private:
+ private:
   static ExceptionEffect m_eff;
 };
 
@@ -118,7 +118,7 @@ private:
  */
 #define DefExceptionMsg(Exception, defaulttext)                  \
   class Exception : public ::krims::ExceptionBase {              \
-  public:                                                        \
+   public:                                                       \
     virtual void print_extra(std::ostream& out) const noexcept { \
       out << defaulttext << std::endl;                           \
     }                                                            \
@@ -131,14 +131,14 @@ private:
  */
 #define DefException1(Exception1, type1, outsequence)            \
   class Exception1 : public ::krims::ExceptionBase {             \
-  public:                                                        \
+   public:                                                       \
     Exception1(const type1 a1) : arg1(a1) {}                     \
     virtual ~Exception1() noexcept {}                            \
     virtual void print_extra(std::ostream& out) const noexcept { \
       out outsequence << std::endl;                              \
     }                                                            \
                                                                  \
-  private:                                                       \
+   private:                                                      \
     const type1 arg1;                                            \
   }
 
@@ -148,14 +148,14 @@ private:
  */
 #define DefException2(Exception2, type1, type2, outsequence)           \
   class Exception2 : public ::krims::ExceptionBase {                   \
-  public:                                                              \
+   public:                                                             \
     Exception2(const type1 a1, const type2 a2) : arg1(a1), arg2(a2) {} \
     virtual ~Exception2() noexcept {}                                  \
     virtual void print_extra(std::ostream& out) const noexcept {       \
       out outsequence << std::endl;                                    \
     }                                                                  \
                                                                        \
-  private:                                                             \
+   private:                                                            \
     const type1 arg1;                                                  \
     const type2 arg2;                                                  \
   }
@@ -168,7 +168,7 @@ private:
  */
 #define DefException3(Exception3, type1, type2, type3, outsequence) \
   class Exception3 : public ::krims::ExceptionBase {                \
-  public:                                                           \
+   public:                                                          \
     Exception3(const type1 a1, const type2 a2, const type3 a3)      \
           : arg1(a1), arg2(a2), arg3(a3) {}                         \
     virtual ~Exception3() noexcept {}                               \
@@ -176,7 +176,7 @@ private:
       out outsequence << std::endl;                                 \
     }                                                               \
                                                                     \
-  private:                                                          \
+   private:                                                         \
     const type1 arg1;                                               \
     const type2 arg2;                                               \
     const type3 arg3;                                               \
@@ -190,7 +190,7 @@ private:
  */
 #define DefException4(Exception4, type1, type2, type3, type4, outsequence)     \
   class Exception4 : public ::krims::ExceptionBase {                           \
-  public:                                                                      \
+   public:                                                                     \
     Exception4(const type1 a1, const type2 a2, const type3 a3, const type4 a4) \
           : arg1(a1), arg2(a2), arg3(a3), arg4(a4) {}                          \
     virtual ~Exception4() noexcept {}                                          \
@@ -198,7 +198,7 @@ private:
       out outsequence << std::endl;                                            \
     }                                                                          \
                                                                                \
-  private:                                                                     \
+   private:                                                                    \
     const type1 arg1;                                                          \
     const type2 arg2;                                                          \
     const type3 arg3;                                                          \
@@ -211,24 +211,23 @@ private:
  *
  * @ingroup Exceptions
  */
-#define DefException5(Exception5, type1, type2, type3, type4, type5,           \
-                      outsequence)                                             \
-  class Exception5 : public ::krims::ExceptionBase {                           \
-  public:                                                                      \
-    Exception5(const type1 a1, const type2 a2, const type3 a3, const type4 a4, \
-               const type5 a5)                                                 \
-          : arg1(a1), arg2(a2), arg3(a3), arg4(a4), arg5(a5) {}                \
-    virtual ~Exception5() noexcept {}                                          \
-    virtual void print_extra(std::ostream& out) const noexcept {               \
-      out outsequence << std::endl;                                            \
-    }                                                                          \
-                                                                               \
-  private:                                                                     \
-    const type1 arg1;                                                          \
-    const type2 arg2;                                                          \
-    const type3 arg3;                                                          \
-    const type4 arg4;                                                          \
-    const type5 arg5;                                                          \
+#define DefException5(Exception5, type1, type2, type3, type4, type5, outsequence) \
+  class Exception5 : public ::krims::ExceptionBase {                              \
+   public:                                                                        \
+    Exception5(const type1 a1, const type2 a2, const type3 a3, const type4 a4,    \
+               const type5 a5)                                                    \
+          : arg1(a1), arg2(a2), arg3(a3), arg4(a4), arg5(a5) {}                   \
+    virtual ~Exception5() noexcept {}                                             \
+    virtual void print_extra(std::ostream& out) const noexcept {                  \
+      out outsequence << std::endl;                                               \
+    }                                                                             \
+                                                                                  \
+   private:                                                                       \
+    const type1 arg1;                                                             \
+    const type2 arg2;                                                             \
+    const type3 arg3;                                                             \
+    const type4 arg4;                                                             \
+    const type5 arg5;                                                             \
   }
 
 }  // namespace krims

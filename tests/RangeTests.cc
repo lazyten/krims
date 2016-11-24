@@ -37,8 +37,7 @@ struct RangeTests {
 
     if (is_valid) {
       range_type r{t1, t2};
-      RC_ASSERT(r.length() ==
-                static_cast<size_type>(static_cast<ptrdiff_t>(t2) - t1));
+      RC_ASSERT(r.length() == static_cast<size_type>(static_cast<ptrdiff_t>(t2) - t1));
     } else {
 #ifdef DEBUG
       RC_ASSERT_THROWS_AS((Range<T>{t1, t2}), krims::ExcTooLarge<T>);
@@ -141,15 +140,12 @@ TEST_CASE("Range tests", "[range]") {
   using namespace range_tests;
 
   SECTION("Range construction") {
-    REQUIRE(rc::check("Range construction (size_t)",
-                      RangeTests<size_t>::construction));
-    REQUIRE(
-          rc::check("Range construction (int)", RangeTests<int>::construction));
+    REQUIRE(rc::check("Range construction (size_t)", RangeTests<size_t>::construction));
+    REQUIRE(rc::check("Range construction (int)", RangeTests<int>::construction));
   }
 
   SECTION("Element access") {
-    REQUIRE(rc::check("Element access (size_t)",
-                      RangeTests<size_t>::element_access));
+    REQUIRE(rc::check("Element access (size_t)", RangeTests<size_t>::element_access));
     REQUIRE(rc::check("Element access (int)", RangeTests<int>::element_access));
   }
 

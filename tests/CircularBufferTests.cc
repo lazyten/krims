@@ -65,8 +65,7 @@ struct CircularBufferModel {
 
 /** Push a random object to the front of the buffer */
 template <typename T>
-struct PushFront
-      : rc::state::Command<CircularBufferModel<T>, CircularBuffer<T>> {
+struct PushFront : rc::state::Command<CircularBufferModel<T>, CircularBuffer<T>> {
   typedef CircularBufferModel<T> model_type;
   typedef CircularBuffer<T> sut_type;
 
@@ -95,15 +94,12 @@ struct PushFront
     nmodel.assert_equivalent_to(sut);
   }
 
-  void show(std::ostream& os) const override {
-    os << "PushFront (" << t << ")";
-  }
+  void show(std::ostream& os) const override { os << "PushFront (" << t << ")"; }
 };  // PushFront
 
 /** Push a random object to the back of the buffer */
 template <typename T>
-struct PushBack
-      : rc::state::Command<CircularBufferModel<T>, CircularBuffer<T>> {
+struct PushBack : rc::state::Command<CircularBufferModel<T>, CircularBuffer<T>> {
   typedef CircularBufferModel<T> model_type;
   typedef CircularBuffer<T> sut_type;
 
@@ -163,8 +159,7 @@ struct Clear : rc::state::Command<CircularBufferModel<T>, CircularBuffer<T>> {
 
 /** Change max_size */
 template <typename T>
-struct ChangeMaxSize
-      : rc::state::Command<CircularBufferModel<T>, CircularBuffer<T>> {
+struct ChangeMaxSize : rc::state::Command<CircularBufferModel<T>, CircularBuffer<T>> {
   typedef CircularBufferModel<T> model_type;
   typedef CircularBuffer<T> sut_type;
 
@@ -190,9 +185,7 @@ struct ChangeMaxSize
     this->nextState(model).assert_equivalent_to(sut);
   }
 
-  void show(std::ostream& os) const override {
-    os << "ChangeMaxSize (" << max << ")";
-  }
+  void show(std::ostream& os) const override { os << "ChangeMaxSize (" << max << ")"; }
 };  // ChangeMaxSize
 
 /** execute a random test of a list of the above commands
@@ -268,13 +261,12 @@ TEST_CASE("Circular Iterator and Circular Buffer", "[circular_buffer]") {
     typedef Clear<testtype> op_Clear;
     typedef ChangeMaxSize<testtype> op_ChangeMaxSize;
 
-    REQUIRE(rc::check(
-          "Random function test of circular buffer with Clear",
-          exectute_random_test<testtype, op_PushBack, op_PushFront, op_Clear>));
+    REQUIRE(
+          rc::check("Random function test of circular buffer with Clear",
+                    exectute_random_test<testtype, op_PushBack, op_PushFront, op_Clear>));
     REQUIRE(rc::check(
           "Random function test of circular buffer with ChangeMaxSize",
-          exectute_random_test<testtype, op_PushBack, op_PushFront,
-                               op_ChangeMaxSize>));
+          exectute_random_test<testtype, op_PushBack, op_PushFront, op_ChangeMaxSize>));
   }  // Random function test
 
 }  // TEST_CASE

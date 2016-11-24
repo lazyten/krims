@@ -35,11 +35,11 @@
  * <li> The upper bound plus one
  * </ol>
  */
-#define assert_range(start, number, end)                                 \
-  {                                                                      \
-    assert_dbg((start <= number) && (number < end),                      \
-               ::krims::ExcOutsideRange<decltype(start + number + end)>( \
-                     number, start, end));                               \
+#define assert_range(start, number, end)                                                 \
+  {                                                                                      \
+    assert_dbg(                                                                          \
+          (start <= number) && (number < end),                                           \
+          ::krims::ExcOutsideRange<decltype(start + number + end)>(number, start, end)); \
   }
 
 /**
@@ -52,11 +52,8 @@
  * <li> rhs number
  * </ol>
  */
-#define assert_greater_equal(lhs, rhs)                               \
-  {                                                                  \
-    assert_dbg(lhs <= rhs,                                           \
-               ::krims::ExcTooLarge<decltype(lhs + rhs)>(lhs, rhs)); \
-  }
+#define assert_greater_equal(lhs, rhs) \
+  { assert_dbg(lhs <= rhs, ::krims::ExcTooLarge<decltype(lhs + rhs)>(lhs, rhs)); }
 
 /**
  * Uses assert_dbg in order to check that a rhs is strictly greater to
@@ -68,11 +65,8 @@
  * <li> rhs number
  * </ol>
  */
-#define assert_greater(lhs, rhs)                                            \
-  {                                                                         \
-    assert_dbg(lhs < rhs,                                                   \
-               ::krims::ExcTooLargeOrEqual<decltype(lhs + rhs)>(lhs, rhs)); \
-  }
+#define assert_greater(lhs, rhs) \
+  { assert_dbg(lhs < rhs, ::krims::ExcTooLargeOrEqual<decltype(lhs + rhs)>(lhs, rhs)); }
 
 /**
  * Uses assert_dbg in order to check that a rhs is exactly
@@ -84,11 +78,8 @@
  * <li> rhs number
  * </ol>
  */
-#define assert_equal(lhs, rhs)                                       \
-  {                                                                  \
-    assert_dbg(lhs == rhs,                                           \
-               ::krims::ExcNotEqual<decltype(lhs + rhs)>(lhs, rhs)); \
-  }
+#define assert_equal(lhs, rhs) \
+  { assert_dbg(lhs == rhs, ::krims::ExcNotEqual<decltype(lhs + rhs)>(lhs, rhs)); }
 
 /**
  * Assert whether two sizes match

@@ -26,8 +26,8 @@
 namespace krims {
 
 #ifdef KRIMS_ADDR2LINE_AVAILABLE
-int addr2line(const char* execname, const char* addr, const size_t maxlen,
-              char* codefile, char* number) {
+int addr2line(const char* execname, const char* addr, const size_t maxlen, char* codefile,
+              char* number) {
   // By default set number and codefile to empty string
   codefile[0] = 0;
   number[0] = 0;

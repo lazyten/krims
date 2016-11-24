@@ -114,8 +114,7 @@ TEST_CASE("ParameterMap tests", "[parametermap]") {
     RCPWrapper<DummySubscribable<double>> dumptr =
           m.at_ptr<DummySubscribable<double>>("dum");
     REQUIRE_THROWS_AS(
-          auto s =
-                static_cast<std::shared_ptr<DummySubscribable<double>>>(dumptr),
+          auto s = static_cast<std::shared_ptr<DummySubscribable<double>>>(dumptr),
           ExcDisabled);
   }
 #endif
@@ -191,11 +190,8 @@ TEST_CASE("ParameterMap tests", "[parametermap]") {
   //
 
   SECTION("Test construction from initialiser list") {
-    ParameterMap m{{"value1", 1},
-                   {"word", "a"},
-                   {"integer", i},
-                   {"string", s},
-                   {"dum", dum}};
+    ParameterMap m{
+          {"value1", 1}, {"word", "a"}, {"integer", i}, {"string", s}, {"dum", dum}};
 
     REQUIRE(m.at<int>("value1") == 1);
     REQUIRE(m.at<std::string>("word") == "a");

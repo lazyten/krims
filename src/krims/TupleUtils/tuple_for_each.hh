@@ -40,8 +40,7 @@ template <typename UnOp, typename Tuple>
 constexpr void tuple_for_each(UnOp&& op, Tuple&& t) {
   return detail::tuple_for_each_impl(
         std::forward<UnOp>(op), std::forward<Tuple>(t),
-        std::make_index_sequence<
-              std::tuple_size<std::decay_t<Tuple>>::value>());
+        std::make_index_sequence<std::tuple_size<std::decay_t<Tuple>>::value>());
 }
 
 #elif defined KRIMS_HAVE_CXX14
@@ -60,8 +59,7 @@ constexpr void tuple_for_each_impl(UnOp&& op, Tuple&& t,
   // The comma operator in each element of the list causes the return value
   // of the function to be discarded. Instead we use the next value (int)
   // as the type. Overall we get an initialiser_list<int>
-  std::initializer_list<int> l = {
-        (op(std::get<Indices>(std::forward<Tuple>(t))), 0)...};
+  std::initializer_list<int> l = {(op(std::get<Indices>(std::forward<Tuple>(t))), 0)...};
 
   // Fake-use local variable l
   (void)l;
@@ -73,8 +71,7 @@ template <typename UnOp, typename Tuple>
 constexpr void tuple_for_each(UnOp&& op, Tuple&& t) {
   return detail::tuple_for_each_impl(
         std::forward<UnOp>(op), std::forward<Tuple>(t),
-        std::make_index_sequence<
-              std::tuple_size<std::decay_t<Tuple>>::value>());
+        std::make_index_sequence<std::tuple_size<std::decay_t<Tuple>>::value>());
 }
 
 #else

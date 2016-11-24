@@ -39,13 +39,13 @@ namespace krims {
  *  TODO: Documentation how / are special and go into submaps down the tree
  */
 class ParameterMap {
-public:
+ public:
   class EntryValue;
 
   // TODO: When modifying an entry using update, make sure that the type
   //       stays unchanged
 
-public:
+ public:
   typedef std::map<std::string, EntryValue> inner_map_type;
   typedef std::pair<const std::string, EntryValue> entry_type;
 
@@ -58,8 +58,7 @@ public:
                 << " The value has type '" << arg2 << "'.");
 
   /** Exception thrown if a key is not valid */
-  DefException1(ExcUnknownKey, std::string, << "The key " << arg1
-                                            << " is unknown.");
+  DefException1(ExcUnknownKey, std::string, << "The key " << arg1 << " is unknown.");
 
   //
   // The entry class
@@ -73,7 +72,7 @@ public:
    * subscribed to.
    */
   class EntryValue {
-  public:
+   public:
     /** \brief Default constructor: Constructs empty object */
     EntryValue() : m_object_ptr_ptr{nullptr} {}
 
@@ -82,10 +81,9 @@ public:
      * This includes std::string and all relevant numeric types (integers,
      * floating point numbers, complex numbers)
      **/
-    template <typename T,
-              typename std::enable_if<!std::is_reference<T>::value &&
-                                            IsCheaplyCopyable<T>::value,
-                                      int>::type = 0>
+    template <typename T, typename std::enable_if<!std::is_reference<T>::value &&
+                                                        IsCheaplyCopyable<T>::value,
+                                                  int>::type = 0>
     EntryValue(T t) {
       // Note about the enable_if:
       //   - We need to make sure that T is the actual type (and not a
@@ -115,9 +113,9 @@ public:
     EntryValue(T& t);
 
     /** Make an EntryValue from an rvalue reference */
-    template <typename T, typename = typename std::enable_if<
-                                !std::is_reference<T>::value &&
-                                !IsCheaplyCopyable<T>::value>::type>
+    template <typename T,
+              typename = typename std::enable_if<!std::is_reference<T>::value &&
+                                                 !IsCheaplyCopyable<T>::value>::type>
     EntryValue(T&& t) : EntryValue{std::make_shared<T>(std::move(t))} {}
     // Note about the enable_if:
     //   - We need to make sure that T is the actual type (and not a
@@ -147,7 +145,7 @@ public:
     /** Is the object empty */
     bool empty() const { return m_object_ptr_ptr == nullptr; }
 
-  private:
+   private:
     //! Stupidly copy the object and set the m_object_ptr_ptr
     template <typename T>
     void copy_in(T t);
@@ -167,14 +165,10 @@ public:
   ///@{
   /** \brief default constructor
    * Constructs empty map */
-  ParameterMap()
-        : m_container_ptr{std::make_shared<inner_map_type>()},
-          m_location{"/"} {}
+  ParameterMap() : m_container_ptr{std::make_shared<inner_map_type>()}, m_location{"/"} {}
 
   /** \brief Construct parameter map from initialiser list of entry_types */
-  ParameterMap(std::initializer_list<entry_type> il) : ParameterMap{} {
-    update(il);
-  };
+  ParameterMap(std::initializer_list<entry_type> il) : ParameterMap{} { update(il); };
 
   ~ParameterMap() = default;
   ParameterMap(ParameterMap&&) = default;
@@ -182,8 +176,7 @@ public:
 
   /** \brief Copy constructor */
   ParameterMap(const ParameterMap& other)
-        : m_container_ptr{std::make_shared<inner_map_type>(
-                *other.m_container_ptr)},
+        : m_container_ptr{std::make_shared<inner_map_type>(*other.m_container_ptr)},
           m_location{other.m_location} {}
 
   /** \brief Copy assignment operator */
@@ -219,8 +212,7 @@ public:
   /** Insert or update a key with a copy of an element */
   template <typename T>
   void update_copy(std::string key, T object) {
-    (*m_container_ptr)[make_full_key(key)] =
-          EntryValue{std::make_shared<T>(object)};
+    (*m_container_ptr)[make_full_key(key)] = EntryValue{std::make_shared<T>(object)};
   }
 
   /** \brief Try to remove an element.
@@ -287,8 +279,7 @@ public:
 
   /** Check weather a key exists */
   bool exists(const std::string& key) const {
-    return m_container_ptr->find(make_full_key(key)) !=
-           std::end(*m_container_ptr);
+    return m_container_ptr->find(make_full_key(key)) != std::end(*m_container_ptr);
   }
 
   /** \brief Get a submap starting pointing at a different location.
@@ -318,7 +309,7 @@ public:
   // TODO alias names, i.e. link one name to a different one.
   //      but be careful not to get a cyclic graph.
 
-private:
+ private:
   /** \brief Construct parameter map from another map and a new location. */
   ParameterMap(std::shared_ptr<inner_map_type> map, std::string newlocation)
         : m_container_ptr{map}, m_location{newlocation} {}
@@ -360,10 +351,9 @@ ParameterMap::EntryValue::EntryValue(RCPWrapper<T> t_ptr) {
 #endif
 }
 
-template <typename T,
-          typename std::enable_if<std::is_base_of<Subscribable, T>::value &&
-                                        !IsCheaplyCopyable<T>::value,
-                                  int>::type>
+template <typename T, typename std::enable_if<std::is_base_of<Subscribable, T>::value &&
+                                                    !IsCheaplyCopyable<T>::value,
+                                              int>::type>
 ParameterMap::EntryValue::EntryValue(T& t) {
   SubscriptionPointer<T> t_ptr = make_subscription(t, "EntryValue");
 
@@ -393,8 +383,7 @@ void ParameterMap::EntryValue::copy_in(T t) {
 template <typename T>
 RCPWrapper<T> ParameterMap::EntryValue::get_ptr() {
   assert_dbg(m_type_name == std::string(typeid(T).name()),
-             ExcWrongTypeRequested(real_typename<T>(),
-                                   demangled_string(m_type_name)));
+             ExcWrongTypeRequested(real_typename<T>(), demangled_string(m_type_name)));
   assert_dbg(!empty(), ExcInvalidPointer());
 
   // We need to cast and then dereference to get the RCPWrapper of the
@@ -405,8 +394,7 @@ RCPWrapper<T> ParameterMap::EntryValue::get_ptr() {
 template <typename T>
 RCPWrapper<const T> ParameterMap::EntryValue::get_ptr() const {
   assert_dbg(m_type_name == std::string(typeid(T).name()),
-             ExcWrongTypeRequested(real_typename<T>(),
-                                   demangled_string(m_type_name)));
+             ExcWrongTypeRequested(real_typename<T>(), demangled_string(m_type_name)));
   assert_dbg(!empty(), ExcInvalidPointer());
 
   // We need to cast and then dereference to get the RCPWrapper of the
@@ -444,8 +432,7 @@ T& ParameterMap::at(const std::string& key, T& default_value) {
 }
 
 template <typename T>
-const T& ParameterMap::at(const std::string& key,
-                          const T& default_value) const {
+const T& ParameterMap::at(const std::string& key, const T& default_value) const {
   auto itkey = m_container_ptr->find(make_full_key(key));
   if (itkey == std::end(*m_container_ptr)) {
     // Key not found, return default:

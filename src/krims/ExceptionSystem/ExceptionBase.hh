@@ -30,7 +30,7 @@ namespace krims {
  *  Greatly inspired by the deal.ii exception system.
  */
 class ExceptionBase : public std::exception {
-public:
+ public:
   /** Constructor */
   ExceptionBase();
 
@@ -71,7 +71,7 @@ public:
   /** Print a stacktrace to the outstream */
   void print_stacktrace(std::ostream& out) const;
 
-protected:
+ protected:
   /**  build the what string of this exception
    */
   virtual std::string generate_message() const noexcept;
@@ -94,7 +94,7 @@ protected:
   //! The failed condition as a string.
   const char* m_failed_condition;
 
-private:
+ private:
   //! The class which will determine the backtrace.
   Backtrace m_backtrace;
 

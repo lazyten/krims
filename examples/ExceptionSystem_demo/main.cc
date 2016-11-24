@@ -26,8 +26,7 @@ using namespace krims;
 
 void print_error(int partmax) {
   std::cerr << "Need a number between " << 0 << " and " << partmax
-            << " as the only argument: The exception which is triggered."
-            << std::endl;
+            << " as the only argument: The exception which is triggered." << std::endl;
 }
 
 void part0() {
@@ -75,8 +74,7 @@ void part5() {
 }
 
 int main(int argc, char** argv) {
-  std::cout << "Using krims version " << krims::version::version_string()
-            << std::endl;
+  std::cout << "Using krims version " << krims::version::version_string() << std::endl;
 
   const int partmax = 5;
 

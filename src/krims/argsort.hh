@@ -31,10 +31,9 @@ std::vector<size_t> argsort(const RandomAccessIterator first,
   std::vector<size_t> indices(last - first);
   std::iota(std::begin(indices), std::end(indices), 0);
 
-  std::sort(std::begin(indices), std::end(indices),
-            [&first, &cmp](size_t i1, size_t i2) {
-              return cmp(*(first + i1), *(first + i2));
-            });
+  std::sort(std::begin(indices), std::end(indices), [&first, &cmp](size_t i1, size_t i2) {
+    return cmp(*(first + i1), *(first + i2));
+  });
 
   return indices;
 }

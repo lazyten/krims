@@ -37,9 +37,8 @@ class RangeIterator;
  * */
 template <typename T>
 class Range {
-public:
-  static_assert(std::is_integral<T>::value,
-                "T needs to be an integral data type");
+ public:
+  static_assert(std::is_integral<T>::value, "T needs to be an integral data type");
 
   typedef T value_type;
   typedef size_t size_type;
@@ -50,10 +49,9 @@ public:
                                     typename std::make_signed<size_type>::type,
                                     size_type>::type diff_type;
 
-  DefExceptionMsg(
-        ExcEmptyRange,
-        "The range object you attempted to use represents an empty range"
-        " and hence cannot be used in this way.");
+  DefExceptionMsg(ExcEmptyRange,
+                  "The range object you attempted to use represents an empty range"
+                  " and hence cannot be used in this way.");
 
   /** \brief Construct a range
    *
@@ -115,7 +113,7 @@ public:
   Range& operator-=(value_type i) { return (*this) += -i; }
   ///@}
 
-private:
+ private:
   value_type m_first;  // inclusive
   value_type m_last;   // exclusive
 };
@@ -149,7 +147,7 @@ Range<T>& operator-(T i, Range<T> r) {
 /** Iterator for ranges */
 template <typename T>
 class RangeIterator : public std::iterator<std::input_iterator_tag, T> {
-public:
+ public:
   typedef std::iterator<std::input_iterator_tag, T> base_type;
   typedef typename base_type::value_type value_type;
   typedef typename base_type::reference reference;
@@ -162,8 +160,7 @@ public:
    * current and runs until last-1 (i.e. last is *not*
    * included any more.
    * */
-  RangeIterator(value_type current, value_type last)
-        : m_current{current}, m_last{last} {
+  RangeIterator(value_type current, value_type last) : m_current{current}, m_last{last} {
     assert_dbg(!is_past_the_end(), krims::ExcIteratorPastEnd());
   }
 
@@ -185,7 +182,7 @@ public:
   /** Check whether two iterators are unequal */
   bool operator!=(const RangeIterator& other) const;
 
-private:
+ private:
   /** Does this data structure represent an
    *  iterator-past-the-end */
   bool is_past_the_end() const { return m_current >= m_last; }
@@ -310,8 +307,7 @@ bool RangeIterator<T>::operator==(const RangeIterator& other) const {
   // or their m_current and their m_last agrees
 
   const bool both_past_the_end = is_past_the_end() && other.is_past_the_end();
-  const bool identical_values =
-        (m_current == other.m_current && m_last == other.m_last);
+  const bool identical_values = (m_current == other.m_current && m_last == other.m_last);
   return both_past_the_end || identical_values;
 }
 

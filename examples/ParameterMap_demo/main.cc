@@ -60,10 +60,9 @@ void print_map(const ParameterMap& map) {
   std::cout << "blubber:          " << map.at("blubber", 0) << std::endl;
 
   // Print an always existing key
-  std::cout << "always:           " << map.at<std::string>("always")
+  std::cout << "always:           " << map.at<std::string>("always") << std::endl;
+  std::cout << "sub/always:       " << map.at<std::string>("sub/always", "notfound")
             << std::endl;
-  std::cout << "sub/always:       "
-            << map.at<std::string>("sub/always", "notfound") << std::endl;
 
   // Print some others
   std::cout << "pi:               " << map.at<double>("pi") << std::endl;
@@ -122,8 +121,7 @@ void modify_map_other(ParameterMap& map) {
 }
 
 int main() {
-  std::cout << "Using krims version " << krims::version::version_string()
-            << std::endl
+  std::cout << "Using krims version " << krims::version::version_string() << std::endl
             << std::endl;
 
   ParameterMap map = make_map();

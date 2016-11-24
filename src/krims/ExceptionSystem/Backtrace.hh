@@ -29,7 +29,7 @@
 namespace krims {
 
 class Backtrace {
-public:
+ public:
   // Struct to represent one frame in the Backtrace
   struct Frame {
     //! Static string to describe an unknown piece of information in the frame
@@ -93,7 +93,7 @@ public:
    */
   bool determine_file_line() const { return m_determine_file_line; }
 
-private:
+ private:
 #ifdef KRIMS_HAVE_GLIBC_STACKTRACE
   /** Parse a string from backtrace_symbols representing a backtrace line
    *  into a Backtrace::Frame */

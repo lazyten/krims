@@ -29,8 +29,7 @@ TEST_CASE("Exception system", "[exception]") {
   SECTION("Test throw or raise mechanism") {
 #ifdef DEBUG
     // Test if an ExcNotImplemented exception would be thrown:
-    REQUIRE_THROWS_AS(assert_dbg(false, ExcNotImplemented()),
-                      ExcNotImplemented);
+    REQUIRE_THROWS_AS(assert_dbg(false, ExcNotImplemented()), ExcNotImplemented);
 
     // Test if an ExcIO exception would be thrown:
     REQUIRE_THROWS_AS(assert_dbg(false, ExcIO()), ExcIO);
@@ -41,8 +40,7 @@ TEST_CASE("Exception system", "[exception]") {
 #endif
 
     // Test if an ExcNotImplemented exception would be thrown:
-    REQUIRE_THROWS_AS(assert_throw(false, ExcNotImplemented()),
-                      ExcNotImplemented);
+    REQUIRE_THROWS_AS(assert_throw(false, ExcNotImplemented()), ExcNotImplemented);
 
     // Test if an ExcIO exception would be thrown:
     REQUIRE_THROWS_AS(assert_throw(false, ExcIO()), ExcIO);
@@ -63,8 +61,7 @@ TEST_CASE("Exception system", "[exception]") {
       auto upper_bound = lower_bound + size + 1;
 
       // Should this assertion fail?
-      const bool should_catch_something =
-            (value < lower_bound) || (upper_bound <= value);
+      const bool should_catch_something = (value < lower_bound) || (upper_bound <= value);
 
       // Classify according to upper property
       RC_CLASSIFY(should_catch_something, "Assertion failed");
