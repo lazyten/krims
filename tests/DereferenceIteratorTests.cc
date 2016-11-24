@@ -87,8 +87,7 @@ TEST_CASE("DereferenceIteratorTests", "[DereferenceIterator]") {
     };
 
     REQUIRE(rc::check(
-          "DereferenceIterator: Running over the full range of const iterator",
-          test));
+          "DereferenceIterator: Running over the full range of const iterator", test));
   }
 
   //
@@ -103,8 +102,7 @@ TEST_CASE("DereferenceIteratorTests", "[DereferenceIterator]") {
                           .as("Test container");
 
       RC_PRE(v.size() > 0u);
-      size_t pos =
-            *gen::inRange<size_t>(0, v.size()).as("position to offset to");
+      size_t pos = *gen::inRange<size_t>(0, v.size()).as("position to offset to");
 
       DereferenceIterator<typename conttype::iterator> it(std::begin(v));
       it += pos;
@@ -118,9 +116,8 @@ TEST_CASE("DereferenceIteratorTests", "[DereferenceIterator]") {
       RC_ASSERT(itm1 == itm2);
     };
 
-    REQUIRE(rc::check(
-          "DereferenceIterator: Agreement of pre-/post- decrement/increment",
-          test));
+    REQUIRE(rc::check("DereferenceIterator: Agreement of pre-/post- decrement/increment",
+                      test));
   }
 
   //
@@ -135,8 +132,7 @@ TEST_CASE("DereferenceIteratorTests", "[DereferenceIterator]") {
                           .as("Test container");
 
       RC_PRE(v.size() > 0u);
-      size_t pos =
-            *gen::inRange<size_t>(0, v.size()).as("position to offset to");
+      size_t pos = *gen::inRange<size_t>(0, v.size()).as("position to offset to");
 
       DereferenceIterator<typename conttype::iterator> it(std::begin(v));
       it += pos;
@@ -169,8 +165,7 @@ TEST_CASE("DereferenceIteratorTests", "[DereferenceIterator]") {
                           .as("Test container");
 
       RC_PRE(v.size() > 0u);
-      size_t pos =
-            *gen::inRange<size_t>(0, v.size()).as("position to offset to");
+      size_t pos = *gen::inRange<size_t>(0, v.size()).as("position to offset to");
 
       typedef DereferenceIterator<typename conttype::iterator> it_type;
       const it_type itorig(std::begin(v));
@@ -198,8 +193,7 @@ TEST_CASE("DereferenceIteratorTests", "[DereferenceIterator]") {
       RC_ASSERT(*(pos + itback) == *it);
     };
 
-    REQUIRE(rc::check("DereferenceIterator: Check offset lookup and +n/-n",
-                      test));
+    REQUIRE(rc::check("DereferenceIterator: Check offset lookup and +n/-n", test));
   }
 
 }  // TEST_CASE

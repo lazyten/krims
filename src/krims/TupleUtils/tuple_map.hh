@@ -28,13 +28,11 @@ namespace krims {
 //
 namespace detail {
 template <typename UnOp, typename Tuple, std::size_t... Indices>
-constexpr auto tuple_map_impl(UnOp&& op, Tuple&& t,
-                              std::index_sequence<Indices...>) {
+constexpr auto tuple_map_impl(UnOp&& op, Tuple&& t, std::index_sequence<Indices...>) {
   return std::make_tuple(op(std::get<Indices>(std::forward<Tuple>(t)))...);
 }
 
-template <typename BinOp, typename Tuple1, typename Tuple2,
-          std::size_t... Indices>
+template <typename BinOp, typename Tuple1, typename Tuple2, std::size_t... Indices>
 constexpr auto tuple_map_impl(BinOp&& op, Tuple1&& t1, Tuple2&& t2,
                               std::index_sequence<Indices...>) {
   return std::make_tuple(op(std::get<Indices>(std::forward<Tuple1>(t1)),
@@ -58,8 +56,7 @@ template <typename UnOp, typename Tuple>
 constexpr auto tuple_map(UnOp&& op, Tuple&& t) {
   return detail::tuple_map_impl(
         std::forward<UnOp>(op), std::forward<Tuple>(t),
-        std::make_index_sequence<
-              std::tuple_size<std::decay_t<Tuple>>::value>());
+        std::make_index_sequence<std::tuple_size<std::decay_t<Tuple>>::value>());
 }
 
 /** Map a binary operator to all elements of two tuples in turn.
@@ -82,9 +79,9 @@ constexpr auto tuple_map(BinOp&& op, Tuple1&& t1, Tuple2&& t2) {
                 "Both tuples to map for the case of binary operations "
                 "need to be of the same size.");
 
-  return detail::tuple_map_impl(
-        std::forward<BinOp>(op), std::forward<Tuple1>(t1),
-        std::forward<Tuple2>(t2), std::make_index_sequence<size1>());
+  return detail::tuple_map_impl(std::forward<BinOp>(op), std::forward<Tuple1>(t1),
+                                std::forward<Tuple2>(t2),
+                                std::make_index_sequence<size1>());
 }
 
 #else
@@ -129,16 +126,15 @@ template <typename UnOp, typename E0, typename E1, typename E2>
 constexpr auto tuple_map(UnOp&& op, std::tuple<E0, E1, E2>& t)
       -> decltype(std::make_tuple(op(std::get<0>(t)), op(std::get<1>(t)),
                                   op(std::get<2>(t)))) {
-  return std::make_tuple(op(std::get<0>(t)), op(std::get<1>(t)),
-                         op(std::get<2>(t)));
+  return std::make_tuple(op(std::get<0>(t)), op(std::get<1>(t)), op(std::get<2>(t)));
 }
 
 template <typename UnOp, typename E0, typename E1, typename E2, typename E3>
 constexpr auto tuple_map(UnOp&& op, std::tuple<E0, E1, E2, E3>& t)
       -> decltype(std::make_tuple(op(std::get<0>(t)), op(std::get<1>(t)),
                                   op(std::get<2>(t)), op(std::get<3>(t)))) {
-  return std::make_tuple(op(std::get<0>(t)), op(std::get<1>(t)),
-                         op(std::get<2>(t)), op(std::get<3>(t)));
+  return std::make_tuple(op(std::get<0>(t)), op(std::get<1>(t)), op(std::get<2>(t)),
+                         op(std::get<3>(t)));
 }
 
 //
@@ -160,16 +156,15 @@ template <typename UnOp, typename E0, typename E1, typename E2>
 constexpr auto tuple_map(UnOp&& op, const std::tuple<E0, E1, E2>& t)
       -> decltype(std::make_tuple(op(std::get<0>(t)), op(std::get<1>(t)),
                                   op(std::get<2>(t)))) {
-  return std::make_tuple(op(std::get<0>(t)), op(std::get<1>(t)),
-                         op(std::get<2>(t)));
+  return std::make_tuple(op(std::get<0>(t)), op(std::get<1>(t)), op(std::get<2>(t)));
 }
 
 template <typename UnOp, typename E0, typename E1, typename E2, typename E3>
 constexpr auto tuple_map(UnOp&& op, const std::tuple<E0, E1, E2, E3>& t)
       -> decltype(std::make_tuple(op(std::get<0>(t)), op(std::get<1>(t)),
                                   op(std::get<2>(t)), op(std::get<3>(t)))) {
-  return std::make_tuple(op(std::get<0>(t)), op(std::get<1>(t)),
-                         op(std::get<2>(t)), op(std::get<3>(t)));
+  return std::make_tuple(op(std::get<0>(t)), op(std::get<1>(t)), op(std::get<2>(t)),
+                         op(std::get<3>(t)));
 }
 //@}
 
@@ -200,16 +195,15 @@ constexpr auto tuple_map(BinOp&& bop, std::tuple<E0>& ee, std::tuple<T0>& tt)
 }
 
 template <typename BinOp, typename E0, typename E1, typename T0, typename T1>
-constexpr auto tuple_map(BinOp&& bop, std::tuple<E0, E1>& ee,
-                         std::tuple<T0, T1>& tt)
+constexpr auto tuple_map(BinOp&& bop, std::tuple<E0, E1>& ee, std::tuple<T0, T1>& tt)
       -> decltype(std::make_tuple(bop(std::get<0>(ee), std::get<0>(tt)),
                                   bop(std::get<1>(ee), std::get<1>(tt)))) {
   return std::make_tuple(bop(std::get<0>(ee), std::get<0>(tt)),
                          bop(std::get<1>(ee), std::get<1>(tt)));
 }
 
-template <typename BinOp, typename E0, typename E1, typename E2, typename T0,
-          typename T1, typename T2>
+template <typename BinOp, typename E0, typename E1, typename E2, typename T0, typename T1,
+          typename T2>
 constexpr auto tuple_map(BinOp&& bop, std::tuple<E0, E1, E2>& ee,
                          std::tuple<T0, T1, T2>& tt)
       -> decltype(std::make_tuple(bop(std::get<0>(ee), std::get<0>(tt)),
@@ -220,26 +214,24 @@ constexpr auto tuple_map(BinOp&& bop, std::tuple<E0, E1, E2>& ee,
                          bop(std::get<2>(ee), std::get<2>(tt)));
 }
 
-template <typename BinOp, typename E0, typename E1, typename E2, typename E3,
-          typename T0, typename T1, typename T2, typename T3>
+template <typename BinOp, typename E0, typename E1, typename E2, typename E3, typename T0,
+          typename T1, typename T2, typename T3>
 constexpr auto tuple_map(BinOp&& bop, std::tuple<E0, E1, E2, E3>& ee,
                          std::tuple<T0, T1, T2, T3>& tt)
       -> decltype(std::make_tuple(bop(std::get<0>(ee), std::get<0>(tt)),
                                   bop(std::get<1>(ee), std::get<1>(tt)),
                                   bop(std::get<2>(ee), std::get<2>(tt)),
                                   bop(std::get<3>(ee), std::get<3>(tt)))) {
-  return std::make_tuple(bop(std::get<0>(ee), std::get<0>(tt)),
-                         bop(std::get<1>(ee), std::get<1>(tt)),
-                         bop(std::get<2>(ee), std::get<2>(tt)),
-                         bop(std::get<3>(ee), std::get<3>(tt)));
+  return std::make_tuple(
+        bop(std::get<0>(ee), std::get<0>(tt)), bop(std::get<1>(ee), std::get<1>(tt)),
+        bop(std::get<2>(ee), std::get<2>(tt)), bop(std::get<3>(ee), std::get<3>(tt)));
 }
 
 //
 // Binary -- const references
 //
 template <typename BinOp, typename E0, typename T0>
-constexpr auto tuple_map(BinOp&& bop, const std::tuple<E0>& ee,
-                         const std::tuple<T0>& tt)
+constexpr auto tuple_map(BinOp&& bop, const std::tuple<E0>& ee, const std::tuple<T0>& tt)
       -> decltype(std::make_tuple(bop(std::get<0>(ee), std::get<0>(tt)))) {
   return std::make_tuple(bop(std::get<0>(ee), std::get<0>(tt)));
 }
@@ -253,8 +245,8 @@ constexpr auto tuple_map(BinOp&& bop, const std::tuple<E0, E1>& ee,
                          bop(std::get<1>(ee), std::get<1>(tt)));
 }
 
-template <typename BinOp, typename E0, typename E1, typename E2, typename T0,
-          typename T1, typename T2>
+template <typename BinOp, typename E0, typename E1, typename E2, typename T0, typename T1,
+          typename T2>
 constexpr auto tuple_map(BinOp&& bop, const std::tuple<E0, E1, E2>& ee,
                          const std::tuple<T0, T1, T2>& tt)
       -> decltype(std::make_tuple(bop(std::get<0>(ee), std::get<0>(tt)),
@@ -265,18 +257,17 @@ constexpr auto tuple_map(BinOp&& bop, const std::tuple<E0, E1, E2>& ee,
                          bop(std::get<2>(ee), std::get<2>(tt)));
 }
 
-template <typename BinOp, typename E0, typename E1, typename E2, typename E3,
-          typename T0, typename T1, typename T2, typename T3>
+template <typename BinOp, typename E0, typename E1, typename E2, typename E3, typename T0,
+          typename T1, typename T2, typename T3>
 constexpr auto tuple_map(BinOp&& bop, const std::tuple<E0, E1, E2, E3>& ee,
                          const std::tuple<T0, T1, T2, T3>& tt)
       -> decltype(std::make_tuple(bop(std::get<0>(ee), std::get<0>(tt)),
                                   bop(std::get<1>(ee), std::get<1>(tt)),
                                   bop(std::get<2>(ee), std::get<2>(tt)),
                                   bop(std::get<3>(ee), std::get<3>(tt)))) {
-  return std::make_tuple(bop(std::get<0>(ee), std::get<0>(tt)),
-                         bop(std::get<1>(ee), std::get<1>(tt)),
-                         bop(std::get<2>(ee), std::get<2>(tt)),
-                         bop(std::get<3>(ee), std::get<3>(tt)));
+  return std::make_tuple(
+        bop(std::get<0>(ee), std::get<0>(tt)), bop(std::get<1>(ee), std::get<1>(tt)),
+        bop(std::get<2>(ee), std::get<2>(tt)), bop(std::get<3>(ee), std::get<3>(tt)));
 }
 //@}
 #endif

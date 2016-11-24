@@ -29,10 +29,10 @@ namespace krims {
  * between objects */
 template <typename T>
 class NumComp {
-public:
+ public:
   // TODO hard-coded double type
-  typedef typename std::conditional<std::is_floating_point<T>::value, T,
-                                    double>::type error_type;
+  typedef typename std::conditional<std::is_floating_point<T>::value, T, double>::type
+        error_type;
 
   /** Construct an NumComp object */
   explicit NumComp(const T& value)
@@ -63,8 +63,7 @@ public:
   /** Compare with another object for equality */
   template <typename U>
   friend bool operator==(const U& lhs, const NumComp& rhs) {
-    return NumEqual<U, T>{rhs.m_tolerance, rhs.m_failure_action}(lhs,
-                                                                 rhs.m_value);
+    return NumEqual<U, T>{rhs.m_tolerance, rhs.m_failure_action}(lhs, rhs.m_value);
   }
 
   template <typename U>
@@ -73,7 +72,7 @@ public:
   }
   //@}
 
-private:
+ private:
   /** \brief tolerance when comparing objects */
   error_type m_tolerance;
 

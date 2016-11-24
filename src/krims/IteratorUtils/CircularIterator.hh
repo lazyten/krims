@@ -31,11 +31,11 @@ namespace krims {
  * m_last to m_first on calling operator++ */
 template <typename Iterator>
 class CircularIterator
-      : public std::iterator<
-              std::bidirectional_iterator_tag, typename Iterator::value_type,
-              typename Iterator::difference_type, typename Iterator::pointer,
-              typename Iterator::reference> {
-public:
+      : public std::iterator<std::bidirectional_iterator_tag,
+                             typename Iterator::value_type,
+                             typename Iterator::difference_type,
+                             typename Iterator::pointer, typename Iterator::reference> {
+ public:
   typedef Iterator iterator_type;
   typedef typename iterator_type::value_type value_type;
   typedef typename iterator_type::reference reference;
@@ -76,10 +76,7 @@ public:
    * */
   CircularIterator(iterator_type first, iterator_type end, iterator_type start,
                    bool begin_iterator = false)
-        : m_begin_iterator{begin_iterator},
-          m_first{first},
-          m_pos{start},
-          m_end{end} {}
+        : m_begin_iterator{begin_iterator}, m_first{first}, m_pos{start}, m_end{end} {}
 
   //
   // Increment and decrement
@@ -103,8 +100,7 @@ public:
   /** Return the value of the element we point to. */
   reference operator*() const {
     assert_dbg(m_first != m_end,
-               ExcInvalidState(
-                     "Cannot dereference CircularIterator over empty range"));
+               ExcInvalidState("Cannot dereference CircularIterator over empty range"));
 
     return *m_pos;
   }
@@ -112,8 +108,7 @@ public:
   /** Access the members of the element we point to. */
   pointer operator->() const {
     assert_dbg(m_first != m_end,
-               ExcInvalidState(
-                     "Cannot dereference CircularIterator over empty range"));
+               ExcInvalidState("Cannot dereference CircularIterator over empty range"));
     return m_pos.operator->();
   }
 
@@ -133,9 +128,7 @@ public:
    * CircularIterators are unequal if they iterate over a different range or
    * point to a different element.
    */
-  bool operator!=(const CircularIterator& other) const {
-    return !(*this == other);
-  }
+  bool operator!=(const CircularIterator& other) const { return !(*this == other); }
 
   //
   // Access range and position
@@ -147,14 +140,13 @@ public:
 
   /** Get the iterator to the current position */
   iterator_type position() const {
-    assert_dbg(
-          m_first != m_end,
-          ExcInvalidState("Cannot get position iterator of CircularIterator "
-                          "over empty range"));
+    assert_dbg(m_first != m_end,
+               ExcInvalidState("Cannot get position iterator of CircularIterator "
+                               "over empty range"));
     return m_pos;
   }
 
-private:
+ private:
   bool m_begin_iterator;  //< Is this a begin iterator
   iterator_type m_first;  //< First element of the range (inclusive)
   iterator_type m_pos;    //< Current position
@@ -170,8 +162,7 @@ private:
  *  from the element start.
  *  */
 template <typename Iterator>
-CircularIterator<Iterator> circular_begin(Iterator begin, Iterator end,
-                                          Iterator start) {
+CircularIterator<Iterator> circular_begin(Iterator begin, Iterator end, Iterator start) {
   return CircularIterator<Iterator>(begin, end, start, true);
 }
 
@@ -183,8 +174,7 @@ CircularIterator<Iterator> circular_begin(Iterator begin, Iterator end,
  * Use both function in pairs and supply them with the same arguments.
  *  */
 template <typename Iterator>
-CircularIterator<Iterator> circular_end(Iterator begin, Iterator end,
-                                        Iterator start) {
+CircularIterator<Iterator> circular_end(Iterator begin, Iterator end, Iterator start) {
   return CircularIterator<Iterator>(begin, end, start, false);
 }
 
@@ -197,8 +187,7 @@ CircularIterator<Iterator> circular_end(Iterator begin, Iterator end,
 template <typename Container>
 auto circular_begin(Container& c, typename Container::size_type i)
       -> CircularIterator<decltype(std::begin(c))> {
-  return circular_begin(std::begin(c), std::end(c),
-                        std::next(std::begin(c), i));
+  return circular_begin(std::begin(c), std::end(c), std::next(std::begin(c), i));
 }
 
 /** \brief Convenience function to make an end CircularIterator for a container,
@@ -243,9 +232,8 @@ auto circular_end(Container& c, decltype(std::begin(c)) start)
 
 template <typename Iterator>
 CircularIterator<Iterator>& CircularIterator<Iterator>::operator++() {
-  assert_dbg(
-        m_first != m_end,
-        ExcInvalidState("Cannot increment CircularIterator over empty range"));
+  assert_dbg(m_first != m_end,
+             ExcInvalidState("Cannot increment CircularIterator over empty range"));
 
   ++m_pos;
   if (m_pos == m_end) {
@@ -266,9 +254,8 @@ CircularIterator<Iterator> CircularIterator<Iterator>::operator++(int) {
 
 template <typename Iterator>
 CircularIterator<Iterator>& CircularIterator<Iterator>::operator--() {
-  assert_dbg(
-        m_first != m_end,
-        ExcInvalidState("Cannot decrement CircularIterator over empty range"));
+  assert_dbg(m_first != m_end,
+             ExcInvalidState("Cannot decrement CircularIterator over empty range"));
 
   if (m_pos == m_first) {
     m_pos = std::prev(m_end);
@@ -288,17 +275,15 @@ CircularIterator<Iterator> CircularIterator<Iterator>::operator--(int) {
 }
 
 template <typename Iterator>
-bool CircularIterator<Iterator>::operator==(
-      const CircularIterator& other) const {
-  if (m_first == m_end && other.m_first == other.m_end &&
-      m_first == other.m_first) {
+bool CircularIterator<Iterator>::operator==(const CircularIterator& other) const {
+  if (m_first == m_end && other.m_first == other.m_end && m_first == other.m_first) {
     // Ranges of both iterators are equivalent and empty.
     // So m_begin_iterator and m_pos play no role.
     return true;
   }
 
-  return m_pos == other.m_pos && m_first == other.m_first &&
-         m_end == other.m_end && m_begin_iterator == other.m_begin_iterator;
+  return m_pos == other.m_pos && m_first == other.m_first && m_end == other.m_end &&
+         m_begin_iterator == other.m_begin_iterator;
 }
 
 }  // namespace krims

@@ -42,8 +42,8 @@ namespace krims {
  * This function is inspired by
  * https://github.com/vmarkovtsev/DeathHandler/blob/master/death_handler.cc
  */
-int addr2line(const char* execname, const char* addr, const size_t maxlen,
-              char* codefile, char* number);
+int addr2line(const char* execname, const char* addr, const size_t maxlen, char* codefile,
+              char* number);
 #define KRIMS_ADDR2LINE_AVAILABLE
 
 #endif

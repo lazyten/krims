@@ -46,7 +46,7 @@ class Subscribable {
   friend class ::krims::SubscriptionPointer;
 #endif
 
-public:
+ public:
   /** A swap function for Subscribables */
   friend void swap(Subscribable&, Subscribable&) {
     // do nothing since the pointers that point to first,
@@ -145,16 +145,15 @@ public:
   std::vector<std::string> subscribers() const {
 #ifdef DEBUG
     std::vector<std::string> v(m_subscribers.size());
-    std::transform(
-          std::begin(m_subscribers), std::end(m_subscribers), std::begin(v),
-          [](const std::shared_ptr<const std::string>& p) { return *p; });
+    std::transform(std::begin(m_subscribers), std::end(m_subscribers), std::begin(v),
+                   [](const std::shared_ptr<const std::string>& p) { return *p; });
     return v;
 #else
     return std::vector<std::string>{};
 #endif
   }
 
-protected:
+ protected:
 #ifdef DEBUG
   /** Assert that this has no subscriptions made to it.
    * If this is not the case, than abort the program via
@@ -175,13 +174,12 @@ protected:
       //       have dangling pointers in the SubscriptionPointer classes
       //       after this has occurred. There is no way we can get out of
       //       this gracefully.
-      assert_abort(false,
-                   ExcStillUsed(m_classname, m_subscribers.size(), s.str()));
+      assert_abort(false, ExcStillUsed(m_classname, m_subscribers.size(), s.str()));
     }
   }
 #endif
 
-private:
+ private:
 #ifdef DEBUG
   //
   // Deal with subscriptions:
@@ -195,8 +193,7 @@ private:
    * @note Does only exist in DEBUG mode
    * */
   void unsubscribe(const std::shared_ptr<const std::string>& id_ptr) const {
-    for (auto it = std::begin(m_subscribers); it != std::end(m_subscribers);
-         ++it) {
+    for (auto it = std::begin(m_subscribers); it != std::end(m_subscribers); ++it) {
       // check if the pointers agree
       if (it->get() == id_ptr.get()) {
         m_subscribers.erase(it);

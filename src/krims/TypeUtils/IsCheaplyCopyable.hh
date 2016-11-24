@@ -42,8 +42,7 @@ struct IsCheaplyCopyable
                     //
                     || std::is_enum<T>::value
                     //
-                    || std::is_same<std::string,
-                                    typename std::remove_cv<T>::type>::value
+                    || std::is_same<std::string, typename std::remove_cv<T>::type>::value
                     //
                     || IsComplexNumber<T>::value> {};
 //@}

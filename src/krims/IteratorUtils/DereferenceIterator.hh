@@ -25,8 +25,7 @@
 namespace krims {
 namespace detail {
 template <typename T>
-using PointedToTypeT =
-      typename std::remove_reference<decltype(*std::declval<T>())>::type;
+using PointedToTypeT = typename std::remove_reference<decltype(*std::declval<T>())>::type;
 }  // namespace detail
 
 /** Enwrap an iterator and return the dereferenced values of the internal
@@ -35,21 +34,18 @@ using PointedToTypeT =
  * objects */
 template <typename Iterator>
 struct DereferenceIterator {
-  typedef detail::PointedToTypeT<
-        typename std::iterator_traits<Iterator>::value_type>
+  typedef detail::PointedToTypeT<typename std::iterator_traits<Iterator>::value_type>
         value_type;
   typedef std::random_access_iterator_tag iterator_category;
   typedef value_type* pointer;
   typedef value_type& reference;
   typedef typename std::add_const<reference>::type const_reference;
-  typedef typename std::iterator_traits<Iterator>::difference_type
-        difference_type;
+  typedef typename std::iterator_traits<Iterator>::difference_type difference_type;
 
-  static_assert(
-        std::is_same<typename std::iterator_traits<Iterator>::iterator_category,
-                     std::random_access_iterator_tag>::value,
-        "Currently DereferenceIterator is only implemented for "
-        "bidirectional inner iterators");
+  static_assert(std::is_same<typename std::iterator_traits<Iterator>::iterator_category,
+                             std::random_access_iterator_tag>::value,
+                "Currently DereferenceIterator is only implemented for "
+                "bidirectional inner iterators");
 
   /** Construct using an inner iterator */
   DereferenceIterator(Iterator inner) : m_inner(inner) {}
@@ -131,23 +127,15 @@ struct DereferenceIterator {
     return *(m_inner[n]);
   }
 
-  bool operator<(const DereferenceIterator& i) const {
-    return (m_inner < i.m_inner);
-  }
+  bool operator<(const DereferenceIterator& i) const { return (m_inner < i.m_inner); }
 
-  bool operator>(const DereferenceIterator& i) const {
-    return (m_inner > i.m_inner);
-  }
+  bool operator>(const DereferenceIterator& i) const { return (m_inner > i.m_inner); }
 
-  bool operator<=(const DereferenceIterator& i) const {
-    return (m_inner <= i.m_inner);
-  }
+  bool operator<=(const DereferenceIterator& i) const { return (m_inner <= i.m_inner); }
 
-  bool operator>=(const DereferenceIterator& i) const {
-    return (m_inner >= i.m_inner);
-  }
+  bool operator>=(const DereferenceIterator& i) const { return (m_inner >= i.m_inner); }
 
-private:
+ private:
   Iterator m_inner;
 };
 

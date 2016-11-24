@@ -57,12 +57,10 @@ constexpr decltype(auto) apply_impl(Func&& f, Tuple&& t,
 template <typename Func, typename Tuple>
 constexpr decltype(auto) apply(Func&& f, Tuple&& t) {
   // Construct index sequence from tuple size:
-  auto idcs =
-        std::make_index_sequence<std::tuple_size<std::decay_t<Tuple>>::value>();
+  auto idcs = std::make_index_sequence<std::tuple_size<std::decay_t<Tuple>>::value>();
 
   // Call helper implementation above:
-  return detail::apply_impl(std::forward<Func>(f), std::forward<Tuple>(t),
-                            idcs);
+  return detail::apply_impl(std::forward<Func>(f), std::forward<Tuple>(t), idcs);
 }
 
 #else
@@ -77,8 +75,7 @@ constexpr decltype(auto) apply(Func&& f, Tuple&& t) {
 /** Call a functor or std::function object, taking the arguments from a
  * referenced tuple */
 template <typename Func, typename E0>
-constexpr auto apply(Func&& f, std::tuple<E0>& t)
-      -> decltype(f(std::get<0>(t))) {
+constexpr auto apply(Func&& f, std::tuple<E0>& t) -> decltype(f(std::get<0>(t))) {
   return f(std::get<0>(t));
 }
 
@@ -96,8 +93,7 @@ constexpr auto apply(Func&& f, std::tuple<E0, E1, E2>& t)
 
 template <typename Func, typename E0, typename E1, typename E2, typename E3>
 constexpr auto apply(Func&& f, std::tuple<E0, E1, E2, E3>& t)
-      -> decltype(f(std::get<0>(t), std::get<1>(t), std::get<2>(t),
-                    std::get<3>(t))) {
+      -> decltype(f(std::get<0>(t), std::get<1>(t), std::get<2>(t), std::get<3>(t))) {
   return f(std::get<0>(t), std::get<1>(t), std::get<2>(t), std::get<3>(t));
 }
 //@}
@@ -116,15 +112,13 @@ constexpr auto apply(Func&& f, const std::tuple<E0>& t)
 
 template <typename Func, typename E0, typename E1>
 constexpr auto apply(Func&& f, const std::tuple<E0, E1>& t)
-      -> decltype(f(std::forward<E0>(std::get<0>(t)),
-                    std::forward<E1>(std::get<1>(t)))) {
+      -> decltype(f(std::forward<E0>(std::get<0>(t)), std::forward<E1>(std::get<1>(t)))) {
   return f(std::forward<E0>(std::get<0>(t)), std::forward<E1>(std::get<1>(t)));
 }
 
 template <typename Func, typename E0, typename E1, typename E2>
 constexpr auto apply(Func&& f, const std::tuple<E0, E1, E2>& t)
-      -> decltype(f(std::forward<E0>(std::get<0>(t)),
-                    std::forward<E1>(std::get<1>(t)),
+      -> decltype(f(std::forward<E0>(std::get<0>(t)), std::forward<E1>(std::get<1>(t)),
                     std::forward<E2>(std::get<2>(t)))) {
   return f(std::forward<E0>(std::get<0>(t)), std::forward<E1>(std::get<1>(t)),
            std::forward<E2>(std::get<2>(t)));
@@ -132,10 +126,8 @@ constexpr auto apply(Func&& f, const std::tuple<E0, E1, E2>& t)
 
 template <typename Func, typename E0, typename E1, typename E2, typename E3>
 constexpr auto apply(Func&& f, const std::tuple<E0, E1, E2, E3>& t)
-      -> decltype(f(std::forward<E0>(std::get<0>(t)),
-                    std::forward<E1>(std::get<1>(t)),
-                    std::forward<E2>(std::get<2>(t)),
-                    std::forward<E3>(std::get<3>(t)))) {
+      -> decltype(f(std::forward<E0>(std::get<0>(t)), std::forward<E1>(std::get<1>(t)),
+                    std::forward<E2>(std::get<2>(t)), std::forward<E3>(std::get<3>(t)))) {
   return f(std::forward<E0>(std::get<0>(t)), std::forward<E1>(std::get<1>(t)),
            std::forward<E2>(std::get<2>(t)), std::forward<E3>(std::get<3>(t)));
 }

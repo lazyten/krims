@@ -27,7 +27,7 @@ namespace krims {
 
 template <typename T, typename Container = std::list<T>>
 class CircularBuffer {
-public:
+ public:
   typedef T value_type;
   typedef T& reference;
   typedef const T& const_reference;
@@ -37,12 +37,10 @@ public:
 
   typedef typename container_type::size_type size_type;
   typedef CircularIterator<typename container_type::iterator> iterator;
-  typedef CircularIterator<typename container_type::const_iterator>
-        const_iterator;
+  typedef CircularIterator<typename container_type::const_iterator> const_iterator;
 
-  static_assert(
-        std::is_same<value_type, typename container_type::value_type>::value,
-        "The type T needs to agree with the value_type of the Container type.");
+  static_assert(std::is_same<value_type, typename container_type::value_type>::value,
+                "The type T needs to agree with the value_type of the Container type.");
 
   /** \name Constructor
    *
@@ -59,9 +57,7 @@ public:
    *            max_size.
    **/
   CircularBuffer(size_type max_size, std::initializer_list<T> il)
-        : m_storage{il},
-          m_max_size{max_size},
-          m_first{circular_begin(m_storage, 0)} {
+        : m_storage{il}, m_max_size{max_size}, m_first{circular_begin(m_storage, 0)} {
     assert_greater_equal(il.size(), max_size);
   }
 
@@ -164,7 +160,7 @@ public:
   bool empty() const { return m_storage.empty(); }
   ///@}
 
-private:
+ private:
   //! Storage for the buffer
   container_type m_storage;
 
@@ -270,8 +266,7 @@ void CircularBuffer<T, Container>::max_size(size_type msize) {
     // std::end(m_storage)
     cont_iter del_begin = begin_remove_range.position();
     cont_iter del_end = del_begin;
-    for (; del_end != std::end(m_storage) &&
-           del_end != end_remove_range.position();
+    for (; del_end != std::end(m_storage) && del_end != end_remove_range.position();
          ++del_end) {
       // Update the begin_remove_range,
       // such that we are prepared for the next step

@@ -37,10 +37,8 @@ TEST_CASE("argsort function", "[argsort]") {
       std::sort(std::begin(sorted), std::end(sorted));
 
       // Argsort the arrays:
-      std::vector<size_t> argsort_res =
-            argsort(std::begin(array), std::end(array));
-      std::vector<size_t> argsort_sorted =
-            argsort(std::begin(sorted), std::end(sorted));
+      std::vector<size_t> argsort_res = argsort(std::begin(array), std::end(array));
+      std::vector<size_t> argsort_sorted = argsort(std::begin(sorted), std::end(sorted));
 
       // The sorted argsort should be just the indices
       for (size_t i = 0; i < argsort_sorted.size(); ++i) {

@@ -26,9 +26,8 @@ namespace krims {
 /** Base exception of all NumCompExceptions. Catch these to get all NumComp
  *  Exceptions type-indepentantly */
 class NumCompExceptionBase : public ExceptionBase {
-public:
-  NumCompExceptionBase(std::string description_) noexcept
-        : description(description_) {}
+ public:
+  NumCompExceptionBase(std::string description_) noexcept : description(description_) {}
 
   //! The description that was additionally supplied
   std::string description;
@@ -40,13 +39,12 @@ public:
 /** Exception raised by the NumComp operations if they fail on some objects. */
 template <typename T>
 class NumCompException : public NumCompExceptionBase {
-public:
-  static_assert(std::is_arithmetic<T>::value,
-                "T needs to be an arithmetic value");
+ public:
+  static_assert(std::is_arithmetic<T>::value, "T needs to be an arithmetic value");
   // otherwise the declaration of T as error and tolerance makes no sense.
 
-  NumCompException(const T lhs_, const T rhs_, const T error_,
-                   const T tolerance_, const std::string operation_string_,
+  NumCompException(const T lhs_, const T rhs_, const T error_, const T tolerance_,
+                   const std::string operation_string_,
                    const std::string description_ = "") noexcept
         : NumCompExceptionBase{description_},
           lhs(lhs_),
@@ -76,7 +74,7 @@ public:
   /** Print exception-specific extra information to the outstream */
   virtual void print_extra(std::ostream& out) const noexcept;
 
-private:
+ private:
   std::string failed_condition{""};
 };
 
@@ -85,11 +83,10 @@ private:
 //
 
 template <typename T>
-void NumCompException<T>::add_exc_data(const char* file, int line,
-                                       const char* function) {
+void NumCompException<T>::add_exc_data(const char* file, int line, const char* function) {
   std::stringstream ss;
-  ss << std::scientific << std::setprecision(15) << lhs << operation_string
-     << rhs << " (tol: " << tolerance << ")";
+  ss << std::scientific << std::setprecision(15) << lhs << operation_string << rhs
+     << " (tol: " << tolerance << ")";
   failed_condition = ss.str();
   ExceptionBase::add_exc_data(file, line, function, failed_condition.c_str(),
                               "NumCompException");
@@ -97,8 +94,8 @@ void NumCompException<T>::add_exc_data(const char* file, int line,
 
 template <typename T>
 void NumCompException<T>::print_extra(std::ostream& out) const noexcept {
-  out << std::scientific << std::setprecision(15) << "Error in comparison ("
-      << error << ") larger than tolerance (" << tolerance << ").";
+  out << std::scientific << std::setprecision(15) << "Error in comparison (" << error
+      << ") larger than tolerance (" << tolerance << ").";
   if (NumCompExceptionBase::description != "") {
     out << std::endl << NumCompExceptionBase::description;
   }

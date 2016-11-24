@@ -32,12 +32,8 @@ struct SimpleSubscribable : public Subscribable {
   SimpleSubscribable() : data(0){};
   explicit SimpleSubscribable(int d) : data{d} {};
 
-  bool operator==(const SimpleSubscribable& other) const {
-    return data == other.data;
-  }
-  bool operator!=(const SimpleSubscribable& other) const {
-    return !operator==(other);
-  }
+  bool operator==(const SimpleSubscribable& other) const { return data == other.data; }
+  bool operator!=(const SimpleSubscribable& other) const { return !operator==(other); }
 };
 
 /** A derived subscribable class */

@@ -35,10 +35,8 @@ ExceptionBase::ExceptionBase()
         m_backtrace{},
         m_what_str("") {}
 
-void ExceptionBase::add_exc_data(const char* file, int line,
-                                 const char* function,
-                                 const char* failed_condition,
-                                 const char* exception_name,
+void ExceptionBase::add_exc_data(const char* file, int line, const char* function,
+                                 const char* failed_condition, const char* exception_name,
                                  bool use_expensive) {
   m_name = exception_name;
   m_file = file;
@@ -67,9 +65,7 @@ const std::string ExceptionBase::extra() const {
   return ss.str();
 }
 
-void ExceptionBase::print_extra(std::ostream& out) const noexcept {
-  out << "(none)";
-}
+void ExceptionBase::print_extra(std::ostream& out) const noexcept { out << "(none)"; }
 
 void ExceptionBase::print_exc_data(std::ostream& out) const noexcept {
   out << "The assertion" << std::endl
@@ -99,8 +95,7 @@ void ExceptionBase::print_stacktrace(std::ostream& out) const {
   out << std::endl;
   out << "Backtrace:" << std::endl;
   out << "----------" << std::endl;
-  out << "## " << std::setw(maxfunclen) << std::left << "function" << std::right
-      << " @ ";
+  out << "## " << std::setw(maxfunclen) << std::left << "function" << std::right << " @ ";
   if (m_backtrace.determine_file_line()) {
     out << "    file    :  linenr" << std::endl;
   } else {
@@ -136,8 +131,7 @@ std::string ExceptionBase::generate_message() const noexcept {
     std::ostringstream converter;
 
     converter << std::endl
-              << "--------------------------------------------------------"
-              << std::endl;
+              << "--------------------------------------------------------" << std::endl;
 
     // Print first the general data we hold:
     print_exc_data(converter);
@@ -150,8 +144,7 @@ std::string ExceptionBase::generate_message() const noexcept {
     print_stacktrace(converter);
 
     converter << std::endl
-              << "--------------------------------------------------------"
-              << std::endl;
+              << "--------------------------------------------------------" << std::endl;
 
     return converter.str();
   } catch (...) {

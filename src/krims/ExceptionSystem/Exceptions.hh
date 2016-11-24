@@ -67,8 +67,8 @@ DefExceptionMsg(ExcUnderflow, "Underflow detected.");
 /**
  * The sizes of two objects are assumed to be equal, but they were not.
  */
-DefException2(ExcSizeMismatch, size_t, size_t, << "Size " << arg1
-                                               << " not equal to " << arg2);
+DefException2(ExcSizeMismatch, size_t, size_t, << "Size " << arg1 << " not equal to "
+                                               << arg2);
 
 /**
  * Exception to indicate that a number is not within the expected range.
@@ -82,32 +82,31 @@ DefException2(ExcSizeMismatch, size_t, size_t, << "Size " << arg1
  */
 template <typename T>
 DefException3(ExcOutsideRange, T, T, T, << "Index " << arg1
-                                        << " is not in the half-open interval ["
-                                        << arg2 << "," << arg3 << ").");
+                                        << " is not in the half-open interval [" << arg2
+                                        << "," << arg3 << ").");
 
 /**
  * Exception to indicate that a number is larger than an upper bound.
  * The intention is that arg1 <= arg2 should have been satisfied.
  */
 template <typename T>
-DefException2(ExcTooLarge, T, T, << "Number " << arg1
-                                 << " must be smaller or equal to " << arg2
-                                 << ".");
+DefException2(ExcTooLarge, T, T, << "Number " << arg1 << " must be smaller or equal to "
+                                 << arg2 << ".");
 
 /**
  * Exception to indicate that a number is larger or equal to an upper bound
  * The intention is that arg1 < arg2 should have been satisfied.
  */
 template <typename T>
-DefException2(ExcTooLargeOrEqual, T, T,
-              << "Number " << arg1 << " must be smaller than " << arg2 << ".");
+DefException2(ExcTooLargeOrEqual, T, T, << "Number " << arg1 << " must be smaller than "
+                                        << arg2 << ".");
 /**
  * Exception to indicate that two numbers, which should be exactly equal are
  * not.
  */
 template <typename T>
-DefException2(ExcNotEqual, T, T, << "Number " << arg1 << " must be equal to "
-                                 << arg2 << ".");
+DefException2(ExcNotEqual, T, T, << "Number " << arg1 << " must be equal to " << arg2
+                                 << ".");
 
 //
 // Program logic
@@ -146,8 +145,7 @@ DefExceptionMsg(ExcNotInitialised,
  * The object is in a state not suitable for this operation.
  */
 DefException1(ExcInvalidState, char*,
-              << "The object you attempt to use is not in a valid state: "
-              << arg1);
+              << "The object you attempt to use is not in a valid state: " << arg1);
 
 /**
  * The pointer is invalid (e.g. a nullptr) and should not be used.
@@ -167,8 +165,8 @@ DefExceptionMsg(ExcInternalError,
  * The calling of this function was deliberately disabled for some reason (which
  * is given here).
  */
-DefException1(ExcDisabled, char*,
-              << "The method you attempt to call has been disabled: " << arg1);
+DefException1(ExcDisabled, char*, << "The method you attempt to call has been disabled: "
+                                  << arg1);
 
 /**
  * This is thrown if an iterator should be incremented, decremented

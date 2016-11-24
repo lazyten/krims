@@ -44,14 +44,12 @@ TEST_CASE("CircularIteratorTests", "[CircularIterator]") {
     auto test = [](std::vector<testtype> v) {
       size_t pos = 0;
       if (v.size() > 0) {
-        pos = *gen::inRange<size_t>(0, v.size())
-                     .as("position of the empty range.");
+        pos = *gen::inRange<size_t>(0, v.size()).as("position of the empty range.");
       }
 
       // Construct the empty range iterator:
       typedef CircularIterator<decltype(v.begin())> circit_t;
-      circit_t it{std::begin(v) + pos, std::begin(v) + pos,
-                  std::begin(v) + pos};
+      circit_t it{std::begin(v) + pos, std::begin(v) + pos, std::begin(v) + pos};
 
 #ifdef DEBUG
       RC_ASSERT_THROWS_AS(++it, ExcInvalidState);
@@ -62,9 +60,8 @@ TEST_CASE("CircularIteratorTests", "[CircularIterator]") {
 #endif
     };
 
-    REQUIRE(rc::check(
-          "CircularIterator: Incrementing and decrementing an empty range",
-          test));
+    REQUIRE(rc::check("CircularIterator: Incrementing and decrementing an empty range",
+                      test));
   }
 
   //
@@ -74,8 +71,7 @@ TEST_CASE("CircularIteratorTests", "[CircularIterator]") {
   SECTION("Check that pre- and post-decrement/increment agree") {
     auto test = [](std::vector<testtype> v) {
       RC_PRE(v.size() > 0u);
-      size_t pos = *gen::inRange<size_t>(0, v.size())
-                          .as("position to start the circle");
+      size_t pos = *gen::inRange<size_t>(0, v.size()).as("position to start the circle");
 
       auto it = circular_begin(v, pos);
       auto itp1 = ++it;
@@ -87,9 +83,8 @@ TEST_CASE("CircularIteratorTests", "[CircularIterator]") {
       RC_ASSERT(itm1 == itm2);
     };
 
-    REQUIRE(rc::check(
-          "CircularIterator: Agreement of pre-/post- decrement/increment",
-          test));
+    REQUIRE(rc::check("CircularIterator: Agreement of pre-/post- decrement/increment",
+                      test));
   }
 
   //
@@ -99,8 +94,7 @@ TEST_CASE("CircularIteratorTests", "[CircularIterator]") {
   SECTION("Check that ++(--it) and --(++it)) are identical.") {
     auto test = [](std::vector<testtype> v) {
       RC_PRE(v.size() > 0u);
-      size_t pos = *gen::inRange<size_t>(0, v.size())
-                          .as("position to start the circle");
+      size_t pos = *gen::inRange<size_t>(0, v.size()).as("position to start the circle");
 
       auto it = circular_begin(v, pos);
       auto res1 = --(++it);
@@ -114,8 +108,7 @@ TEST_CASE("CircularIteratorTests", "[CircularIterator]") {
     };
 
     REQUIRE(rc::check(
-          "CircularIterator: Check that ++(--it) and --(++it)) are identical.",
-          test));
+          "CircularIterator: Check that ++(--it) and --(++it)) are identical.", test));
   }
 
   //
@@ -129,17 +122,16 @@ TEST_CASE("CircularIteratorTests", "[CircularIterator]") {
 
       size_t iterations = *gen::inRange<size_t>(1, 10 * v.size())
                                  .as("Number of iterations to carry out");
-      size_t startpos = *gen::inRange<size_t>(0, v.size())
-                               .as("position to start the circle");
+      size_t startpos =
+            *gen::inRange<size_t>(0, v.size()).as("position to start the circle");
 
       // Test forward
       auto it = circular_begin(v, startpos);
       for (size_t i = 0; i < iterations; ++i, ++it) {
         size_t i_modded = (startpos + i) % v.size();
         if (v[i_modded] != *it) {
-          RC_FAIL("v[" + std::to_string(i_modded) + "] = " +
-                  std::to_string(v[i_modded]) + " == " + std::to_string(*it) +
-                  " failed in forward.");
+          RC_FAIL("v[" + std::to_string(i_modded) + "] = " + std::to_string(v[i_modded]) +
+                  " == " + std::to_string(*it) + " failed in forward.");
         }
       }
 
@@ -148,15 +140,14 @@ TEST_CASE("CircularIteratorTests", "[CircularIterator]") {
       for (size_t i = 0; i < iterations; ++i, --it) {
         size_t i_modded = (v.size() - (i % v.size()) + startpos) % v.size();
         if (v[i_modded] != *it) {
-          RC_FAIL("v[" + std::to_string(i_modded) + "] = " +
-                  std::to_string(v[i_modded]) + " == " + std::to_string(*it) +
-                  " failed in backward.");
+          RC_FAIL("v[" + std::to_string(i_modded) + "] = " + std::to_string(v[i_modded]) +
+                  " == " + std::to_string(*it) + " failed in backward.");
         }
       }
     };
 
-    REQUIRE(rc::check(
-          "CircularIterator: Infinite circular iteration around vector", test));
+    REQUIRE(
+          rc::check("CircularIterator: Infinite circular iteration around vector", test));
   }
 
   //
@@ -167,8 +158,7 @@ TEST_CASE("CircularIteratorTests", "[CircularIterator]") {
     auto test = [](std::vector<testtype> v) {
       size_t startpos = 0;
       if (v.size() > 0) {
-        startpos = *gen::inRange<size_t>(0, v.size())
-                          .as("position to start the circle");
+        startpos = *gen::inRange<size_t>(0, v.size()).as("position to start the circle");
       }
 
       // Construct the iterators:
@@ -180,9 +170,8 @@ TEST_CASE("CircularIteratorTests", "[CircularIterator]") {
       for (; begin != end; ++begin) {
         size_t i_modded = (n_iter + startpos) % v.size();
         if (v[i_modded] != *begin) {
-          RC_FAIL("v[" + std::to_string(i_modded) + "] = " +
-                  std::to_string(v[i_modded]) + " == " +
-                  std::to_string(*begin) + " failed in forward.");
+          RC_FAIL("v[" + std::to_string(i_modded) + "] = " + std::to_string(v[i_modded]) +
+                  " == " + std::to_string(*begin) + " failed in forward.");
         }
         ++n_iter;
       }
@@ -194,17 +183,15 @@ TEST_CASE("CircularIteratorTests", "[CircularIterator]") {
       for (; begin != end; --begin) {
         size_t i_modded = (v.size() - n_iter + startpos) % v.size();
         if (v[i_modded] != *begin) {
-          RC_FAIL("v[" + std::to_string(i_modded) + "] = " +
-                  std::to_string(v[i_modded]) + " == " +
-                  std::to_string(*begin) + " failed in backward.");
+          RC_FAIL("v[" + std::to_string(i_modded) + "] = " + std::to_string(v[i_modded]) +
+                  " == " + std::to_string(*begin) + " failed in backward.");
         }
         ++n_iter;
       }
       RC_ASSERT(n_iter == v.size());
     };
 
-    REQUIRE(rc::check("CircularIterator: Iteration around vector with offset",
-                      test));
+    REQUIRE(rc::check("CircularIterator: Iteration around vector with offset", test));
   }
 }  // TEST_CASE
 }  // namespace test

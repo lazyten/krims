@@ -40,19 +40,17 @@ namespace krims {
 template <typename T, typename = void>
 class RCPWrapper {
   // Implementation for std::false_type, i.e. we don't have a subscribable
-public:
+ public:
   /** \name Constructors */
   ///@{
   /** Default constructor: Construct RCPWrapper containing nullptr*/
   RCPWrapper() : m_shared_ptr{nullptr} {}
 
   /** Construct RCPWrapper from shared pointer */
-  explicit RCPWrapper(const std::shared_ptr<T> ptr)
-        : m_shared_ptr{std::move(ptr)} {}
+  explicit RCPWrapper(const std::shared_ptr<T> ptr) : m_shared_ptr{std::move(ptr)} {}
 
   /** Implicitly convert from a different inner type */
-  template <typename U,
-            typename = enable_if_t<std::is_convertible<U*, T*>::value>>
+  template <typename U, typename = enable_if_t<std::is_convertible<U*, T*>::value>>
   RCPWrapper(const RCPWrapper<U>& pw) : m_shared_ptr{pw.m_shared_ptr} {}
 
   /** Copy constructor */
@@ -94,7 +92,7 @@ public:
    **/
   constexpr bool is_shared_ptr() const { return true; }
 
-private:
+ private:
   const std::shared_ptr<T> m_shared_ptr;
 };
 
@@ -105,10 +103,10 @@ private:
  * may take both a std::shared_ptr as well as a SubscriptionPointer<T>.
  **/
 template <typename T>
-class RCPWrapper<T, typename std::enable_if<
-                          std::is_base_of<Subscribable, T>::value>::type> {
+class RCPWrapper<T,
+                 typename std::enable_if<std::is_base_of<Subscribable, T>::value>::type> {
   // Implementation for std::true_type, i.e. we have a subscribable T
-public:
+ public:
   // Make other RCPWrappers friends
   template <typename U, typename>
   friend class RCPWrapper;
@@ -117,9 +115,7 @@ public:
   ///@{
   /** Default constructor: Construct RCPWrapper containing nullptr */
   RCPWrapper()
-        : m_contains_shared_ptr{false},
-          m_subscr_ptr{nullptr},
-          m_shared_ptr{nullptr} {}
+        : m_contains_shared_ptr{false}, m_subscr_ptr{nullptr}, m_shared_ptr{nullptr} {}
 
   /** Construct RCPWrapper from subscription pointer */
   explicit RCPWrapper(const SubscriptionPointer<T> ptr)
@@ -134,8 +130,7 @@ public:
           m_shared_ptr{std::move(ptr)} {}
 
   /** Implicitly convert from a different inner type */
-  template <typename U,
-            typename = enable_if_t<std::is_convertible<U*, T*>::value>>
+  template <typename U, typename = enable_if_t<std::is_convertible<U*, T*>::value>>
   RCPWrapper(const RCPWrapper<U>& pw)
         : m_contains_shared_ptr{pw.m_contains_shared_ptr},
           m_subscr_ptr{pw.m_subscr_ptr},
@@ -184,14 +179,12 @@ public:
     } else if (m_subscr_ptr == nullptr) {
       return std::shared_ptr<T>{};
     } else {
-      assert_dbg(
-            false,
-            ExcDisabled(
-                  "Casting a RCPWrapper to a shared pointer which does not "
-                  "contain a shared ptr internally implies a copying of the "
-                  "full data and is hence disabled. Perform an explicit copy "
-                  "instead by dereferencing the result of the get() function "
-                  "and employing it together with std::make_shared."));
+      assert_dbg(false,
+                 ExcDisabled("Casting a RCPWrapper to a shared pointer which does not "
+                             "contain a shared ptr internally implies a copying of the "
+                             "full data and is hence disabled. Perform an explicit copy "
+                             "instead by dereferencing the result of the get() function "
+                             "and employing it together with std::make_shared."));
       return std::make_shared<T>(*m_subscr_ptr);
     }
   }
@@ -227,7 +220,7 @@ public:
    **/
   bool is_shared_ptr() const { return m_contains_shared_ptr; }
 
-private:
+ private:
   //! Does this class contain a shared pointer?
   const bool m_contains_shared_ptr;
 

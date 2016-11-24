@@ -29,18 +29,16 @@ static_assert(!IsComplexNumber<float>::value, "Test failed");
 static_assert(!IsComplexNumber<int>::value, "Test failed");
 
 // RealTypeOf
-static_assert(std::is_same<typename RealTypeOf<std::complex<double>>::type,
-                           double>::value,
-              "Test failed");
-static_assert(std::is_same<typename RealTypeOf<std::complex<float>>::type,
-                           float>::value,
+static_assert(
+      std::is_same<typename RealTypeOf<std::complex<double>>::type, double>::value,
+      "Test failed");
+static_assert(std::is_same<typename RealTypeOf<std::complex<float>>::type, float>::value,
               "Test failed");
 static_assert(std::is_same<typename RealTypeOf<double>::type, double>::value,
               "Test failed");
 static_assert(std::is_same<typename RealTypeOf<float>::type, float>::value,
               "Test failed");
-static_assert(std::is_same<typename RealTypeOf<int>::type, int>::value,
-              "Test failed");
+static_assert(std::is_same<typename RealTypeOf<int>::type, int>::value, "Test failed");
 
 }  // namespace tests
 }  // namespace krims
