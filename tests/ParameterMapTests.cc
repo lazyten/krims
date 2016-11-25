@@ -204,6 +204,25 @@ TEST_CASE("ParameterMap tests", "[parametermap]") {
   // ---------------------------------------------------------------
   //
 
+  SECTION("Test insert_default") {
+    const ParameterMap m{{"double", 3.4}, {"pi", 3.141592}};
+    REQUIRE(m.at<double>("double") == 3.4);
+    REQUIRE(m.at<double>("pi") == 3.141592);
+
+    m.insert_default("string", "blubba");
+    m.insert_default({{"one", 1}, {"two", 2}});
+
+    REQUIRE(m.at<std::string>("string") == "blubba");
+    REQUIRE(m.at<int>("one") == 1);
+    REQUIRE(m.at<int>("two") == 2);
+    REQUIRE(m.at<double>("double") == 3.4);
+    REQUIRE(m.at<double>("pi") == 3.141592);
+  }
+
+  //
+  // ---------------------------------------------------------------
+  //
+
   SECTION("Check basic path transformations") {
     // Add data to map.
     ParameterMap m{};

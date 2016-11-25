@@ -215,6 +215,28 @@ class ParameterMap {
     (*m_container_ptr)[make_full_key(key)] = EntryValue{std::make_shared<T>(object)};
   }
 
+  /** Insert a default value for a key, i.e. no existing key will be touched,
+   * only new ones inserted (That's why the method is still const)
+   */
+  void insert_default(const std::string& key, EntryValue e) const {
+    auto itkey = m_container_ptr->find(make_full_key(key));
+    if (itkey == std::end(*m_container_ptr)) {
+      // Key not found, hence insert default.
+      (*m_container_ptr)[make_full_key(key)] = std::move(e);
+    }
+  }
+
+  /** Insert default values for many entries at once using an initialiser list.
+   *
+   * Only inserts values that do not already exist in the map
+   * (That's why the method is const)
+   */
+  void insert_default(std::initializer_list<entry_type> il) const {
+    for (entry_type t : il) {
+      insert_default(t.first, t.second);
+    }
+  }
+
   /** \brief Try to remove an element.
    *
    * Return the number of removed elements (i.e. 0 or 1)*/
