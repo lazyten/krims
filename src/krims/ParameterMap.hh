@@ -36,7 +36,10 @@ namespace krims {
  *  around using this object and they can be quickly accessed by the
  *  std::string key.
  *
- *  TODO: Documentation how / are special and go into submaps down the tree
+ *  The copy-constructor and the copy-assignment operator perform deep
+ *  copies of the mapped data. If only a shallow copy is desired, use
+ *  the function ``copy_shallow``. Shallow copies to only parts of the
+ *  parameter data can be obtained via the function ``submap``.
  */
 class ParameterMap {
  public:
@@ -174,7 +177,7 @@ class ParameterMap {
   ParameterMap(ParameterMap&&) = default;
   ParameterMap& operator=(ParameterMap&&) = default;
 
-  /** \brief Copy constructor */
+  /** \brief Copy constructor: Performs deep copy */
   ParameterMap(const ParameterMap& other)
         : m_container_ptr{std::make_shared<inner_map_type>(*other.m_container_ptr)},
           m_location{other.m_location} {}
@@ -325,8 +328,20 @@ class ParameterMap {
    * */
   ParameterMap submap(const std::string& location);
 
-  /** Get a const submap */
+  /** Get a const submap
+   * Entries of a const submap cannot be modified.
+   * */
   const ParameterMap submap(const std::string& location) const;
+
+  /** Get a deep copy of the ParameterMap object (all keys copied, too) */
+  ParameterMap copy_deep() const {
+    return ParameterMap(*this);  // The copy constructor does this
+  }
+
+  /** Get a shallow copy of the ParameterMap object (only a view to itself) */
+  const ParameterMap copy_shallow() const {
+    return submap("/");  // The submap function does this
+  }
 
   // TODO alias names, i.e. link one name to a different one.
   //      but be careful not to get a cyclic graph.
