@@ -288,11 +288,8 @@ TEST_CASE("ParameterMap tests", "[parametermap]") {
 
   SECTION("Check submap functionality") {
     // Add data to map.
-    ParameterMap m{{"tree/sub", s},
-                   {"tree/i", i},
-                   {"dum", dum},
-                   {"tree/value", 9},
-                   {"tree", "root"}};
+    ParameterMap m{{"tree/sub", s},   {"tree/i", i},    {"dum", dum},
+                   {"tree/value", 9}, {"tree", "root"}, {"/", "god"}};
 
     // check it is there:
     REQUIRE(m.exists("tree/sub"));
@@ -300,6 +297,7 @@ TEST_CASE("ParameterMap tests", "[parametermap]") {
     REQUIRE(m.exists("tree"));
     REQUIRE(m.exists("tree/value"));
     REQUIRE(m.exists("dum"));
+    REQUIRE(m.exists("/"));
 
     ParameterMap sub = m.submap("tree");
 
@@ -318,8 +316,10 @@ TEST_CASE("ParameterMap tests", "[parametermap]") {
     REQUIRE(sub.at<int>("value") == 9);
     REQUIRE(sub.at<std::string>("/") == "root");
     REQUIRE(sub.at<std::string>("..") == "root");
+    REQUIRE(sub.at<std::string>("../..") == "root");
     REQUIRE(sub.at<std::string>("/../.") == "root");
     REQUIRE(sub.at<std::string>(".././") == "root");
+    REQUIRE(m.at<std::string>("/") == "god");
 
     // Check adding a new value in the submap:
     sub.update("neu", 1.23);
@@ -332,6 +332,83 @@ TEST_CASE("ParameterMap tests", "[parametermap]") {
     REQUIRE(sub2.at<std::string>("sub") == s);
     REQUIRE(sub2.at<int>("i") == i);
     REQUIRE(sub2.at<int>("value") == 10);
+  }
+
+  //
+  // ---------------------------------------------------------------
+  //
+
+  SECTION("Check begin_keys() and end_keys()") {
+    // Add data to map.
+    ParameterMap m{{"tree/sub", s},  {"tree/i", i}, {"dum", dum},    {"tree/value", 9},
+                   {"tree", "root"}, {"/", "god"},  {"/zzz", "end"}, {"/zz", "mend"}};
+
+    // Check we get all keys for starters:
+    std::vector<std::string> ref{"/",         "/dum",        "/tree", "/tree/i",
+                                 "/tree/sub", "/tree/value", "/zz",   "/zzz"};
+    auto itref = std::begin(ref);
+    for (auto it = m.begin_keys(); it != m.end_keys(); ++it, ++itref) {
+      REQUIRE(itref != std::end(ref));
+      CHECK(*itref == *it);
+    }
+    CHECK(itref == std::end(ref));
+
+    // Get a submap:
+    ParameterMap sub = m.submap("tree");
+
+    // Check we get all keys of the submap:
+    std::vector<std::string> subref{"/", "/i", "/sub", "/value"};
+    auto itsubref = std::begin(subref);
+    for (auto it = sub.begin_keys(); it != sub.end_keys(); ++it, ++itsubref) {
+      REQUIRE(itsubref != std::end(subref));
+      CHECK(*itsubref == *it);
+    }
+    CHECK(itsubref == std::end(subref));
+  }
+
+  //
+  // ---------------------------------------------------------------
+  //
+
+  SECTION("Check that copying submaps works.") {
+    // Add data to map.
+    ParameterMap m{{"tree/sub", s},   {"tree/i", i},    {"dum", dum},
+                   {"tree/value", 9}, {"tree", "root"}, {"/", "god"}};
+
+    // Get a submap:
+    const ParameterMap sub = m.submap("/tree");
+
+    // Copy it:
+    ParameterMap copy = sub;
+
+    // Check existence:
+    REQUIRE_FALSE(copy.exists("tree/sub"));
+    REQUIRE_FALSE(copy.exists("tree/i"));
+    REQUIRE_FALSE(copy.exists("dum"));
+    REQUIRE(copy.exists("sub"));
+    REQUIRE(copy.exists("i"));
+    REQUIRE(copy.exists("value"));
+    REQUIRE(copy.exists("/"));
+
+    // Check value is appropriate:
+    REQUIRE(copy.at<std::string>("sub") == s);
+    REQUIRE(copy.at<int>("i") == i);
+    REQUIRE(copy.at<int>("value") == 9);
+    REQUIRE(copy.at<std::string>("/") == "root");
+    REQUIRE(copy.at<std::string>("..") == "root");
+    REQUIRE(copy.at<std::string>("../..") == "root");
+    REQUIRE(copy.at<std::string>("/../.") == "root");
+    REQUIRE(copy.at<std::string>(".././") == "root");
+    REQUIRE(m.at<std::string>("/") == "god");
+
+    // Check adding a new value in the copy does not
+    // affect original.
+    copy.update("neu", 1.23);
+    copy.update("value", 10);
+    REQUIRE_FALSE(m.exists("tree/neu"));
+    REQUIRE(m.at<int>("tree/value") == 9);
+    REQUIRE_FALSE(sub.exists("neu"));
+    REQUIRE(sub.at<int>("value") == 9);
   }
 
   //

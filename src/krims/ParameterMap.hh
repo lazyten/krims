@@ -23,6 +23,7 @@
 #include "SubscriptionPointer.hh"
 #include "TypeUtils.hh"
 #include "demangle.hh"
+#include <iterator>
 #include <map>
 #include <memory>
 #include <string>
@@ -36,14 +37,12 @@ namespace krims {
  *  around using this object and they can be quickly accessed by the
  *  std::string key.
  *
- *  The copy-constructor and the copy-assignment operator perform deep
- *  copies of the mapped data. If only a shallow copy is desired, use
- *  the function ``copy_shallow``. Shallow copies to only parts of the
- *  parameter data can be obtained via the function ``submap``.
+ *  TODO: Documentation how "/" are special and go into submaps down the tree
  */
 class ParameterMap {
  public:
   class EntryValue;
+  class KeyIterator;
 
   // TODO: When modifying an entry using update, make sure that the type
   //       stays unchanged
@@ -164,26 +163,75 @@ class ParameterMap {
 #endif
   };
 
+  class KeyIterator
+        : public std::iterator<std::bidirectional_iterator_tag, const std::string> {
+    // Make parent class a friend (such that we can get the internal raw map iterator)
+    friend ParameterMap;
+
+   public:
+    typedef inner_map_type::const_iterator iter_type;
+
+    /** Dereference key iterator */
+    const std::string& operator*() const;
+
+    /** Obtain pointer to key iterator */
+    const std::string* operator->() const { return &operator*(); }
+
+    /** Prefix increment to the next key */
+    KeyIterator& operator++() {
+      ++m_iter;
+      return *this;
+    }
+
+    /** Postfix increment to the next key */
+    KeyIterator operator++(int) {
+      KeyIterator copy(*this);
+      ++m_iter;
+      return copy;
+    }
+
+    /** Prefix decrement to the next key */
+    KeyIterator& operator--() {
+      --m_iter;
+      return *this;
+    }
+
+    /** Postfix decrement to the next key */
+    KeyIterator operator--(int) {
+      KeyIterator copy(*this);
+      --m_iter;
+      return copy;
+    }
+
+    bool operator==(const KeyIterator& other) { return m_iter == other.m_iter; }
+    bool operator!=(const KeyIterator& other) { return m_iter != other.m_iter; }
+
+    KeyIterator(iter_type iter, const std::string& location)
+          : m_iter(iter), m_location(location) {}
+
+   private:
+    iter_type m_iter;               //< Iterator to the current key,value pair
+    const std::string m_location;   //< Location of the ParameterMap we iteratie over
+    mutable std::string key_cache;  //< Cache for the current key string
+  };
+
   /** \name Constructors, destructors and assignment */
   ///@{
   /** \brief default constructor
    * Constructs empty map */
-  ParameterMap() : m_container_ptr{std::make_shared<inner_map_type>()}, m_location{"/"} {}
+  ParameterMap() : m_container_ptr{std::make_shared<inner_map_type>()}, m_location{""} {}
 
   /** \brief Construct parameter map from initialiser list of entry_types */
   ParameterMap(std::initializer_list<entry_type> il) : ParameterMap{} { update(il); };
 
   ~ParameterMap() = default;
   ParameterMap(ParameterMap&&) = default;
-  ParameterMap& operator=(ParameterMap&&) = default;
 
-  /** \brief Copy constructor: Performs deep copy */
-  ParameterMap(const ParameterMap& other)
-        : m_container_ptr{std::make_shared<inner_map_type>(*other.m_container_ptr)},
-          m_location{other.m_location} {}
+  /** \brief Copy constructor */
+  ParameterMap(const ParameterMap& other);
 
-  /** \brief Copy assignment operator */
-  ParameterMap& operator=(const ParameterMap& other);
+  /** \brief Assignment operator */
+  ParameterMap& operator=(ParameterMap other);
   ///@}
 
   /** \name Modifiers */
@@ -322,29 +370,32 @@ class ParameterMap {
    * entry.
    *
    * Escaping a submap via ".." is not possible. This means that the submap
-   * at location "bla" does still not contain a key "../bla/blubber/foo".
-   * But it does contain a key "../blubber/foo", since the leading ".."
+   * at location "bla" does still not contain a key "../bla/blubber/foo",
+   * but it does contain a key "../blubber/foo", since the leading ".."
    * has no effect (we are at the root of the ParameterMap)
    * */
-  ParameterMap submap(const std::string& location);
-
-  /** Get a const submap
-   * Entries of a const submap cannot be modified.
-   * */
-  const ParameterMap submap(const std::string& location) const;
-
-  /** Get a deep copy of the ParameterMap object (all keys copied, too) */
-  ParameterMap copy_deep() const {
-    return ParameterMap(*this);  // The copy constructor does this
+  ParameterMap submap(const std::string& location) {
+    // Construct new map, but starting at a different location
+    return ParameterMap{m_container_ptr, make_full_key(location)};
   }
 
-  /** Get a shallow copy of the ParameterMap object (only a view to itself) */
-  const ParameterMap copy_shallow() const {
-    return submap("/");  // The submap function does this
+  /** Get a const submap */
+  const ParameterMap submap(const std::string& location) const {
+    // Construct new map, but starting at a different location
+    return ParameterMap{m_container_ptr, make_full_key(location)};
   }
 
   // TODO alias names, i.e. link one name to a different one.
   //      but be careful not to get a cyclic graph.
+
+  /** \name Key iterators */
+  //@{
+  /** Return a begin iterator which runs over all keys of this map */
+  KeyIterator begin_keys() const;
+
+  /** Return an end iterator to run over the keys of this map */
+  KeyIterator end_keys() const;
+  //@}
 
  private:
   /** \brief Construct parameter map from another map and a new location. */
@@ -359,7 +410,8 @@ class ParameterMap {
   std::shared_ptr<inner_map_type> m_container_ptr;
 
   /** The location we are currently on in the tree
-   * Has to end with a slash. */
+   * may not end with a slash (but a full key like "/tree"
+   */
   std::string m_location;
 };
 
@@ -437,6 +489,19 @@ RCPWrapper<const T> ParameterMap::EntryValue::get_ptr() const {
   // We need to cast and then dereference to get the RCPWrapper of the
   // appropriate type out.
   return *std::static_pointer_cast<RCPWrapper<const T>>(m_object_ptr_ptr);
+}
+
+//
+// KeyIterator subclass
+//
+inline const std::string& ParameterMap::KeyIterator::operator*() const {
+  if (m_iter->first.size() <= m_location.size()) {
+    key_cache = "/";
+  } else {
+    key_cache = m_iter->first.substr(m_location.size());
+    if (key_cache.length() == 0) key_cache = "/";
+  }
+  return key_cache;
 }
 
 //
