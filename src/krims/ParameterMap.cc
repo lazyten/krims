@@ -21,36 +21,29 @@
 
 namespace krims {
 
-ParameterMap& ParameterMap::operator=(const ParameterMap& other) {
-  m_location = other.m_location;
-  m_container_ptr = std::make_shared<inner_map_type>(*other.m_container_ptr);
+ParameterMap& ParameterMap::operator=(ParameterMap other) {
+  m_location = std::move(other.m_location);
+  m_container_ptr = std::move(other.m_container_ptr);
   return *this;
 }
 
-ParameterMap ParameterMap::submap(const std::string& location) {
-  // Clean the location path first:
-  std::string newlocation = make_full_key(location);
-
-  // Add a tailing "/" if not yet there
-  if (newlocation.back() != '/') newlocation += "/";
-
-  // Use a special constructor, which makes the resulting ParameterMap object
-  // share the map string->EntryValue, but start at a different location
-  return ParameterMap{m_container_ptr, newlocation};
-}
-
-const ParameterMap ParameterMap::submap(const std::string& location) const {
-  // Normalise path:
-  std::string newlocation = make_full_key(location);
-  if (newlocation.back() != '/') newlocation += "/";
-
-  // Construct new map, but starting at a different location
-  return ParameterMap{m_container_ptr, newlocation};
+ParameterMap::ParameterMap(const ParameterMap& other) : ParameterMap() {
+  if (other.m_location == std::string("")) {
+    // We are root, copy everything
+    m_container_ptr = std::make_shared<inner_map_type>(*other.m_container_ptr);
+  } else {
+    // Copy only keys of the subtree
+    for (auto it = other.begin_keys(); it != other.end_keys(); ++it) {
+      // Insert the key (cleared off the location part as done by the KeyIterator)
+      // and a copy of the EntryValue object.
+      update(*it, it.m_iter->second);
+    }
+  }
 }
 
 std::string ParameterMap::make_full_key(const std::string& key) const {
-  assert_dbg(m_location[0] == '/', krims::ExcInternalError());
-  assert_dbg(m_location.back() == '/', krims::ExcInternalError());
+  assert_dbg(m_location[0] == '/' || m_location.length() == 0, krims::ExcInternalError());
+  assert_dbg(m_location.back() != '/', krims::ExcInternalError());
 
   // Make a stack out of the key:
   std::vector<std::string> pathparts;
@@ -72,11 +65,11 @@ std::string ParameterMap::make_full_key(const std::string& key) const {
     // Update start for next iteration:
     start += part.length();
 
-    // Ignore "." path part (does nothing)
-    if (part == ".") continue;
-
-    // If ".." path part, then pop the most recently added path part if any.
-    if (part == "..") {
+    if (part == ".") {
+      // Ignore "." path part (does nothing)
+      continue;
+    } else if (part == "..") {
+      // If ".." path part, then pop the most recently added path part if any.
       if (pathparts.size() != 0) pathparts.pop_back();
     } else {
       pathparts.push_back(std::move(part));
@@ -85,15 +78,32 @@ std::string ParameterMap::make_full_key(const std::string& key) const {
 
   std::string res{m_location};
   for (const auto& part : pathparts) {
-    res += part + "/";
+    res += "/" + part;
   }
 
-  assert_dbg(res.back() == '/', krims::ExcInternalError());
-
-  // Remove the '/' at the end if res is not "/"
-  if (res != "/") res.pop_back();
+  assert_dbg(res.back() != '/', krims::ExcInternalError());
+  assert_dbg(res[0] == '/' || res.length() == 0, krims::ExcInternalError());
 
   return res;
 }
 
+ParameterMap::KeyIterator ParameterMap::begin_keys() const {
+  // obtain lower bound to the root location
+  // (since the keys are sorted alphabetically in the map
+  //  the ones which follow next must all be below our current
+  //  location)
+
+  auto it = m_container_ptr->lower_bound(m_location);
+  return KeyIterator(std::move(it), m_location);
+}
+
+ParameterMap::KeyIterator ParameterMap::end_keys() const {
+  // We call begin_keys and advance until we find the first key
+  // which is no longer part of this subtree (i.e. starts differently)
+  auto it = begin_keys();
+  for (; it.m_iter != std::end(*m_container_ptr); ++it) {
+    if (0 != it.m_iter->first.compare(0, m_location.length(), m_location)) break;
+  }
+  return it;
+}
 }  // namespace krims
