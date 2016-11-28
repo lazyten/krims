@@ -32,12 +32,32 @@ ParameterMap::ParameterMap(const ParameterMap& other) : ParameterMap() {
     // We are root, copy everything
     m_container_ptr = std::make_shared<inner_map_type>(*other.m_container_ptr);
   } else {
-    // Copy only keys of the subtree
-    for (auto it = other.begin_keys(); it != other.end_keys(); ++it) {
-      // Insert the key (cleared off the location part as done by the KeyIterator)
-      // and a copy of the EntryValue object.
-      update(*it, it.m_iter->second);
-    }
+    update(other);
+  }
+}
+
+void ParameterMap::update(std::initializer_list<entry_type> il) {
+  // Make each key a full path key and append/modify entry in map
+  for (entry_type t : il) {
+    (*m_container_ptr)[make_full_key(t.first)] = std::move(t.second);
+  }
+}
+
+void ParameterMap::update(const std::string& key, const ParameterMap& other) {
+  for (auto it = other.begin_keys(); it != other.end_keys(); ++it) {
+    // Truncate the other key, relative to its location, then
+    // make it full for our location and update
+    std::string relloc = other.strip_location_prefix(it.m_iter->first);
+    (*m_container_ptr)[make_full_key(key + "/" + relloc)] = it.m_iter->second;
+  }
+}
+
+void ParameterMap::update(const std::string& key, ParameterMap&& other) {
+  for (auto it = other.begin_keys(); it != other.end_keys(); ++it) {
+    // Truncate the other key, relative to its location, then
+    // make it full for our location and update
+    std::string relloc = other.strip_location_prefix(it.m_iter->first);
+    (*m_container_ptr)[make_full_key(key + "/" + relloc)] = std::move(it.m_iter->second);
   }
 }
 
@@ -87,6 +107,21 @@ std::string ParameterMap::make_full_key(const std::string& key) const {
   return res;
 }
 
+std::string ParameterMap::strip_location_prefix(const std::string& key) const {
+  // The first part needs to be exactly the location:
+  assert_dbg(0 == key.compare(0, m_location.size(), m_location), ExcInternalError());
+
+  if (key.size() <= m_location.size()) {
+    // Cannot remove something
+    return "";
+  } else {
+    std::string res = key.substr(m_location.size());
+    assert_dbg(res[0] == '/' || res.length() == 0, ExcInternalError());
+    assert_dbg(res.back() != '/', ExcInternalError());
+    return res;
+  }
+}
+
 ParameterMap::KeyIterator ParameterMap::begin_keys() const {
   // obtain lower bound to the root location
   // (since the keys are sorted alphabetically in the map
@@ -94,7 +129,7 @@ ParameterMap::KeyIterator ParameterMap::begin_keys() const {
   //  location)
 
   auto it = m_container_ptr->lower_bound(m_location);
-  return KeyIterator(std::move(it), m_location);
+  return KeyIterator(std::move(it), *this);
 }
 
 ParameterMap::KeyIterator ParameterMap::end_keys() const {

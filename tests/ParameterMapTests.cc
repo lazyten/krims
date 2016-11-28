@@ -415,6 +415,97 @@ TEST_CASE("ParameterMap tests", "[parametermap]") {
   // ---------------------------------------------------------------
   //
 
+  SECTION("Check that updating from other maps works.") {
+    // Add data to map.
+    ParameterMap m{{"tree/sub", s},   {"tree/i", i},    {"dum", dum},
+                   {"tree/value", 9}, {"tree", "root"}, {"/", "god"}};
+
+    // Make a second map
+    ParameterMap n{{"house/window", true},
+                   {"house/open", "14-15"},
+                   {"garden", false},
+                   {"blubber", "blabla"},
+                   {"house/value", 14}};
+
+    // Make submaps:
+    ParameterMap subm = m.submap("tree");
+    ParameterMap subn = n.submap("house");
+
+    CHECK(subn.at<bool>("window") == true);
+    CHECK(subn.at<std::string>("open") == "14-15");
+    CHECK(subn.at<int>("value") == 14);
+    CHECK(subm.at<int>("i") == i);
+    CHECK(subm.at<int>("value") == 9);
+    CHECK_FALSE(subm.exists("window"));
+    CHECK_FALSE(subm.exists("open"));
+
+    subm.update(subn);
+
+    CHECK(subm.at<int>("i") == i);
+    CHECK(subm.at<int>("value") == 14);
+    CHECK(subm.at<bool>("window") == true);
+    CHECK(subm.at<std::string>("open") == "14-15");
+    CHECK(m.at<int>("tree/value") == 14);
+    CHECK(m.at<std::string>("tree/open") == "14-15");
+    CHECK(m.at<bool>("tree/window") == true);
+
+    m.update("tree/value", 42);
+    CHECK(subm.at<int>("value") == 42);
+    CHECK(subn.at<int>("value") == 14);
+    CHECK(n.at<int>("house/value") == 14);
+
+    std::vector<std::string> ref{"/",           "/dum",        "/tree",
+                                 "/tree/i",     "/tree/open",  "/tree/sub",
+                                 "/tree/value", "/tree/window"};
+    auto itref = std::begin(ref);
+    for (auto it = m.begin_keys(); it != m.end_keys(); ++it, ++itref) {
+      REQUIRE(itref != std::end(ref));
+      CHECK(*itref == *it);
+    }
+    CHECK(itref == std::end(ref));
+
+    std::vector<std::string> refn{"/blubber", "/garden", "/house/open", "/house/value",
+                                  "/house/window"};
+    auto itrefn = std::begin(refn);
+    for (auto it = n.begin_keys(); it != n.end_keys(); ++it, ++itrefn) {
+      REQUIRE(itrefn != std::end(refn));
+      CHECK(*itrefn == *it);
+    }
+    CHECK(itrefn == std::end(refn));
+
+    // Append map n to m:
+    m.update("mapn", n);
+
+    std::vector<std::string> refm{"/",
+                                  "/dum",
+                                  "/mapn/blubber",
+                                  "/mapn/garden",
+                                  "/mapn/house/open",
+                                  "/mapn/house/value",
+                                  "/mapn/house/window",
+                                  "/tree",
+                                  "/tree/i",
+                                  "/tree/open",
+                                  "/tree/sub",
+                                  "/tree/value",
+                                  "/tree/window"};
+
+    auto itrefm = std::begin(refm);
+    for (auto it = m.begin_keys(); it != m.end_keys(); ++it, ++itrefm) {
+      REQUIRE(itrefm != std::end(refm));
+      CHECK(*itrefm == *it);
+    }
+    CHECK(itrefm == std::end(refm));
+
+    CHECK(m.at<int>("mapn/house/value") == 14);
+    CHECK(m.at<bool>("mapn/house/window") == true);
+    CHECK(m.at<std::string>("mapn/house/open") == "14-15");
+  }
+
+  //
+  // ---------------------------------------------------------------
+  //
+
   // TODO Test that changing data in copies / submaps does the intended thing
   // TODO Test mass update from initialiser list
 
