@@ -172,7 +172,10 @@ class ParameterMap {
     typedef inner_map_type::const_iterator iter_type;
 
     /** Dereference key iterator */
-    const std::string& operator*() const;
+    const std::string& operator*() const {
+      key_cache = strip_location_prefix(m_iter->first);
+      return key_cache;
+    }
 
     /** Obtain pointer to key iterator */
     const std::string* operator->() const { return &operator*(); }
@@ -186,7 +189,7 @@ class ParameterMap {
     /** Postfix increment to the next key */
     KeyIterator operator++(int) {
       KeyIterator copy(*this);
-      ++m_iter;
+      this->operator++();
       return copy;
     }
 
@@ -199,7 +202,7 @@ class ParameterMap {
     /** Postfix decrement to the next key */
     KeyIterator operator--(int) {
       KeyIterator copy(*this);
-      --m_iter;
+      this->operator--();
       return copy;
     }
 
@@ -210,9 +213,13 @@ class ParameterMap {
           : m_iter(iter), m_location(location) {}
 
    private:
+    /** Undo the operation of make_full_key, i.e. strip off the
+     * first location part and get a relative path to it*/
+    std::string strip_location_prefix(const std::string& key) const;
+
     iter_type m_iter;               //< Iterator to the current key,value pair
-    const std::string m_location;   //< Location of the ParameterMap we iteratie over
-    mutable std::string key_cache;  //< Cache for the current key string
+    std::string m_location;         //< Subtree location we iterate over
+    mutable std::string key_cache;  //< Cache for the current truncated key string
   };
 
   /** \name Constructors, destructors and assignment */
@@ -253,12 +260,35 @@ class ParameterMap {
    *
    * TODO More details, have an example
    * */
-  void update(std::initializer_list<entry_type> il) {
-    // Make each key a full path key and append/modify entry in map
-    for (entry_type t : il) {
-      (*m_container_ptr)[make_full_key(t.first)] = std::move(t.second);
-    }
-  }
+  void update(std::initializer_list<entry_type> il);
+
+  /** \brief Update many entries using another ParameterMap
+   *
+   * The entries are updated relative to the given key paths.
+   * I.e. if key == "blubber" and the map \t map contairs "foo" and
+   * "bar", then "blubber/foo" and "blubber/bar" will be updated.
+   * */
+  void update(const std::string& key, const ParameterMap& map);
+
+  /** \brief Update many entries using another ParameterMap
+   *
+   * The entries are updated relative to the given key paths.
+   * I.e. if key == "blubber" and the map \t map contairs "foo" and
+   * "bar", then "blubber/foo" and "blubber/bar" will be updated.
+   * */
+  void update(const std::string& key, ParameterMap&& map);
+
+  /** \brief Update many entries using another ParameterMap
+   *
+   * The entries are updated in paths relative to /
+   * */
+  void update(const ParameterMap& other) { update("/", other); }
+
+  /** \brief Update many entries using another ParameterMap
+   *
+   * The entries are updated in paths relative to /
+   */
+  void update(ParameterMap&& other) { update("/", std::move(other)); }
 
   /** Insert or update a key with a copy of an element */
   template <typename T>
@@ -295,6 +325,7 @@ class ParameterMap {
     return m_container_ptr->erase(make_full_key(key));
   }
 
+  /** Remove all elements from the map */
   void clear() noexcept { m_container_ptr->clear(); }
   ///@}
 
@@ -489,19 +520,6 @@ RCPWrapper<const T> ParameterMap::EntryValue::get_ptr() const {
   // We need to cast and then dereference to get the RCPWrapper of the
   // appropriate type out.
   return *std::static_pointer_cast<RCPWrapper<const T>>(m_object_ptr_ptr);
-}
-
-//
-// KeyIterator subclass
-//
-inline const std::string& ParameterMap::KeyIterator::operator*() const {
-  if (m_iter->first.size() <= m_location.size()) {
-    key_cache = "/";
-  } else {
-    key_cache = m_iter->first.substr(m_location.size());
-    if (key_cache.length() == 0) key_cache = "/";
-  }
-  return key_cache;
 }
 
 //
