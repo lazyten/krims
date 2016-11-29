@@ -173,8 +173,7 @@ class ParameterMap {
 
     /** Dereference key iterator */
     const std::string& operator*() const {
-      key_cache = m_map.strip_location_prefix(m_iter->first);
-      if (key_cache.size() == 0) key_cache = "/";
+      key_cache = strip_location_prefix(m_iter->first);
       return key_cache;
     }
 
@@ -190,7 +189,7 @@ class ParameterMap {
     /** Postfix increment to the next key */
     KeyIterator operator++(int) {
       KeyIterator copy(*this);
-      ++m_iter;
+      this->operator++();
       return copy;
     }
 
@@ -203,19 +202,24 @@ class ParameterMap {
     /** Postfix decrement to the next key */
     KeyIterator operator--(int) {
       KeyIterator copy(*this);
-      --m_iter;
+      this->operator--();
       return copy;
     }
 
     bool operator==(const KeyIterator& other) { return m_iter == other.m_iter; }
     bool operator!=(const KeyIterator& other) { return m_iter != other.m_iter; }
 
-    KeyIterator(iter_type iter, const ParameterMap& map) : m_iter(iter), m_map{map} {}
+    KeyIterator(iter_type iter, const std::string& location)
+          : m_iter(iter), m_location(location) {}
 
    private:
+    /** Undo the operation of make_full_key, i.e. strip off the
+     * first location part and get a relative path to it*/
+    std::string strip_location_prefix(const std::string& key) const;
+
     iter_type m_iter;               //< Iterator to the current key,value pair
-    const ParameterMap& m_map;      //< The map we iterate over
-    mutable std::string key_cache;  //< Cache for the current key string
+    std::string m_location;         //< Subtree location we iterate over
+    mutable std::string key_cache;  //< Cache for the current truncated key string
   };
 
   /** \name Constructors, destructors and assignment */
@@ -433,10 +437,6 @@ class ParameterMap {
    *  Care is taken such that we cannot escape the subtree.
    * */
   std::string make_full_key(const std::string& key) const;
-
-  /** Undo the operation of make_full_key, i.e. strip off the
-   * first location part and get a relative path to it*/
-  std::string strip_location_prefix(const std::string& key) const;
 
   std::shared_ptr<inner_map_type> m_container_ptr;
 

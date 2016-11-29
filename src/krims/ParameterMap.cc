@@ -44,20 +44,26 @@ void ParameterMap::update(std::initializer_list<entry_type> il) {
 }
 
 void ParameterMap::update(const std::string& key, const ParameterMap& other) {
+  // TODO maybe code a subtree iterator for internal usage on begin() and end()
+  //      and use it here instead. Then get rid of the friends
+  //      in the KeyIterator.
   for (auto it = other.begin_keys(); it != other.end_keys(); ++it) {
-    // Truncate the other key, relative to its location, then
-    // make it full for our location and update
-    std::string relloc = other.strip_location_prefix(it.m_iter->first);
-    (*m_container_ptr)[make_full_key(key + "/" + relloc)] = it.m_iter->second;
+    // The iterator truncates the other key relative to the builtin
+    // location of other for us. We then make it full for our location
+    // and update.
+    (*m_container_ptr)[make_full_key(key + "/" + *it)] = it.m_iter->second;
   }
 }
 
 void ParameterMap::update(const std::string& key, ParameterMap&& other) {
+  // TODO maybe code a subtree iterator for internal usage on begin() and end()
+  //      and use it here instead. Then get rid of the friends
+  //      in the KeyIterator.
   for (auto it = other.begin_keys(); it != other.end_keys(); ++it) {
-    // Truncate the other key, relative to its location, then
-    // make it full for our location and update
-    std::string relloc = other.strip_location_prefix(it.m_iter->first);
-    (*m_container_ptr)[make_full_key(key + "/" + relloc)] = std::move(it.m_iter->second);
+    // The iterator truncates the other key relative to the builtin
+    // location of other for us. We then make it full for our location
+    // and update.
+    (*m_container_ptr)[make_full_key(key + "/" + *it)] = std::move(it.m_iter->second);
   }
 }
 
@@ -107,13 +113,13 @@ std::string ParameterMap::make_full_key(const std::string& key) const {
   return res;
 }
 
-std::string ParameterMap::strip_location_prefix(const std::string& key) const {
+std::string ParameterMap::KeyIterator::strip_location_prefix(
+      const std::string& key) const {
   // The first part needs to be exactly the location:
   assert_dbg(0 == key.compare(0, m_location.size(), m_location), ExcInternalError());
 
   if (key.size() <= m_location.size()) {
-    // Cannot remove something
-    return "";
+    return "/";
   } else {
     std::string res = key.substr(m_location.size());
     assert_dbg(res[0] == '/' || res.length() == 0, ExcInternalError());
@@ -129,7 +135,7 @@ ParameterMap::KeyIterator ParameterMap::begin_keys() const {
   //  location)
 
   auto it = m_container_ptr->lower_bound(m_location);
-  return KeyIterator(std::move(it), *this);
+  return KeyIterator(std::move(it), m_location);
 }
 
 ParameterMap::KeyIterator ParameterMap::end_keys() const {
