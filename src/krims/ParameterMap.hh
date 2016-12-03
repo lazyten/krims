@@ -379,8 +379,6 @@ class ParameterMap {
   template <typename T>
   RCPWrapper<const T> at_ptr(const std::string& key) const;
 
-  // TODO find, iterators
-
   /** Check weather a key exists */
   bool exists(const std::string& key) const {
     return m_container_ptr->find(make_full_key(key)) != std::end(*m_container_ptr);
@@ -527,16 +525,16 @@ RCPWrapper<const T> ParameterMap::EntryValue::get_ptr() const {
 //
 template <typename T>
 T& ParameterMap::at(const std::string& key) {
-  assert_dbg(exists(key), ExcUnknownKey(key));
-  EntryValue& e = m_container_ptr->at(make_full_key(key));
-  return e.get<T>();
+  auto itkey = m_container_ptr->find(make_full_key(key));
+  assert_throw(itkey != std::end(*m_container_ptr), ExcUnknownKey(key));
+  return itkey->second.get<T>();
 }
 
 template <typename T>
 const T& ParameterMap::at(const std::string& key) const {
-  assert_dbg(exists(key), ExcUnknownKey(key));
-  const EntryValue& e = m_container_ptr->at(make_full_key(key));
-  return e.get<T>();
+  auto itkey = m_container_ptr->find(make_full_key(key));
+  assert_throw(itkey != std::end(*m_container_ptr), ExcUnknownKey(key));
+  return itkey->second.get<T>();
 }
 
 template <typename T>
@@ -565,16 +563,16 @@ const T& ParameterMap::at(const std::string& key, const T& default_value) const 
 
 template <typename T>
 RCPWrapper<T> ParameterMap::at_ptr(const std::string& key) {
-  assert_dbg(exists(key), ExcUnknownKey(key));
-  EntryValue& e = m_container_ptr->at(make_full_key(key));
-  return e.get_ptr<T>();
+  auto itkey = m_container_ptr->find(make_full_key(key));
+  assert_throw(itkey != std::end(*m_container_ptr), ExcUnknownKey(key));
+  return itkey->second.get_ptr<T>();
 }
 
 template <typename T>
 RCPWrapper<const T> ParameterMap::at_ptr(const std::string& key) const {
-  assert_dbg(exists(key), ExcUnknownKey(key));
-  const EntryValue& e = m_container_ptr->at(make_full_key(key));
-  return e.get_ptr<T>();
+  auto itkey = m_container_ptr->find(make_full_key(key));
+  assert_throw(itkey != std::end(*m_container_ptr), ExcUnknownKey(key));
+  return itkey->second.get_ptr<T>();
 }
 
 }  // krims
