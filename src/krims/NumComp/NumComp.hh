@@ -89,6 +89,12 @@ NumComp<T> numcomp(const T& value) {
   return NumComp<T>(value);
 }
 
+/** Helper function to make a NumComp<T> object which is guaranteed to return */
+template <typename T>
+NumComp<T> numcomp_return(const T& value) {
+  return NumComp<T>(value).failure_action(NumCompActionType::Return);
+}
+
 //
 // ----------------------------------------------------------------------------
 //
