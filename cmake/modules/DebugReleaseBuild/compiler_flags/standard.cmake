@@ -78,6 +78,11 @@ endif()
 #
 # Extra stuff for release:
 #
+option(DRB_MACHINE_SPECIFIC_OPTIM_Release "Enable machine-specific optimisations in REALEASE build. Your build might not be transferable to other machines.")
 if (CMAKE_BUILD_TYPE MATCHES "Release")
-	# nothing atm
+	if (DRB_MACHINE_SPECIFIC_OPTIM_Release)
+		enable_if_compiles(CMAKE_CXX_FLAGS_RELEASE "-march=native")
+		enable_if_compiles(CMAKE_CXX_FLAGS_RELEASE "-mtune=native")
+		message(STATUS "Enabled machine-specific optimisations in Release build.")
+	endif()
 endif()
