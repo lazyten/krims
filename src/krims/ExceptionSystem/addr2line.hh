@@ -22,9 +22,7 @@
 
 namespace krims {
 
-// TODO remove KRIMS_ENABLE_EXPERIMENTAL after some while
-#if defined DEBUG && defined KRIMS_HAVE_GLIBC_STACKTRACE && \
-      defined KRIMS_ENABLE_EXPERIMENTAL
+#if defined DEBUG && defined KRIMS_HAVE_GLIBC_STACKTRACE
 // It only makes sense to define addr2line if we actually can make use of its
 // functionality, i.e. if we have a glibc stacktrace and are in DEBUG mode
 // (Debug symbols)
@@ -46,5 +44,5 @@ int addr2line(const char* execname, const char* addr, const size_t maxlen, char*
               char* number);
 #define KRIMS_ADDR2LINE_AVAILABLE
 
-#endif
+#endif  // DEBUG && defined KRIMS_HAVE_GLIBC_STACKTRACE
 }  // namespace krims
