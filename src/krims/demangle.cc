@@ -1,5 +1,6 @@
 #include "demangle.hh"
 #include <cstring>
+#include <stdlib.h>
 #ifdef KRIMS_HAVE_LIBSTDCXX_DEMANGLER
 #include <cxxabi.h>
 #endif
