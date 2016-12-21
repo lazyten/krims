@@ -77,6 +77,6 @@ if (CMAKE_BUILD_TYPE MATCHES "Release")
 	enable_if_compiles(_FLAGSS "-fno-optimize-sibling-calls")
 
 	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${_FLAGSS}")
-	set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${_FLAGSS}")
+	set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} ${_FLAGSS}")
 	unset(_FLAGSS)
 endif()
