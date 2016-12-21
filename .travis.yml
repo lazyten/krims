@@ -53,24 +53,24 @@ matrix:
     - install:
       - travis_retry sudo apt-get install -y libstdc++-4.9-dev
       compiler: clang
-      env: CC_COMPILER="clang" CXX_COMPILER="clang++" TEST_REGEX="krims_tests_"
+      env: CC_COMP="clang" CXX_COMP="clang++" TEST_REGEX="krims_tests_"
         EXTRA_OPTS="-DDRB_MAXIMUM_CXX_STANDARD=11"
     #
     # Clang 3.9 (has c++14)
     - install:
       - travis_retry sudo apt-get install -y clang-3.9 libstdc++-4.9-dev
       compiler: clang
-      env: CC_COMPILER="clang-3.9" CXX_COMPILER="clang++-3.9" TEST_REGEX="krims_tests_"
+      env: CC_COMP="clang-3.9" CXX_COMP="clang++-3.9" TEST_REGEX="krims_tests_" GCOV="llvm-cov-3.9 gcov"
     #
     # gcc-4.8 (c++11 and without tests, since rapidcheck does not compile like this)
     - compiler: gcc
-      env: CC_COMPILER="gcc" CXX_COMPILER="g++" EXTRA_OPTS="-DKRIMS_ENABLE_TESTS=OFF"
+      env: CC_COMP="gcc" CXX_COMP="g++" EXTRA_OPTS="-DKRIMS_ENABLE_TESTS=OFF"
     #
     # gcc-5 (with tests and c++14)
     - install:
       - travis_retry sudo apt-get install -y g++-5
       compiler: gcc
-      env: CC_COMPILER="gcc-5" CXX_COMPILER="g++-5" TEST_REGEX="krims_tests_"
+      env: CC_COMP="gcc-5" CXX_COMP="g++-5" TEST_REGEX="krims_tests_" GCOV="llvm-cov-3.9 gcov"
     #
     # Clang-tidy 3.9
     - install:
@@ -79,14 +79,15 @@ matrix:
       #     (which needs it for a generated python scripts)
       - travis_retry pip3 install --user pyyaml
       compiler: clang
-      env: CC_COMPILER="clang-3.9" CXX_COMPILER="clang++-3.9" BUILD_TARGET="clang-tidy-krims"
+      env: CC_COMP="clang-3.9" CXX_COMP="clang++-3.9" BUILD_TARGET="clang-tidy-krims"
 
 script:
   - cmake --version
   - ninja --version
   - mkdir build && cd build
-  - cmake -DCMAKE_CXX_COMPILER=${CXX_COMPILER} -DCMAKE_C_COMPILER=${CC_COMPILER}
+  - cmake -DCMAKE_CXX_COMPILER=${CXX_COMP} -DCMAKE_C_COMPILER=${CC_COMP}
            -DCMAKE_BUILD_TYPE=DebugRelease ${EXTRA_OPTS}
+           -DDRB_COVERAGE_Debug=ON
            -DAUTOCHECKOUT_MISSING_REPOS=ON
            -DRC_ENABLE_TESTS=OFF
            -DKRIMS_ENABLE_EXPERIMENTAL=ON
@@ -95,3 +96,6 @@ script:
   - if [ "${TEST_REGEX}" ]; then
            ctest -j ${CORES} --output-on-failure -R ${TEST_REGEX};
     else true; fi
+
+after_success:
+  - if [ "${GCOV}" ]; then bash <(curl -s https://raw.githubusercontent.com/codecov/codecov-bash/master/codecov) -x $GCOV -a "-s build" ; fi
