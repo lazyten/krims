@@ -147,13 +147,14 @@ checkout_repo () {
 	fi
 
 	git clone $I_ARGS --recursive "$I_FROM" "$I_WHAT" || return 1
-	if ! have_checkfile $I_CHECKFILE; then
+	if [ -f "$I_WHAT/$I_CHECKFILE" ]; then
+		mark_update_done "$I_WHAT" || return 1
+		return 0
+	else
 		echo "   Error ... file $I_CHECKFILE not found after checkout" >&2
 		return 1
 	fi
 
-	mark_update_done "$I_WHAT" || return 1
-	return 0
 }
 
 pull_repo() {
