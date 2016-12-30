@@ -318,15 +318,53 @@ class ParameterMap {
     }
   }
 
-  /** \brief Try to remove an element.
+  //@{
+  /** \brief Try to remove an element
+   *  which is referenced by this string
    *
-   * Return the number of removed elements (i.e. 0 or 1)*/
+   *  \return The number of removed elements (i.e. 0 or 1)
+   **/
   size_t erase(const std::string& key) {
     return m_container_ptr->erase(make_full_key(key));
   }
 
-  /** Remove all elements from the map */
-  void clear() noexcept { m_container_ptr->clear(); }
+  /** \brief Try to remove an element referenced by a key iterator
+   *
+   *  \return The iterator referencing the key *after* the last
+   *          element removed
+   **/
+  KeyIterator erase(KeyIterator position) {
+    auto res = m_container_ptr->erase(position.m_iter);
+    return KeyIterator(std::move(res), m_location);
+  }
+
+  /** \brief Try to remove a range of elements
+   *
+   *  \return The iterator referencing the key *after* the last
+   *          element removed
+   **/
+  KeyIterator erase(KeyIterator first, KeyIterator last) {
+    auto res = m_container_ptr->erase(first.m_iter, last.m_iter);
+    return KeyIterator(std::move(res), m_location);
+  }
+
+  /** \brief Try to remove a full submap path including all
+   *         child key entries.
+   *
+   *  \note  The function is equivalent to ``this->submap(path).clear()``.
+   *  \return The number of key-value entries removed from the map
+   */
+  void erase_recursive(const std::string& path) {
+    erase(begin_keys(path), end_keys(path));
+  }
+  //@}
+
+  /** Remove all elements from the map
+   *
+   * \note This takes the location of submaps into account,
+   * i.e. only the elements of the submap are deleted and
+   * not all elements of the parent. */
+  void clear();
   ///@}
 
   /** Return the value at a given key in a specific type
@@ -420,10 +458,17 @@ class ParameterMap {
   /** \name Key iterators */
   //@{
   /** Return a begin iterator which runs over all keys of this map */
-  KeyIterator begin_keys() const;
+  KeyIterator begin_keys() const { return begin_keys("/"); }
 
   /** Return an end iterator to run over the keys of this map */
-  KeyIterator end_keys() const;
+  KeyIterator end_keys() const { return end_keys("/"); }
+
+  //@{
+  /** Return a begin iterator which runs over all keys of a submap */
+  KeyIterator begin_keys(const std::string& path) const;
+
+  /** Return an end iterator matching to begin_keys(path) */
+  KeyIterator end_keys(const std::string& path) const;
   //@}
 
  private:

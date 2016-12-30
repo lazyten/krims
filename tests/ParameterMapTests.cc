@@ -280,6 +280,34 @@ TEST_CASE("ParameterMap tests", "[parametermap]") {
     REQUIRE(!m.exists("i"));
     REQUIRE(m.exists("s"));
     REQUIRE(!m.exists("dum"));
+
+    // Add more data to map
+    m.update({{"tree/sub", s},
+              {"tree/i", i},
+              {"dum", dum},
+              {"tree/value", 9},
+              {"tree", "root"},
+              {"/", "god"}});
+    REQUIRE(m.exists("tree/sub"));
+    REQUIRE(m.exists("tree/i"));
+    REQUIRE(m.exists("dum"));
+    REQUIRE(m.exists("tree/value"));
+    REQUIRE(m.exists("tree"));
+    REQUIRE(m.exists("/"));
+    REQUIRE(m.exists("s"));
+
+    m.erase_recursive("tree");
+    REQUIRE(m.exists("/"));
+    REQUIRE(m.exists("s"));
+    REQUIRE(m.exists("dum"));
+    REQUIRE_FALSE(m.exists("tree/sub"));
+    REQUIRE_FALSE(m.exists("tree/i"));
+    REQUIRE_FALSE(m.exists("tree/value"));
+    REQUIRE_FALSE(m.exists("tree"));
+
+    auto key = *m.begin_keys();
+    m.erase(m.begin_keys());
+    REQUIRE_FALSE(m.exists(key));
   }
 
   //
@@ -332,6 +360,15 @@ TEST_CASE("ParameterMap tests", "[parametermap]") {
     REQUIRE(sub2.at<std::string>("sub") == s);
     REQUIRE(sub2.at<int>("i") == i);
     REQUIRE(sub2.at<int>("value") == 10);
+
+    // Check that clearing a subtree leaves the rest intact
+    sub.clear();
+    REQUIRE(m.at<std::string>("/") == "god");
+    REQUIRE(m.exists("dum"));
+    REQUIRE(m.exists("/"));
+    REQUIRE_FALSE(m.exists("neu"));
+    REQUIRE_FALSE(m.exists("tree/neu"));
+    REQUIRE_FALSE(m.exists("tree"));
   }
 
   //
@@ -360,6 +397,13 @@ TEST_CASE("ParameterMap tests", "[parametermap]") {
     std::vector<std::string> subref{"/", "/i", "/sub", "/value"};
     auto itsubref = std::begin(subref);
     for (auto it = sub.begin_keys(); it != sub.end_keys(); ++it, ++itsubref) {
+      REQUIRE(itsubref != std::end(subref));
+      CHECK(*itsubref == *it);
+    }
+    CHECK(itsubref == std::end(subref));
+
+    itsubref = std::begin(subref);
+    for (auto it = m.begin_keys("tree"); it != m.end_keys("tree"); ++it, ++itsubref) {
       REQUIRE(itsubref != std::end(subref));
       CHECK(*itsubref == *it);
     }

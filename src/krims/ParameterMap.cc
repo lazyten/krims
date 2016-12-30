@@ -43,10 +43,17 @@ void ParameterMap::update(std::initializer_list<entry_type> il) {
   }
 }
 
+void ParameterMap::clear() {
+  if (m_location == std::string("")) {
+    // We are root, clear everything
+    m_container_ptr->clear();
+  } else {
+    // Clear only our stuff
+    erase(begin_keys(), end_keys());
+  }
+}
+
 void ParameterMap::update(const std::string& key, const ParameterMap& other) {
-  // TODO maybe code a subtree iterator for internal usage on begin() and end()
-  //      and use it here instead. Then get rid of the friends
-  //      in the KeyIterator.
   for (auto it = other.begin_keys(); it != other.end_keys(); ++it) {
     // The iterator truncates the other key relative to the builtin
     // location of other for us. We then make it full for our location
@@ -56,9 +63,6 @@ void ParameterMap::update(const std::string& key, const ParameterMap& other) {
 }
 
 void ParameterMap::update(const std::string& key, ParameterMap&& other) {
-  // TODO maybe code a subtree iterator for internal usage on begin() and end()
-  //      and use it here instead. Then get rid of the friends
-  //      in the KeyIterator.
   for (auto it = other.begin_keys(); it != other.end_keys(); ++it) {
     // The iterator truncates the other key relative to the builtin
     // location of other for us. We then make it full for our location
@@ -128,22 +132,34 @@ std::string ParameterMap::KeyIterator::strip_location_prefix(
   }
 }
 
-ParameterMap::KeyIterator ParameterMap::begin_keys() const {
-  // obtain lower bound to the root location
+ParameterMap::KeyIterator ParameterMap::begin_keys(const std::string& path) const {
+  // obtain lower bound to the path location
   // (since the keys are sorted alphabetically in the map
   //  the ones which follow next must all be below our current
   //  location)
 
-  auto it = m_container_ptr->lower_bound(m_location);
-  return KeyIterator(std::move(it), m_location);
+  const std::string path_full = make_full_key(path);
+  auto it = m_container_ptr->lower_bound(path_full);
+
+  // if it->first (the key) starts with the full path,
+  // then the subtree we care about actually exists at the position
+  // we found
+  if (0 == it->first.compare(0, path_full.length(), path_full)) {
+    return KeyIterator(std::move(it), path_full);
+  } else {
+    // we found the lower bound of the path, but it does not represent
+    // a subtree, hence return end:
+    return KeyIterator(std::end(*m_container_ptr), path_full);
+  }
 }
 
-ParameterMap::KeyIterator ParameterMap::end_keys() const {
+ParameterMap::KeyIterator ParameterMap::end_keys(const std::string& path) const {
   // We call begin_keys and advance until we find the first key
   // which is no longer part of this subtree (i.e. starts differently)
-  auto it = begin_keys();
+  auto it = begin_keys(path);
   for (; it.m_iter != std::end(*m_container_ptr); ++it) {
-    if (0 != it.m_iter->first.compare(0, m_location.length(), m_location)) break;
+    const std::string path_full = make_full_key(path);
+    if (0 != it.m_iter->first.compare(0, path_full.length(), path_full)) break;
   }
   return it;
 }
