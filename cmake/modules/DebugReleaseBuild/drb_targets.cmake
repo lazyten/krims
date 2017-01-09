@@ -92,7 +92,7 @@ macro(drb_add_target TARGET KIND)
 			LINK_FLAGS "${LINKER_FLAGS}"
 			LINKER_LANGUAGE "CXX"
 			COMPILE_FLAGS "${CMAKE_CXX_FLAGS_${build}}" #${CMAKE_CXX_FLAGS} is added by default
-			COMPILE_DEFINITIONS "${build}"
+			COMPILE_DEFINITIONS "${build}=${build}"
 		)
 	endforeach()
 

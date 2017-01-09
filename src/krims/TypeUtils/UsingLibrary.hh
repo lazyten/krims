@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 by the krims authors
+// Copyright (C) 2017 by the krims authors
 //
 // This file is part of krims.
 //
@@ -18,13 +18,12 @@
 //
 
 #pragma once
+#include <type_traits>
 
-// Include this header to get the krims type utils
-// for transforming types or asserting properties of types.
+namespace krims {
 
-#include "TypeUtils/EnableIfLibrary.hh"
-#include "TypeUtils/IsCheaplyCopyable.hh"
-#include "TypeUtils/IsComplexNumber.hh"
-#include "TypeUtils/RealTypeOf.hh"
-#include "TypeUtils/UsingLibrary.hh"
-#include "TypeUtils/VoidType.hh"
+/** Convenience using statement for std::decay */
+template <typename T>
+using decay_t = typename std::decay<T>::type;
+
+}  // namespace krims
