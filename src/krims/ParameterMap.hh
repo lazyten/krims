@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 by the krims authors
+// Copyright (C) 2016-17 by the krims authors
 //
 // This file is part of krims.
 //
@@ -39,7 +39,7 @@ namespace krims {
  *
  *  TODO: Documentation how "/" are special and go into submaps down the tree
  */
-class ParameterMap {
+class ParameterMap : Subscribable {
  public:
   class EntryValue;
   class KeyIterator;
@@ -100,24 +100,28 @@ class ParameterMap {
     EntryValue(const char* s) : EntryValue(std::string(s)) {}
 
     /** \brief Make an EntryValue from a shared pointer */
-    template <typename T>
+    template <typename T, typename = krims::enable_if_t<
+                                !std::is_same<ParameterMap, decay_t<T>>::value>>
     EntryValue(std::shared_ptr<T> t_ptr);
 
     /** \brief Make an EntryValue from an RCPWrapper */
-    template <typename T>
+    template <typename T, typename = krims::enable_if_t<
+                                !std::is_same<ParameterMap, decay_t<T>>::value>>
     EntryValue(RCPWrapper<T> t_ptr);
 
-    /** Make an EntryValue from a Subscribable object */
-    template <typename T,
-              typename std::enable_if<std::is_base_of<Subscribable, T>::value &&
-                                            !IsCheaplyCopyable<T>::value,
-                                      int>::type = 0>
+    /** Make an EntryValue from a Subscribable object (which is not a ParameterMap) */
+    template <typename T, typename std::enable_if<
+                                std::is_base_of<Subscribable, T>::value &&
+                                      !IsCheaplyCopyable<T>::value &&
+                                      !std::is_same<ParameterMap, decay_t<T>>::value,
+                                int>::type = 0>
     EntryValue(T& t);
 
     /** Make an EntryValue from an rvalue reference */
     template <typename T,
-              typename = typename std::enable_if<!std::is_reference<T>::value &&
-                                                 !IsCheaplyCopyable<T>::value>::type>
+              typename = typename std::enable_if<
+                    !std::is_reference<T>::value && !IsCheaplyCopyable<T>::value &&
+                    !std::is_same<ParameterMap, decay_t<T>>::value>::type>
     EntryValue(T&& t) : EntryValue{std::make_shared<T>(std::move(t))} {}
     // Note about the enable_if:
     //   - We need to make sure that T is the actual type (and not a
@@ -496,7 +500,7 @@ class ParameterMap {
 //
 // EntryValue subclass
 //
-template <typename T>
+template <typename T, typename>
 ParameterMap::EntryValue::EntryValue(std::shared_ptr<T> t_ptr) {
   // see copy_in and m_object_ptr_ptr comments for details why this is done
   m_object_ptr_ptr = std::make_shared<RCPWrapper<T>>(std::move(t_ptr));
@@ -505,7 +509,7 @@ ParameterMap::EntryValue::EntryValue(std::shared_ptr<T> t_ptr) {
 #endif
 }
 
-template <typename T>
+template <typename T, typename>
 ParameterMap::EntryValue::EntryValue(RCPWrapper<T> t_ptr) {
   // see copy_in and m_object_ptr_ptr comments for details why this is done
   m_object_ptr_ptr = std::make_shared<RCPWrapper<T>>(std::move(t_ptr));
@@ -514,9 +518,11 @@ ParameterMap::EntryValue::EntryValue(RCPWrapper<T> t_ptr) {
 #endif
 }
 
-template <typename T, typename std::enable_if<std::is_base_of<Subscribable, T>::value &&
-                                                    !IsCheaplyCopyable<T>::value,
-                                              int>::type>
+template <typename T,
+          typename std::enable_if<std::is_base_of<Subscribable, T>::value &&
+                                        !IsCheaplyCopyable<T>::value &&
+                                        !std::is_same<ParameterMap, decay_t<T>>::value,
+                                  int>::type>
 ParameterMap::EntryValue::EntryValue(T& t) {
   SubscriptionPointer<T> t_ptr = make_subscription(t, "EntryValue");
 
