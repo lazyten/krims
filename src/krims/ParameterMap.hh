@@ -39,7 +39,7 @@ namespace krims {
  *
  *  TODO: Documentation how "/" are special and go into submaps down the tree
  */
-class ParameterMap : Subscribable {
+class ParameterMap : public Subscribable {
  public:
   class EntryValue;
   class KeyIterator;
@@ -127,6 +127,13 @@ class ParameterMap : Subscribable {
     //   - We need to make sure that T is the actual type (and not a
     //     reference)
     //   - T should not be cheap to copy (else first constructor applies)
+    //   - T should not be a ParameterMap (we do not want maps in maps)
+
+    EntryValue(const EntryValue&) = default;
+    EntryValue(EntryValue&&) = default;
+    ~EntryValue() = default;
+    EntryValue& operator=(const EntryValue&) = default;
+    EntryValue& operator=(EntryValue&&) = default;
 
     /** Obtain a non-const pointer to the internal object */
     template <typename T>
@@ -156,7 +163,7 @@ class ParameterMap : Subscribable {
     template <typename T>
     void copy_in(T t);
 
-    /** The stored pointer to the Pointerwrapper<T>
+    /** The stored pointer to the RCPWrapper<T>
      * In other words: Twice dereferencing this will always
      * get us the object back.
      */
@@ -322,7 +329,6 @@ class ParameterMap : Subscribable {
     }
   }
 
-  //@{
   /** \brief Try to remove an element
    *  which is referenced by this string
    *
@@ -361,7 +367,6 @@ class ParameterMap : Subscribable {
   void erase_recursive(const std::string& path) {
     erase(begin_keys(path), end_keys(path));
   }
-  //@}
 
   /** Remove all elements from the map
    *
@@ -371,19 +376,25 @@ class ParameterMap : Subscribable {
   void clear();
   ///@}
 
+  /** \name Obtaining elements and pointers to elements */
+  ///@{
   /** Return the value at a given key in a specific type
    *
    * If the value cannot be found an ExcUnknownKey is thrown.
    * If the type requested is wrong the program is aborted.
    */
   template <typename T>
-  T& at(const std::string& key);
+  T& at(const std::string& key) {
+    return at_raw_value(key).get<T>();
+  }
 
   /** \brief Return the value at a given key in a specific type (const version)
    * See non-const version for details.
    */
   template <typename T>
-  const T& at(const std::string& key) const;
+  const T& at(const std::string& key) const {
+    return at_raw_value(key).get<T>();
+  }
 
   /** \brief Get the value of an element.
    *
@@ -412,20 +423,48 @@ class ParameterMap : Subscribable {
    * Use the contains_shared_ptr() function to check this.
    */
   template <typename T>
-  RCPWrapper<T> at_ptr(const std::string& key);
+  RCPWrapper<T> at_ptr(const std::string& key) {
+    return at_raw_value(key).get_ptr<T>();
+  }
 
   /** Return the pointer to the value of a specific key. (const version)
    *
    * See non-const version for details
    */
   template <typename T>
-  RCPWrapper<const T> at_ptr(const std::string& key) const;
+  RCPWrapper<const T> at_ptr(const std::string& key) const {
+    return at_raw_value(key).get_ptr<T>();
+  }
+
+  /** Return an EntryValue object representing the data behind the specified key
+   *
+   * \note This is an advanced method. Use only if you know what you are doing.
+   * */
+  EntryValue& at_raw_value(const std::string& key) {
+    auto itkey = m_container_ptr->find(make_full_key(key));
+    assert_throw(itkey != std::end(*m_container_ptr), ExcUnknownKey(key));
+    return itkey->second;
+  }
+
+  /** Return an EntryValue object representing the data behind the specified key
+   * (const version)
+   *
+   * \note This is an advanced method. Use only if you know what you are doing.
+   * */
+  const EntryValue& at_raw_value(const std::string& key) const {
+    auto itkey = m_container_ptr->find(make_full_key(key));
+    assert_throw(itkey != std::end(*m_container_ptr), ExcUnknownKey(key));
+    return itkey->second;
+  }
+  ///@}
 
   /** Check weather a key exists */
   bool exists(const std::string& key) const {
     return m_container_ptr->find(make_full_key(key)) != std::end(*m_container_ptr);
   }
 
+  /** \name Submaps */
+  ///@{
   /** \brief Get a submap starting pointing at a different location.
    *
    * The ParameterMap allows the hierarchical organisation of data
@@ -447,14 +486,15 @@ class ParameterMap : Subscribable {
    * */
   ParameterMap submap(const std::string& location) {
     // Construct new map, but starting at a different location
-    return ParameterMap{m_container_ptr, make_full_key(location)};
+    return ParameterMap{*this, location};
   }
 
   /** Get a const submap */
   const ParameterMap submap(const std::string& location) const {
     // Construct new map, but starting at a different location
-    return ParameterMap{m_container_ptr, make_full_key(location)};
+    return ParameterMap{*this, location};
   }
+  ///@}
 
   // TODO alias names, i.e. link one name to a different one.
   //      but be careful not to get a cyclic graph.
@@ -475,11 +515,30 @@ class ParameterMap : Subscribable {
   KeyIterator end_keys(const std::string& path) const;
   //@}
 
- private:
-  /** \brief Construct parameter map from another map and a new location. */
-  ParameterMap(std::shared_ptr<inner_map_type> map, std::string newlocation)
-        : m_container_ptr{map}, m_location{newlocation} {}
+ protected:
+  /** \brief Construct parameter map from a reference to another ParameterMap
+   *  and a new location.
+   *
+   * The newlocation is relative to the original ParameterMap ``orig``, since
+   * it is processed through ``other.make_full_key()``. In other words this
+   * constructor is only suitable to move downwards in the tree and never upwards.
+   * Note that this is due to the fact, that make_full_key ignores leading "../".
+   *
+   * The returned ParameterMap is essentially a shallow copy to a subtree
+   * of the input map (i.e. a view into a subtree). Since they operate
+   * on the same inner data, all changes will be visible to both objects.
+   *
+   * \note This constructor may remove constness (if newlocation == "/"),
+   * so beware how you expose the constructed object to the outside.
+   *
+   * \note This is an advanced constructor. Use only if you know what you are
+   * doing.
+   **/
+  ParameterMap(const ParameterMap& other, std::string newlocation)
+        : m_container_ptr{other.m_container_ptr},
+          m_location{other.make_full_key(newlocation)} {}
 
+ private:
   /** Make the actual container key from a key supplied by the user
    *  Care is taken such that we cannot escape the subtree.
    * */
@@ -575,20 +634,6 @@ RCPWrapper<const T> ParameterMap::EntryValue::get_ptr() const {
 // ParameterMap
 //
 template <typename T>
-T& ParameterMap::at(const std::string& key) {
-  auto itkey = m_container_ptr->find(make_full_key(key));
-  assert_throw(itkey != std::end(*m_container_ptr), ExcUnknownKey(key));
-  return itkey->second.get<T>();
-}
-
-template <typename T>
-const T& ParameterMap::at(const std::string& key) const {
-  auto itkey = m_container_ptr->find(make_full_key(key));
-  assert_throw(itkey != std::end(*m_container_ptr), ExcUnknownKey(key));
-  return itkey->second.get<T>();
-}
-
-template <typename T>
 T& ParameterMap::at(const std::string& key, T& default_value) {
   auto itkey = m_container_ptr->find(make_full_key(key));
   if (itkey == std::end(*m_container_ptr)) {
@@ -610,20 +655,6 @@ const T& ParameterMap::at(const std::string& key, const T& default_value) const 
     // Key found, return mapped value
     return itkey->second.get<T>();
   }
-}
-
-template <typename T>
-RCPWrapper<T> ParameterMap::at_ptr(const std::string& key) {
-  auto itkey = m_container_ptr->find(make_full_key(key));
-  assert_throw(itkey != std::end(*m_container_ptr), ExcUnknownKey(key));
-  return itkey->second.get_ptr<T>();
-}
-
-template <typename T>
-RCPWrapper<const T> ParameterMap::at_ptr(const std::string& key) const {
-  auto itkey = m_container_ptr->find(make_full_key(key));
-  assert_throw(itkey != std::end(*m_container_ptr), ExcUnknownKey(key));
-  return itkey->second.get_ptr<T>();
 }
 
 }  // krims
