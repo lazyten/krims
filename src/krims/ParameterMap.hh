@@ -39,7 +39,7 @@ namespace krims {
  *
  *  TODO: Documentation how "/" are special and go into submaps down the tree
  */
-class ParameterMap : Subscribable {
+class ParameterMap : public Subscribable {
  public:
   class EntryValue;
   class KeyIterator;
@@ -127,6 +127,13 @@ class ParameterMap : Subscribable {
     //   - We need to make sure that T is the actual type (and not a
     //     reference)
     //   - T should not be cheap to copy (else first constructor applies)
+    //   - T should not be a ParameterMap (we do not want maps in maps)
+
+    EntryValue(const EntryValue&) = default;
+    EntryValue(EntryValue&&) = default;
+    ~EntryValue() = default;
+    EntryValue& operator=(const EntryValue&) = default;
+    EntryValue& operator=(EntryValue&&) = default;
 
     /** Obtain a non-const pointer to the internal object */
     template <typename T>
@@ -156,7 +163,7 @@ class ParameterMap : Subscribable {
     template <typename T>
     void copy_in(T t);
 
-    /** The stored pointer to the Pointerwrapper<T>
+    /** The stored pointer to the RCPWrapper<T>
      * In other words: Twice dereferencing this will always
      * get us the object back.
      */
