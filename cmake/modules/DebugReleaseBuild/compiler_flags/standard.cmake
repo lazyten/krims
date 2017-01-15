@@ -51,6 +51,14 @@ enable_if_compiles(CMAKE_CXX_FLAGS "-Werror")
 #######################
 #include(${DRB_DIR}/workarounds/missing_gets_bug.cmake)
 
+######################
+#--  Linker flags  --#
+######################
+# Add all symbols in the symbol table, such that we can get meaningful stacktraces
+# on application crash.
+set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -rdynamic")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -rdynamic")
+
 ##############
 #--  Debug --#
 ##############
