@@ -245,7 +245,35 @@ class ParameterMap : public Subscribable {
   ~ParameterMap() = default;
   ParameterMap(ParameterMap&&) = default;
 
-  /** \brief Copy constructor */
+  /** \brief Copy constructor
+   *
+   * Note that the copy is deep, but only in the sense that the pointers to
+   * the mapped data is copied, but not the actual data itself.
+   *
+   * This manifests in the different behaviour of the ``update`` versus the
+   * ``at`` function, because the former updates the actual pointer and the
+   * latter updates the data referred to by the pointer.
+   *
+   * Consider as an example:
+   * ```
+   * ParameterMap map{"a", 1};
+   * ParameterMap copy(map);
+   * copy.update("a", 42);
+   *
+   * std::cout << map.at<int>("a");
+   * std::cout << copy.at<int>("a");
+   * ```
+   * This will print 1 and then 42, but
+   * ```
+   * ParameterMap map{"a", 1};
+   * ParameterMap copy(map);
+   * copy.at<int>("a") = 42;
+   *
+   * std::cout << map.at<int>("a");
+   * std::cout << copy.at<int>("a");
+   * ```
+   * will print 42 twice.
+   * */
   ParameterMap(const ParameterMap& other);
 
   /** \brief Assignment operator */
@@ -278,6 +306,15 @@ class ParameterMap : public Subscribable {
    * The entries are updated relative to the given key paths.
    * I.e. if key == "blubber" and the map \t map contairs "foo" and
    * "bar", then "blubber/foo" and "blubber/bar" will be updated.
+   *
+   * Note that the update involves a deep copy of the referring pointers,
+   * but not a copy of the actual data in memory. See the details of
+   * the copy-constructor for consequences as it involves such a deep
+   * copy of the map data as well.
+   *
+   * Roughly speaking modification of entries via ``at`` affects both
+   * ``this`` and ``map``, wherease modification of entries via ``update``
+   * only effects the ParameterMap object on which the method is called.
    * */
   void update(const std::string& key, const ParameterMap& map);
 
@@ -378,17 +415,27 @@ class ParameterMap : public Subscribable {
 
   /** \name Obtaining elements and pointers to elements */
   ///@{
-  /** Return the value at a given key in a specific type
+  /** Return a reference to the value at a given key
+   *  with the specified type.
    *
    * If the value cannot be found an ExcUnknownKey is thrown.
    * If the type requested is wrong the program is aborted.
+   *
+   * \note This directly modifies the data in memory, so all
+   * ParameterMap objects which internally refer to this data
+   * will be changed by modifying this value as well. This not
+   * only includes submaps, but also deep copies of this
+   * ParameterMap either done by ``update(std::string, ParameterMap)``
+   * or by the copy constructor. See the documentation of the
+   * copy constructor for details.
    */
   template <typename T>
   T& at(const std::string& key) {
     return at_raw_value(key).get<T>();
   }
 
-  /** \brief Return the value at a given key in a specific type (const version)
+  /** \brief Return a reference to the value at a given key
+   * with the specified type. (const version)
    * See non-const version for details.
    */
   template <typename T>
@@ -410,7 +457,7 @@ class ParameterMap : public Subscribable {
   template <typename T>
   const T& at(const std::string& key, const T& default_value) const;
 
-  /** \brief Return the pointer to the value of a specific key.
+  /** \brief Return a pointer to the value of a specific key.
    *
    * The returned object is a RCPWrapper, meaning that it internally
    * may contain a shared pointer, but it may also contain a
@@ -427,7 +474,7 @@ class ParameterMap : public Subscribable {
     return at_raw_value(key).get_ptr<T>();
   }
 
-  /** Return the pointer to the value of a specific key. (const version)
+  /** Return a pointer to the value of a specific key. (const version)
    *
    * See non-const version for details
    */
@@ -483,6 +530,29 @@ class ParameterMap : public Subscribable {
    * at location "bla" does still not contain a key "../bla/blubber/foo",
    * but it does contain a key "../blubber/foo", since the leading ".."
    * has no effect (we are at the root of the ParameterMap)
+   *
+   * The submap is a shallow copy of a subpath of *this. This means that
+   * both the pointer and the referred values are identical. So unlike the
+   * copy constructor both ``update`` and ``at`` of both maps
+   * work on the same state. I.e.
+   * ```
+   * ParameterMap map{"/tree/a", 1};
+   * ParameterMap sub = map.submap("tree");
+   * sub.update("a", 42);
+   *
+   * std::cout << map.at<int>("/tree/a");
+   * std::cout << sub.at<int>("a");
+   * ```
+   * will print 42 twice and
+   * ```
+   * ParameterMap map{"/tree/a", 1};
+   * ParameterMap sub = map.submap("tree");
+   * sub.at<int>("a") =  42;
+   *
+   * std::cout << map.at<int>("a");
+   * std::cout << copy.at<int>("a");
+   * ```
+   * will print 42 twice as well.
    * */
   ParameterMap submap(const std::string& location) {
     // Construct new map, but starting at a different location
@@ -508,7 +578,9 @@ class ParameterMap : public Subscribable {
   KeyIterator end_keys() const { return end_keys("/"); }
 
   //@{
-  /** Return a begin iterator which runs over all keys of a submap */
+  /** Return a begin iterator which runs over all keys of a submap
+   *  including ``path + "/"``, i.e. the root of the submap.
+   **/
   KeyIterator begin_keys(const std::string& path) const;
 
   /** Return an end iterator matching to begin_keys(path) */
