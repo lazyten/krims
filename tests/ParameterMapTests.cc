@@ -261,8 +261,11 @@ TEST_CASE("ParameterMap tests", "[parametermap]") {
   //
 
   SECTION("Check that data can be erased") {
-    // Add data to map.
     ParameterMap m{};
+
+    REQUIRE_FALSE(m.exists("bla"));
+
+    // Add data to map.
     m.update_copy("s", s);
     m.update_copy("i", i);
     m.update("dum", dum);
