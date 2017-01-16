@@ -158,6 +158,29 @@ class ParameterMap : public Subscribable {
     /** Is the object empty */
     bool empty() const { return m_object_ptr_ptr == nullptr; }
 
+    /** Return the demangled typename of the type which is stored
+     *  inside this EntryValue object.
+     *
+     *  \note This function only returns a sensible value if the
+     *  code is compiled in DEBUG mode and if type demangling
+     *  is supported by the OS (i.e. if KRIMS_HAVE_LIBSTDCXX_DEMANGLER
+     *  is set).
+     *
+     *  Otherwise either type demangling is not possible or
+     *  for performance reasons no type information is stored
+     *  in this object.
+     *
+     *  In RELEASE builds this function always returns
+     *  the string "<no typeinfo available>".
+     */
+    std::string type_name_object_ptr() const {
+#ifdef DEBUG
+      return demangled_string(m_type_name);
+#else
+      return "<no typeinfo>";
+#endif
+    }
+
    private:
     //! Stupidly copy the object and set the m_object_ptr_ptr
     template <typename T>
@@ -510,6 +533,20 @@ class ParameterMap : public Subscribable {
     return m_container_ptr->find(make_full_key(key)) != std::end(*m_container_ptr);
   }
 
+  /** Return a string which describes the type of the
+   * stored data
+   *
+   * \note This function only returns a senbible value if:
+   *   - The code is compiled in DEBUG mode
+   *   - The OS exposes an interface for type demangling.
+   *   - In RELEASE builds this function always returns
+   *     the string "<no typeinfo>".
+   *
+   */
+  std::string type_name_of(const std::string& key) const {
+    return at_raw_value(key).type_name_object_ptr();
+  }
+
   /** \name Submaps */
   ///@{
   /** \brief Get a submap starting pointing at a different location.
@@ -683,7 +720,7 @@ void ParameterMap::EntryValue::copy_in(T t) {
 template <typename T>
 RCPWrapper<T> ParameterMap::EntryValue::get_ptr() {
   assert_dbg(m_type_name == std::string(typeid(T).name()),
-             ExcWrongTypeRequested(real_typename<T>(), demangled_string(m_type_name)));
+             ExcWrongTypeRequested(real_typename<T>(), type_name_object_ptr()));
   assert_dbg(!empty(), ExcInvalidPointer());
 
   // We need to cast and then dereference to get the RCPWrapper of the
@@ -694,7 +731,7 @@ RCPWrapper<T> ParameterMap::EntryValue::get_ptr() {
 template <typename T>
 RCPWrapper<const T> ParameterMap::EntryValue::get_ptr() const {
   assert_dbg(m_type_name == std::string(typeid(T).name()),
-             ExcWrongTypeRequested(real_typename<T>(), demangled_string(m_type_name)));
+             ExcWrongTypeRequested(real_typename<T>(), type_name_object_ptr()));
   assert_dbg(!empty(), ExcInvalidPointer());
 
   // We need to cast and then dereference to get the RCPWrapper of the
