@@ -181,8 +181,13 @@ TEST_CASE("ParameterMap tests", "[parametermap]") {
     m.update("string", s);
     m.update("integer", i);
 
+    std::shared_ptr<std::string> strptr(new std::string("data"));
+
     REQUIRE(m.at<int>("blubber", 4) == 4);
     REQUIRE(m.at<std::string>("blub", "neun") == "neun");
+    REQUIRE(m.at<std::string>("string", "neun") == s);
+    REQUIRE(*m.at_ptr("string", strptr) == s);
+    REQUIRE(m.at_ptr("blubber", strptr).get() == strptr.get());
   }
 
   //
