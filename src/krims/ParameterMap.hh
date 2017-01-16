@@ -468,7 +468,7 @@ class ParameterMap : public Subscribable {
 
   /** \brief Get the value of an element.
    *
-   * If the key cannot be found, returns the reference provided instead.
+   * If the key cannot be found, returns the provided reference instead.
    * If the type requested is wrong the program is aborted.
    */
   template <typename T>
@@ -505,6 +505,37 @@ class ParameterMap : public Subscribable {
   RCPWrapper<const T> at_ptr(const std::string& key) const {
     return at_raw_value(key).get_ptr<T>();
   }
+
+  //@{
+  /** \brief Get the pointer to the value of a key or a default.
+   *
+   * If the key cannot be found, returns the provided pointer instead.
+   * If the type requested is wrong the program is aborted.
+   */
+  template <typename T>
+  RCPWrapper<T> at_ptr(const std::string& key, RCPWrapper<T> default_ptr);
+
+  template <typename T>
+  RCPWrapper<T> at_ptr(const std::string& key, std::shared_ptr<T> default_ptr) {
+    return at_ptr(key, RCPWrapper<T>(default_ptr));
+  }
+  //@}
+
+  //@{
+  /** \brief Get the pointer to the value of a key or a default. (const version)
+   *
+   *  See the non-const version for details.
+   */
+  template <typename T>
+  RCPWrapper<const T> at_ptr(const std::string& key,
+                             RCPWrapper<const T> default_ptr) const;
+
+  template <typename T>
+  RCPWrapper<const T> at_ptr(const std::string& key,
+                             std::shared_ptr<const T> default_ptr) const {
+    return at_ptr(key, RCPWrapper<const T>(default_ptr));
+  }
+  //@}
 
   /** Return an EntryValue object representing the data behind the specified key
    *
@@ -746,10 +777,8 @@ template <typename T>
 T& ParameterMap::at(const std::string& key, T& default_value) {
   auto itkey = m_container_ptr->find(make_full_key(key));
   if (itkey == std::end(*m_container_ptr)) {
-    // Key not found, return default:
-    return default_value;
+    return default_value;  // Key not found
   } else {
-    // Key found, return mapped value
     return itkey->second.get<T>();
   }
 }
@@ -758,11 +787,30 @@ template <typename T>
 const T& ParameterMap::at(const std::string& key, const T& default_value) const {
   auto itkey = m_container_ptr->find(make_full_key(key));
   if (itkey == std::end(*m_container_ptr)) {
-    // Key not found, return default:
-    return default_value;
+    return default_value;  // Key not found
   } else {
-    // Key found, return mapped value
     return itkey->second.get<T>();
+  }
+}
+
+template <typename T>
+RCPWrapper<T> ParameterMap::at_ptr(const std::string& key, RCPWrapper<T> default_ptr) {
+  auto itkey = m_container_ptr->find(make_full_key(key));
+  if (itkey == std::end(*m_container_ptr)) {
+    return default_ptr;  // Key not found
+  } else {
+    return itkey->second.get_ptr<T>();
+  }
+}
+
+template <typename T>
+RCPWrapper<const T> ParameterMap::at_ptr(const std::string& key,
+                                         RCPWrapper<const T> default_ptr) const {
+  auto itkey = m_container_ptr->find(make_full_key(key));
+  if (itkey == std::end(*m_container_ptr)) {
+    return default_ptr;  // Key not found
+  } else {
+    return itkey->second.get_ptr<T>();
   }
 }
 
