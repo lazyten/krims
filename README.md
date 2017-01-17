@@ -51,7 +51,7 @@ parts of the library.
   and a release version, which is highly optimised by the compiler
 - Just by selecting which version to link with, one gets either the checking or the speed.
 - Using this module a whole dependency tree of libraries can be build for
-  Debug and Release simultaneously and hence with little afford one can switch even
+  Debug and Release simultaneously and hence with little effort one can switch even
   for a complex project.
 - The module is also responsible for determining the compiler features and set suitable
   compiler flags for a built.
@@ -69,6 +69,7 @@ drb_init()
 project(MyProject)
 
 # Determine compiler flags
+#    and require c++11 or higher
 set (cxx_minimum_required 11)
 drb_setup_compiler_flags(${cxx_minimum_required})
 
