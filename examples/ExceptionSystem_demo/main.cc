@@ -18,6 +18,7 @@
 //
 
 #include <krims/ExceptionSystem.hh>
+#include <krims/SubscriptionPointer.hh>
 #include <krims/version.hh>
 #include <sstream>
 #include <vector>
@@ -66,6 +67,7 @@ void part4() {
   double i = 3. / 0.;
   assert_finite(i);
 }
+
 void part5() {
   std::vector<std::vector<int>> vvec{{0, 1}, {2, 3, 4}};
 
@@ -73,10 +75,17 @@ void part5() {
   assert_element_sizes(vvec, 2);
 }
 
+class testclass_part6 : public krims::Subscribable {};
+void part6() {
+  krims::SubscriptionPointer<testclass_part6> bptr("part6");
+  testclass_part6 b;
+  bptr.reset(b);
+}
+
 int main(int argc, char** argv) {
   std::cout << "Using krims version " << krims::version::version_string() << std::endl;
 
-  const int partmax = 5;
+  const int partmax = 6;
 
   if (argc != 2) {
     print_error(partmax);
@@ -96,6 +105,7 @@ int main(int argc, char** argv) {
   if (part-- == 0) part3();
   if (part-- == 0) part4();
   if (part-- == 0) part5();
+  if (part-- == 0) part6();
 
   return 0;
 }

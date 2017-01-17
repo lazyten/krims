@@ -20,6 +20,7 @@
 #pragma once
 #include "ExceptionSystem.hh"
 #include "SubscriptionPointer.hh"
+#include "demangle.hh"
 #include <algorithm>
 #include <list>
 #include <memory>
@@ -60,13 +61,13 @@ class Subscribable {
 
   /** Exception to indicate that Subscribable is still used */
   DefException3(ExcStillUsed, std::string, size_t, std::string,
-                << "Object of type " << arg1 << " is still used by " << arg2
+                << "Object of type \"" << arg1 << "\" is still used by " << arg2
                 << " other objects, which are (from new to old): " << arg3);
 
   /** Exception to indicate that Subscriber is not known. */
   DefException2(ExcUnknownSubscriberId, std::string, std::string,
-                << "No subscriber with identifier " << arg1
-                << " is known to have subscribed to the class " << arg2 << ".");
+                << "No subscriber with identifier \"" << arg1
+                << "\" is known to have subscribed to the class " << arg2 << ".");
 
   //
   // Constructor, destructor and assignment
@@ -196,6 +197,9 @@ class Subscribable {
     for (auto it = std::begin(m_subscribers); it != std::end(m_subscribers); ++it) {
       // check if the pointers agree
       if (it->get() == id_ptr.get()) {
+        // TODO This part is not thread-safe
+        //
+        //      Have a mutex to guard the erase
         m_subscribers.erase(it);
         return;
       }
@@ -211,12 +215,20 @@ class Subscribable {
    * @note Does only exist in DEBUG mode
    * */
   void subscribe(const std::shared_ptr<const std::string>& id_ptr) const {
-    m_subscribers.push_front(id_ptr);
+    // TODO This part is not thread-safe
+    //
+    //      Have a mutex to guard the push and the actual setting
+    //      of the classname.
 
     // Set classname here, since this is actually executed by the
     // precise object we subscribe to and not the generic Subscribable
     // class. So here we have the "proper" type available in this.
-    m_classname = std::string(typeid(*this).name());
+    const std::string expected_classname = demangled_string(typeid(*this).name());
+    if (m_classname != expected_classname) {
+      m_classname = expected_classname;
+    }
+
+    m_subscribers.push_front(id_ptr);
   }
 
   /** List to contain the pointer of string object, which are passed
