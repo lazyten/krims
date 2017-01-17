@@ -17,6 +17,7 @@
 // along with krims. If not, see <http://www.gnu.org/licenses/>.
 //
 
+#include <iomanip>
 #include <iostream>
 #include <krims/ParameterMap.hh>
 #include <krims/version.hh>
@@ -69,11 +70,24 @@ void print_map(const ParameterMap& map) {
   std::cout << "eins:             " << map.at<std::string>("eins") << std::endl;
   std::cout << "a->data:          " << map.at<A>("a").data << std::endl;
 
+#ifndef DEBUG
   // Note that the types have to match. This will yield undefined behaviour
   // in a Release build and an aborting of the Program in a Debug build.
   std::cout << "always (rubbish): " << map.at<int>("always") << std::endl;
+#endif
 
   std::cout << std::endl;
+}
+
+void print_keys(const ParameterMap& map) {
+  // Print all keys which are stored along
+  // with a string describing the type of the data.
+  // Note: In RELEASE the type information is
+  // not stored for perfomance and space reasons
+  // and hence is not available!
+  for (auto itkey = map.begin_keys(); itkey != map.end_keys(); ++itkey) {
+    std::cout << std::setw(14) << *itkey << "  " << map.type_name_of(*itkey) << std::endl;
+  }
 }
 
 void modify_map(ParameterMap& map) {
@@ -93,22 +107,28 @@ void modify_map(ParameterMap& map) {
   // And modify the data:
   aptr->data = 9;
 
+#ifndef DEBUG
   // Note: The pointer one receives this way is *not* a shared pointer, but
-  // a wrapper object that does the right thing for any kind of data passed
-  // to the map, i.e. also Subscribable objects passed to the ParameterMap
-  // by reference can be usend and stored *as pointers* this way.
+  // a wrapper object called RCPWrapper, that does the right thing for any
+  // kind of data passed to the map, i.e. also Subscribable objects passed
+  // to the ParameterMap by reference can retrieved and used like *pointers*
+  // this way.
   //
-  // One can make a proper shared pointer out of this if by explicit casting:
+  // One can make a proper shared pointer out of this RCPWrapper by explicit casting:
   std::shared_ptr<A> asptr = static_cast<std::shared_ptr<A>>(aptr);
 
-  // In Debug mode this will abort the program. In Release mode this will
-  // imply a *copy* off all data if the value object is only available by
-  // reference, i.e. if the object is a Subscribable.
-  // Whether a full shared_ptr is a available can be checked using
+  // In Debug mode this will abort the program for Subscriptions
+  // (but of cause it will be fine for objects owned by the ParameterMap).
+  // In Release mode a subscribed object will be *copied* and a pointer
+  // to the copy returned.
+  //
+  // Whether a full shared_ptr is a available, i.e. whether the ParameterMap
+  // actually has ownership of the data, can be checked using
   // bool is_shared = aptr.is_shared_ptr();
 
-  // asptr is a normal unique ptr:
+  // asptr is now a std::shared_ptr:
   if (asptr.unique()) return;
+#endif  // DEBUG
 }
 
 void modify_map_other(ParameterMap& map) {
@@ -129,14 +149,27 @@ int main() {
   std::cout << "Printing map" << std::endl;
   print_map(map);
 
+  std::cout << "#" << std::endl;
+  std::cout << "# Modify submap with modify_map_other(map.submap(\"sub\")" << std::endl;
+  std::cout << "#" << std::endl;
+
   ParameterMap submap = map.submap("sub");
   modify_map_other(submap);
+
+  std::cout << "Printing all keys of submap:" << std::endl;
+  print_keys(map.submap("sub"));
 
   std::cout << "Printing submap:" << std::endl;
   print_map(map.submap("sub"));
 
+  std::cout << "#" << std::endl;
+  std::cout << "# Modify map with modify_map(map)" << std::endl;
+  std::cout << "#" << std::endl;
+
   modify_map(map);
 
+  std::cout << "Printing all keys of map" << std::endl;
+  print_keys(map);
   std::cout << "Printing map" << std::endl;
   print_map(map);
   std::cout << "Printing submap:" << std::endl;

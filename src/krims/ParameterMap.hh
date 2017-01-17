@@ -171,13 +171,13 @@ class ParameterMap : public Subscribable {
      *  in this object.
      *
      *  In RELEASE builds this function always returns
-     *  the string "<no typeinfo available>".
+     *  the string "<no typeinfo for RELEASE>".
      */
     std::string type_name_object_ptr() const {
 #ifdef DEBUG
       return demangled_string(m_type_name);
 #else
-      return "<no typeinfo>";
+      return "<no typeinfo for RELEASE>";
 #endif
     }
 
