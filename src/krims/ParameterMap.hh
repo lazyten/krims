@@ -171,13 +171,13 @@ class ParameterMap : public Subscribable {
      *  in this object.
      *
      *  In RELEASE builds this function always returns
-     *  the string "<no typeinfo for RELEASE>".
+     *  the string "<no_typeinfo_available>".
      */
-    std::string type_name_object_ptr() const {
+    std::string type_name() const {
 #ifdef DEBUG
       return demangled_string(m_type_name);
 #else
-      return "<no typeinfo for RELEASE>";
+      return "<no_typeinfo_available>";
 #endif
     }
 
@@ -185,6 +185,21 @@ class ParameterMap : public Subscribable {
     //! Stupidly copy the object and set the m_object_ptr_ptr
     template <typename T>
     void copy_in(T t);
+
+#ifdef DEBUG
+    /** Check whether the object pointer stored in m_object_ptr_ptr
+     *  can be obtained as a RCPWrapper<T>
+     */
+    template <typename T>
+    constexpr bool can_get_value_as() const {
+      typedef typename std::remove_const<T>::type nonconstT;
+
+      // Allow if the type is identical to the type originally stored
+      // or if a simple addition of const does the trick.
+      return m_type_name == std::string(typeid(T).name()) ||
+             m_type_name == std::string(typeid(nonconstT).name());
+    }
+#endif  // DEBUG
 
     /** The stored pointer to the RCPWrapper<T>
      * In other words: Twice dereferencing this will always
@@ -194,7 +209,7 @@ class ParameterMap : public Subscribable {
 
 #ifdef DEBUG
     std::string m_type_name;
-#endif
+#endif  // DEBUG
   };
 
   class KeyIterator
@@ -575,7 +590,7 @@ class ParameterMap : public Subscribable {
    *
    */
   std::string type_name_of(const std::string& key) const {
-    return at_raw_value(key).type_name_object_ptr();
+    return at_raw_value(key).type_name();
   }
 
   /** \name Submaps */
@@ -750,9 +765,9 @@ void ParameterMap::EntryValue::copy_in(T t) {
 
 template <typename T>
 RCPWrapper<T> ParameterMap::EntryValue::get_ptr() {
-  assert_dbg(m_type_name == std::string(typeid(T).name()),
-             ExcWrongTypeRequested(real_typename<T>(), type_name_object_ptr()));
   assert_dbg(!empty(), ExcInvalidPointer());
+  assert_dbg(can_get_value_as<T>(),
+             ExcWrongTypeRequested(real_typename<T>(), type_name()));
 
   // We need to cast and then dereference to get the RCPWrapper of the
   // appropriate type out.
@@ -761,9 +776,9 @@ RCPWrapper<T> ParameterMap::EntryValue::get_ptr() {
 
 template <typename T>
 RCPWrapper<const T> ParameterMap::EntryValue::get_ptr() const {
-  assert_dbg(m_type_name == std::string(typeid(T).name()),
-             ExcWrongTypeRequested(real_typename<T>(), type_name_object_ptr()));
   assert_dbg(!empty(), ExcInvalidPointer());
+  assert_dbg(can_get_value_as<const T>(),
+             ExcWrongTypeRequested(real_typename<T>(), type_name()));
 
   // We need to cast and then dereference to get the RCPWrapper of the
   // appropriate type out.

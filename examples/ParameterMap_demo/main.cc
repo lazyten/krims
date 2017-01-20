@@ -66,14 +66,14 @@ void print_map(const ParameterMap& map) {
             << std::endl;
 
   // Print some others
-  std::cout << "pi:               " << map.at<double>("pi") << std::endl;
-  std::cout << "eins:             " << map.at<std::string>("eins") << std::endl;
-  std::cout << "a->data:          " << map.at<A>("a").data << std::endl;
+  std::cout << "pi:               " << map.at<const double>("pi") << std::endl;
+  std::cout << "eins:             " << map.at<const std::string>("eins") << std::endl;
+  std::cout << "a->data:          " << map.at<const A>("a").data << std::endl;
 
 #ifndef DEBUG
   // Note that the types have to match. This will yield undefined behaviour
   // in a Release build and an aborting of the Program in a Debug build.
-  std::cout << "always (rubbish): " << map.at<int>("always") << std::endl;
+  std::cout << "always (rubbish): " << map.at<const int>("always") << std::endl;
 #endif
 
   std::cout << std::endl;

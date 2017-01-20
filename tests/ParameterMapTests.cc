@@ -76,6 +76,8 @@ TEST_CASE("ParameterMap tests", "[parametermap]") {
     REQUIRE_THROWS_AS(m.at<double>("i"), ParameterMap::ExcWrongTypeRequested);
     REQUIRE_THROWS_AS(m.at<double>("s"), ParameterMap::ExcWrongTypeRequested);
     REQUIRE_THROWS_AS(m.at<double>("dum"), ParameterMap::ExcWrongTypeRequested);
+    REQUIRE(m.at<DummySubscribable<double>>("dum") == dum);
+    REQUIRE(m.at<const DummySubscribable<double>>("dum") == dum);
   }
 
   //
