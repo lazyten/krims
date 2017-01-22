@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016-17 by the krims authors
+// Copyright (C) 2017 by the krims authors
 //
 // This file is part of krims.
 //
@@ -18,18 +18,20 @@
 //
 
 #pragma once
-#include "GenMap.hh"
-#include "macros/deprecated.hh"
+#include "GenMapValue.hh"
+#include <map>
 
 namespace krims {
+namespace detail {
 
-#if defined KRIMS_ENABLE_EXPERIMENTAL
-// Provide backwards compatibility, but complain that it is deprecated
-KRIMS_DEPRECATED("Use GenMap from GenMap.hh instead") typedef GenMap ParameterMap;
+/** Struct which defines the basic types used throughout the GenMap implementation. */
+struct GenMapTraits {
+  //! The type used to store the entries of arbitrary type.
+  typedef GenMapValue entry_value_type;
 
-#else
-// Provide silent backwards compatibility
-typedef GenMap ParameterMap;
-#endif  // experimental and debug
+  //! The type used as the map string to the entry value.
+  typedef std::map<std::string, entry_value_type> map_type;
+};
 
-}  // krims
+}  // namespace detail
+}  // namespace krims

@@ -1,6 +1,6 @@
 ## ---------------------------------------------------------------------
 ##
-## Copyright (C) 2016 by the krims authors
+## Copyright (C) 2016-17 by the krims authors
 ##
 ## This file is part of krims.
 ##
@@ -28,7 +28,7 @@ set(KRIMS_TESTS_SOURCES
 	RangeTests.cc
 	SubscriptionTests.cc
 	RCPWrapperTests.cc
-	ParameterMapTests.cc
+	GenMapTests.cc
 	CircularIteratorTests.cc
 	DereferenceIteratorTests.cc
 	CircularBufferTests.cc

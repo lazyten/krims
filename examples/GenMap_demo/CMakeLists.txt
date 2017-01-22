@@ -1,6 +1,6 @@
 ## ---------------------------------------------------------------------
 ##
-## Copyright (C) 2016 by the krims authors
+## Copyright (C) 2016-17 by the krims authors
 ##
 ## This file is part of krims.
 ##
@@ -19,5 +19,5 @@
 ##
 ## ---------------------------------------------------------------------
 
-add_executable(param_demo main.cc)
-setup_example_target(param_demo)
+add_executable(genmap_demo main.cc)
+setup_example_target(genmap_demo)
