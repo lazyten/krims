@@ -21,9 +21,20 @@
 #include <type_traits>
 
 namespace krims {
+#ifdef KRIMS_HAVE_CXX14
+
+using std::decay_t;
+using std::conditional_t;
+
+#else
 
 /** Convenience using statement for std::decay */
 template <typename T>
 using decay_t = typename std::decay<T>::type;
 
+/** Convenience using statement for std::conditional */
+template <bool B, class T, class F>
+using conditional_t = typename std::conditional<B, T, F>::type;
+
+#endif  // KRIMS_HAVE_CXX14
 }  // namespace krims
