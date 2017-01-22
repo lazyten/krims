@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 by the krims authors
+// Copyright (C) 2016-17 by the krims authors
 //
 // This file is part of krims.
 //
@@ -18,15 +18,14 @@
 //
 
 #include <catch.hpp>
-#include <krims/ParameterMap.hh>
-#include <krims/SubscriptionPointer.hh>
+#include <krims/GenMap.hh>
 #include <rapidcheck.h>
 
 namespace krims {
 namespace tests {
 using namespace rc;
 
-namespace parametermap_tests {
+namespace genmap_tests {
 template <typename T>
 struct DummySubscribable : public Subscribable, public std::array<T, 4> {
   typedef std::array<T, 4> base_type;
@@ -39,17 +38,17 @@ struct DummySubscribable : public Subscribable, public std::array<T, 4> {
 };
 }
 
-TEST_CASE("ParameterMap tests", "[parametermap]") {
-  using namespace parametermap_tests;
+TEST_CASE("GenMap tests", "[genmap]") {
+  using namespace genmap_tests;
 
   // Some data:
   int i = 5;
   std::string s{"test"};
   DummySubscribable<double> dum{1., 2., 3., 4.};
 
-  SECTION("Can add data to ParameterMap") {
+  SECTION("Can add data to GenMap") {
     // Insert some data into a map.
-    ParameterMap m{};
+    GenMap m{};
     m.update_copy("string", s);
     m.update_copy("integer", i);
     m.update("dummy", dum);
@@ -67,15 +66,15 @@ TEST_CASE("ParameterMap tests", "[parametermap]") {
 #ifdef DEBUG
   SECTION("Check that type safety is assured") {
     // Add data to map.
-    ParameterMap m{};
+    GenMap m{};
     m.update_copy("s", s);
     m.update_copy("i", i);
     m.update("dum", dum);
 
     // Extract using the wrong type
-    REQUIRE_THROWS_AS(m.at<double>("i"), ParameterMap::ExcWrongTypeRequested);
-    REQUIRE_THROWS_AS(m.at<double>("s"), ParameterMap::ExcWrongTypeRequested);
-    REQUIRE_THROWS_AS(m.at<double>("dum"), ParameterMap::ExcWrongTypeRequested);
+    REQUIRE_THROWS_AS(m.at<double>("i"), GenMap::ExcWrongTypeRequested);
+    REQUIRE_THROWS_AS(m.at<double>("s"), GenMap::ExcWrongTypeRequested);
+    REQUIRE_THROWS_AS(m.at<double>("dum"), GenMap::ExcWrongTypeRequested);
     REQUIRE(m.at<DummySubscribable<double>>("dum") == dum);
     REQUIRE(m.at<const DummySubscribable<double>>("dum") == dum);
   }
@@ -86,11 +85,11 @@ TEST_CASE("ParameterMap tests", "[parametermap]") {
 
   SECTION("Check for UnknownKey") {
     // Add data to map.
-    ParameterMap m{};
+    GenMap m{};
     m.update_copy("i", i);
 
-    REQUIRE_THROWS_AS(m.at<bool>("blubber"), ParameterMap::ExcUnknownKey);
-    REQUIRE_THROWS_AS(m.at<int>("blubb"), ParameterMap::ExcUnknownKey);
+    REQUIRE_THROWS_AS(m.at<bool>("blubber"), GenMap::ExcUnknownKey);
+    REQUIRE_THROWS_AS(m.at<int>("blubb"), GenMap::ExcUnknownKey);
     REQUIRE(m.at<int>("i") == i);
   }
 
@@ -100,7 +99,7 @@ TEST_CASE("ParameterMap tests", "[parametermap]") {
 
   SECTION("Check for Getting the shared pointer back.") {
     // Add data to map.
-    ParameterMap m{};
+    GenMap m{};
     m.update_copy("string", s);
     m.update_copy("integer", i);
     m.update("dum", dum);
@@ -126,7 +125,7 @@ TEST_CASE("ParameterMap tests", "[parametermap]") {
   //
 
   SECTION("Test update from cheaply copyable data.") {
-    ParameterMap m;
+    GenMap m;
     double d = 3.4;
     m.update("double", d);
     m.update("noref", 3.141592);
@@ -144,7 +143,7 @@ TEST_CASE("ParameterMap tests", "[parametermap]") {
   //
 
   SECTION("Test update for various pointer types.") {
-    ParameterMap m;
+    GenMap m;
     auto dptr = std::make_shared<double>(3.4);
     auto sptr = make_subscription(dum, "dum");
     RCPWrapper<DummySubscribable<double>> rcpwrap(sptr);
@@ -161,13 +160,13 @@ TEST_CASE("ParameterMap tests", "[parametermap]") {
   //
 
   SECTION("Test retrieving data from const maps") {
-    ParameterMap m;
+    GenMap m;
     m.update("double", 1.24);
     m.update("noref", 3.141592);
     m.update("word", "some");
     m.update("dum", dum);
 
-    const ParameterMap& mref{m};
+    const GenMap& mref{m};
     REQUIRE(mref.at<double>("double") == 1.24);
     REQUIRE(mref.at<double>("noref") == 3.141592);
     REQUIRE(mref.at<std::string>("word") == "some");
@@ -179,7 +178,7 @@ TEST_CASE("ParameterMap tests", "[parametermap]") {
   //
 
   SECTION("Test at with default return") {
-    ParameterMap m;
+    GenMap m;
     m.update("string", s);
     m.update("integer", i);
 
@@ -197,8 +196,7 @@ TEST_CASE("ParameterMap tests", "[parametermap]") {
   //
 
   SECTION("Test construction from initialiser list") {
-    ParameterMap m{
-          {"value1", 1}, {"word", "a"}, {"integer", i}, {"string", s}, {"dum", dum}};
+    GenMap m{{"value1", 1}, {"word", "a"}, {"integer", i}, {"string", s}, {"dum", dum}};
 
     REQUIRE(m.at<int>("value1") == 1);
     REQUIRE(m.at<std::string>("word") == "a");
@@ -212,7 +210,7 @@ TEST_CASE("ParameterMap tests", "[parametermap]") {
   //
 
   SECTION("Test insert_default") {
-    const ParameterMap m{{"double", 3.4}, {"pi", 3.141592}};
+    const GenMap m{{"double", 3.4}, {"pi", 3.141592}};
     REQUIRE(m.at<double>("double") == 3.4);
     REQUIRE(m.at<double>("pi") == 3.141592);
 
@@ -232,7 +230,7 @@ TEST_CASE("ParameterMap tests", "[parametermap]") {
 
   SECTION("Check basic path transformations") {
     // Add data to map.
-    ParameterMap m{};
+    GenMap m{};
     m.update("one/two/three", "3");
     m.update("three/two/one", 4);
     m.update("", "test");
@@ -268,7 +266,7 @@ TEST_CASE("ParameterMap tests", "[parametermap]") {
   //
 
   SECTION("Check that data can be erased") {
-    ParameterMap m{};
+    GenMap m{};
 
     REQUIRE_FALSE(m.exists("bla"));
 
@@ -281,15 +279,16 @@ TEST_CASE("ParameterMap tests", "[parametermap]") {
     REQUIRE(m.exists("i"));
     REQUIRE(m.exists("s"));
     REQUIRE(m.exists("dum"));
+    REQUIRE_FALSE(m.exists("bla"));
 
     // remove a few:
     m.erase("/i/././");
     m.erase("dum");
 
     // check they are there (or not)
-    REQUIRE(!m.exists("i"));
+    REQUIRE_FALSE(m.exists("i"));
     REQUIRE(m.exists("s"));
-    REQUIRE(!m.exists("dum"));
+    REQUIRE_FALSE(m.exists("dum"));
 
     // Add more data to map
     m.update({{"tree/sub", s},
@@ -306,6 +305,19 @@ TEST_CASE("ParameterMap tests", "[parametermap]") {
     REQUIRE(m.exists("/"));
     REQUIRE(m.exists("s"));
 
+    // Erase second tree element.
+    auto it = m.submap("tree").begin();
+    ++it;
+    m.erase(it);
+    REQUIRE(m.exists("tree/sub"));
+    REQUIRE(m.exists("dum"));
+    REQUIRE(m.exists("tree/value"));
+    REQUIRE(m.exists("tree"));
+    REQUIRE(m.exists("/"));
+    REQUIRE(m.exists("s"));
+    REQUIRE_FALSE(m.exists("tree/i"));
+
+    // Erase recursive
     m.erase_recursive("tree");
     REQUIRE(m.exists("/"));
     REQUIRE(m.exists("s"));
@@ -315,8 +327,8 @@ TEST_CASE("ParameterMap tests", "[parametermap]") {
     REQUIRE_FALSE(m.exists("tree/value"));
     REQUIRE_FALSE(m.exists("tree"));
 
-    auto key = *m.begin_keys();
-    m.erase(m.begin_keys());
+    auto key = m.begin()->key();
+    m.erase(m.begin());
     REQUIRE_FALSE(m.exists(key));
   }
 
@@ -326,8 +338,8 @@ TEST_CASE("ParameterMap tests", "[parametermap]") {
 
   SECTION("Check submap functionality") {
     // Add data to map.
-    ParameterMap m{{"tree/sub", s},   {"tree/i", i},    {"dum", dum},
-                   {"tree/value", 9}, {"tree", "root"}, {"/", "god"}};
+    GenMap m{{"tree/sub", s},   {"tree/i", i},    {"dum", dum},
+             {"tree/value", 9}, {"tree", "root"}, {"/", "god"}};
 
     // check it is there:
     REQUIRE(m.exists("tree/sub"));
@@ -337,7 +349,7 @@ TEST_CASE("ParameterMap tests", "[parametermap]") {
     REQUIRE(m.exists("dum"));
     REQUIRE(m.exists("/"));
 
-    ParameterMap sub = m.submap("tree");
+    GenMap sub = m.submap("tree");
 
     // Check existence:
     REQUIRE_FALSE(sub.exists("tree/sub"));
@@ -366,7 +378,7 @@ TEST_CASE("ParameterMap tests", "[parametermap]") {
     REQUIRE(m.at<int>("tree/value") == 10);
 
     // Check path normalisation for submap:
-    ParameterMap sub2 = m.submap("/./tree/.");
+    GenMap sub2 = m.submap("/./tree/.");
     REQUIRE(sub2.at<std::string>("sub") == s);
     REQUIRE(sub2.at<int>("i") == i);
     REQUIRE(sub2.at<int>("value") == 10);
@@ -385,40 +397,136 @@ TEST_CASE("ParameterMap tests", "[parametermap]") {
   // ---------------------------------------------------------------
   //
 
-  SECTION("Check begin_keys() and end_keys()") {
+  SECTION("Check iterators with begin() and end()") {
     // Add data to map.
-    ParameterMap m{{"tree/sub", s},  {"tree/i", i}, {"dum", dum},    {"tree/value", 9},
-                   {"tree", "root"}, {"/", "god"},  {"/zzz", "end"}, {"/zz", "mend"}};
+    GenMap m{{"tree/sub", s},  {"tree/i", i}, {"dum", dum},    {"tree/value", 9},
+             {"tree", "root"}, {"/", "god"},  {"/zzz", "end"}, {"/zz", "mend"}};
 
     // Check we get all keys for starters:
     std::vector<std::string> ref{"/",         "/dum",        "/tree", "/tree/i",
                                  "/tree/sub", "/tree/value", "/zz",   "/zzz"};
     auto itref = std::begin(ref);
-    for (auto it = m.begin_keys(); it != m.end_keys(); ++it, ++itref) {
+    for (auto it = m.begin(); it != m.end(); ++it, ++itref) {
       REQUIRE(itref != std::end(ref));
-      CHECK(*itref == *it);
+      CHECK(*itref == it->key());
+    }
+    CHECK(itref == std::end(ref));
+
+    // For const iterator:
+    itref = std::begin(ref);
+    for (auto it = m.cbegin(); it != m.cend(); ++it, ++itref) {
+      REQUIRE(itref != std::end(ref));
+      CHECK(*itref == it->key());
     }
     CHECK(itref == std::end(ref));
 
     // Get a submap:
-    ParameterMap sub = m.submap("tree");
+    GenMap sub = m.submap("tree");
 
     // Check we get all keys of the submap:
     std::vector<std::string> subref{"/", "/i", "/sub", "/value"};
     auto itsubref = std::begin(subref);
-    for (auto it = sub.begin_keys(); it != sub.end_keys(); ++it, ++itsubref) {
+    for (auto it = sub.begin(); it != sub.end(); ++it, ++itsubref) {
       REQUIRE(itsubref != std::end(subref));
-      CHECK(*itsubref == *it);
+      CHECK(*itsubref == it->key());
     }
     CHECK(itsubref == std::end(subref));
 
+    // For const iterator:
     itsubref = std::begin(subref);
-    for (auto it = m.begin_keys("tree"); it != m.end_keys("tree"); ++it, ++itsubref) {
+    for (auto it = sub.cbegin(); it != sub.cend(); ++it, ++itsubref) {
       REQUIRE(itsubref != std::end(subref));
-      CHECK(*itsubref == *it);
+      CHECK(*itsubref == it->key());
     }
     CHECK(itsubref == std::end(subref));
+
+    // For iterator over subpath
+    itsubref = std::begin(subref);
+    for (auto it = m.begin("tree"); it != m.end("tree"); ++it, ++itsubref) {
+      REQUIRE(itsubref != std::end(subref));
+      CHECK(*itsubref == it->key());
+    }
+    CHECK(itsubref == std::end(subref));
+
+    // For const iterator over subpath
+    itsubref = std::begin(subref);
+    for (auto it = m.cbegin("tree"); it != m.cend("tree"); ++it, ++itsubref) {
+      REQUIRE(itsubref != std::end(subref));
+      CHECK(*itsubref == it->key());
+    }
+    CHECK(itsubref == std::end(subref));
+
+    // Iterator over empty range:
+    for (auto& kv : m.submap("blubba")) {
+      REQUIRE(false);  // We should never get here, since range empty
+    }
+    for (auto it = m.begin("blubba"); it != m.end("blubba"); ++it) {
+      REQUIRE(false);  // We should never get here, since range empty
+    }
+    for (auto it = m.cbegin("blubba"); it != m.cend("blubba"); ++it) {
+      REQUIRE(false);  // We should never get here, since range empty
+    }
   }
+
+  //
+  // ---------------------------------------------------------------
+  //
+
+  SECTION("Check accessor interface of the iterator") {
+    const double pi = 3.14159265;
+    GenMap map;
+    const GenMap& cmap(map);
+
+    // Add a bunch of ints and  doubles
+    for (int i = 0; i < 9; ++i) {
+      map.update("ints/" + std::to_string(i), i);
+      map.update("doubles/pip" + std::to_string(i), pi * i);
+    }
+
+    // Check iteration over ints
+    int iref = 0;
+    for (auto& kv : map.submap("ints")) {
+      CHECK(kv.key() == "/" + std::to_string(iref));
+      CHECK(kv.value<int>() == iref);
+#if defined KRIMS_HAVE_LIBSTDCXX_DEMANGLER and defined DEBUG
+      CHECK(kv.type_name() == "int");
+#endif
+      ++iref;
+    }
+
+    // Check const iteration over ints
+    iref = 0;
+    for (auto& kv : cmap.submap("ints")) {
+      CHECK(kv.key() == "/" + std::to_string(iref));
+      CHECK(kv.value<int>() == iref);
+#if defined KRIMS_HAVE_LIBSTDCXX_DEMANGLER and defined DEBUG
+      CHECK(kv.type_name() == "int");
+#endif
+      ++iref;
+    }
+
+    // Iteration over doubles
+    iref = 0;
+    for (auto& kv : map.submap("doubles")) {
+      CHECK(kv.key() == "/pip" + std::to_string(iref));
+      CHECK(kv.value<double>() == pi * iref);
+#if defined KRIMS_HAVE_LIBSTDCXX_DEMANGLER and defined DEBUG
+      CHECK(kv.type_name() == "double");
+#endif
+      ++iref;
+    }
+
+    // Const iteration over doubles
+    iref = 0;
+    for (auto& kv : cmap.submap("doubles")) {
+      CHECK(kv.key() == "/pip" + std::to_string(iref));
+      CHECK(kv.value<double>() == pi * iref);
+#if defined KRIMS_HAVE_LIBSTDCXX_DEMANGLER and defined DEBUG
+      CHECK(kv.type_name() == "double");
+#endif
+      ++iref;
+    }
+  }  // Check accessor interface of the iterator
 
   //
   // ---------------------------------------------------------------
@@ -426,14 +534,14 @@ TEST_CASE("ParameterMap tests", "[parametermap]") {
 
   SECTION("Check that copying submaps works.") {
     // Add data to map.
-    ParameterMap m{{"tree/sub", s},   {"tree/i", i},    {"dum", dum},
-                   {"tree/value", 9}, {"tree", "root"}, {"/", "god"}};
+    GenMap m{{"tree/sub", s},   {"tree/i", i},    {"dum", dum},
+             {"tree/value", 9}, {"tree", "root"}, {"/", "god"}};
 
     // Get a submap:
-    const ParameterMap sub = m.submap("/tree");
+    const GenMap sub = m.submap("/tree");
 
     // Copy it:
-    ParameterMap copy = sub;
+    GenMap copy = sub;
 
     // Check existence:
     REQUIRE_FALSE(copy.exists("tree/sub"));
@@ -471,19 +579,19 @@ TEST_CASE("ParameterMap tests", "[parametermap]") {
 
   SECTION("Check that updating from other maps works.") {
     // Add data to map.
-    ParameterMap m{{"tree/sub", s},   {"tree/i", i},    {"dum", dum},
-                   {"tree/value", 9}, {"tree", "root"}, {"/", "god"}};
+    GenMap m{{"tree/sub", s},   {"tree/i", i},    {"dum", dum},
+             {"tree/value", 9}, {"tree", "root"}, {"/", "god"}};
 
     // Make a second map
-    ParameterMap n{{"house/window", true},
-                   {"house/open", "14-15"},
-                   {"garden", false},
-                   {"blubber", "blabla"},
-                   {"house/value", 14}};
+    GenMap n{{"house/window", true},
+             {"house/open", "14-15"},
+             {"garden", false},
+             {"blubber", "blabla"},
+             {"house/value", 14}};
 
     // Make submaps:
-    ParameterMap subm = m.submap("tree");
-    ParameterMap subn = n.submap("house");
+    GenMap subm = m.submap("tree");
+    GenMap subn = n.submap("house");
 
     CHECK(subn.at<bool>("window") == true);
     CHECK(subn.at<std::string>("open") == "14-15");
@@ -512,18 +620,18 @@ TEST_CASE("ParameterMap tests", "[parametermap]") {
                                  "/tree/i",     "/tree/open",  "/tree/sub",
                                  "/tree/value", "/tree/window"};
     auto itref = std::begin(ref);
-    for (auto it = m.begin_keys(); it != m.end_keys(); ++it, ++itref) {
+    for (auto it = m.begin(); it != m.end(); ++it, ++itref) {
       REQUIRE(itref != std::end(ref));
-      CHECK(*itref == *it);
+      CHECK(*itref == it->key());
     }
     CHECK(itref == std::end(ref));
 
     std::vector<std::string> refn{"/blubber", "/garden", "/house/open", "/house/value",
                                   "/house/window"};
     auto itrefn = std::begin(refn);
-    for (auto it = n.begin_keys(); it != n.end_keys(); ++it, ++itrefn) {
+    for (auto it = n.begin(); it != n.end(); ++it, ++itrefn) {
       REQUIRE(itrefn != std::end(refn));
-      CHECK(*itrefn == *it);
+      CHECK(*itrefn == it->key());
     }
     CHECK(itrefn == std::end(refn));
 
@@ -545,9 +653,9 @@ TEST_CASE("ParameterMap tests", "[parametermap]") {
                                   "/tree/window"};
 
     auto itrefm = std::begin(refm);
-    for (auto it = m.begin_keys(); it != m.end_keys(); ++it, ++itrefm) {
+    for (auto it = m.begin(); it != m.end(); ++it, ++itrefm) {
       REQUIRE(itrefm != std::end(refm));
-      CHECK(*itrefm == *it);
+      CHECK(*itrefm == it->key());
     }
     CHECK(itrefm == std::end(refm));
 
@@ -560,7 +668,6 @@ TEST_CASE("ParameterMap tests", "[parametermap]") {
   // ---------------------------------------------------------------
   //
 
-  // TODO Test that changing data in copies / submaps does the intended thing
   // TODO Test mass update from initialiser list
 
 }  // TEST_CASE

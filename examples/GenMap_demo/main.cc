@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 by the krims authors
+// Copyright (C) 2016-17 by the krims authors
 //
 // This file is part of krims.
 //
@@ -19,7 +19,7 @@
 
 #include <iomanip>
 #include <iostream>
-#include <krims/ParameterMap.hh>
+#include <krims/GenMap.hh>
 #include <krims/version.hh>
 
 using namespace krims;
@@ -29,7 +29,7 @@ struct A {
   int data = 15;
 };
 
-ParameterMap make_map() {
+GenMap make_map() {
   // Make a pointer to such a boring class
   auto aptr = std::make_shared<A>();
 
@@ -51,11 +51,11 @@ ParameterMap make_map() {
           {"always", "never"}};
 
   // E.g. in this case the object referenced by *aptr will remain alive until
-  // the ParameterMap is destroyed, since this is guaranteed by the managed
+  // the GenMap is destroyed, since this is guaranteed by the managed
   // std::shared_ptr
 }
 
-void print_map(const ParameterMap& map) {
+void print_map(const GenMap& map) {
   // Print value of key blubber, which is an integer.
   // If blubber is not in the map, the default value 0 is chosen
   std::cout << "blubber:          " << map.at("blubber", 0) << std::endl;
@@ -79,18 +79,18 @@ void print_map(const ParameterMap& map) {
   std::cout << std::endl;
 }
 
-void print_keys(const ParameterMap& map) {
+void print_keys(const GenMap& map) {
   // Print all keys which are stored along
   // with a string describing the type of the data.
   // Note: In RELEASE the type information is
   // not stored for perfomance and space reasons
   // and hence is not available!
-  for (auto itkey = map.begin_keys(); itkey != map.end_keys(); ++itkey) {
-    std::cout << std::setw(14) << *itkey << "  " << map.type_name_of(*itkey) << std::endl;
+  for (const auto& kv : map) {
+    std::cout << std::setw(14) << kv.key() << "  " << kv.type_name() << std::endl;
   }
 }
 
-void modify_map(ParameterMap& map) {
+void modify_map(GenMap& map) {
   // Remove an element.
   map.erase("blubber");
 
@@ -111,18 +111,18 @@ void modify_map(ParameterMap& map) {
   // Note: The pointer one receives this way is *not* a shared pointer, but
   // a wrapper object called RCPWrapper, that does the right thing for any
   // kind of data passed to the map, i.e. also Subscribable objects passed
-  // to the ParameterMap by reference can retrieved and used like *pointers*
+  // to the GenMap by reference can retrieved and used like *pointers*
   // this way.
   //
   // One can make a proper shared pointer out of this RCPWrapper by explicit casting:
   std::shared_ptr<A> asptr = static_cast<std::shared_ptr<A>>(aptr);
 
   // In Debug mode this will abort the program for Subscriptions
-  // (but of cause it will be fine for objects owned by the ParameterMap).
+  // (but of cause it will be fine for objects owned by the GenMap).
   // In Release mode a subscribed object will be *copied* and a pointer
   // to the copy returned.
   //
-  // Whether a full shared_ptr is a available, i.e. whether the ParameterMap
+  // Whether a full shared_ptr is a available, i.e. whether the GenMap
   // actually has ownership of the data, can be checked using
   // bool is_shared = aptr.is_shared_ptr();
 
@@ -131,7 +131,7 @@ void modify_map(ParameterMap& map) {
 #endif  // DEBUG
 }
 
-void modify_map_other(ParameterMap& map) {
+void modify_map_other(GenMap& map) {
   // Add/update some other values and things:
   map.update({{"blubber", 99},
               {"always", "sure"},
@@ -144,7 +144,7 @@ int main() {
   std::cout << "Using krims version " << krims::version::version_string() << std::endl
             << std::endl;
 
-  ParameterMap map = make_map();
+  GenMap map = make_map();
 
   std::cout << "Printing map" << std::endl;
   print_map(map);
@@ -153,7 +153,7 @@ int main() {
   std::cout << "# Modify submap with modify_map_other(map.submap(\"sub\")" << std::endl;
   std::cout << "#" << std::endl;
 
-  ParameterMap submap = map.submap("sub");
+  GenMap submap = map.submap("sub");
   modify_map_other(submap);
 
   std::cout << "Printing all keys of submap:" << std::endl;

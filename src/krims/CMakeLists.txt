@@ -1,6 +1,6 @@
 ## ---------------------------------------------------------------------
 ##
-## Copyright (C) 2016 by the krims authors
+## Copyright (C) 2016-17 by the krims authors
 ##
 ## This file is part of krims.
 ##
@@ -29,7 +29,7 @@ set(KRIMS_SOURCES
 	ExceptionSystem/Backtrace.cc
 	ExceptionSystem/ExceptionBase.cc
 	ExceptionSystem/exception_defs.cc
-	ParameterMap.cc
+	GenMap.cc
 	NumComp/NumCompException.cc
 	NumComp/NumCompConstants.cc
 )

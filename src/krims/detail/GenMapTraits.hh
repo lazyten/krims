@@ -18,23 +18,20 @@
 //
 
 #pragma once
-#include <type_traits>
+#include "GenMapValue.hh"
+#include <map>
 
 namespace krims {
-#ifdef KRIMS_HAVE_CXX14
+namespace detail {
 
-using std::decay_t;
-using std::conditional_t;
+/** Struct which defines the basic types used throughout the GenMap implementation. */
+struct GenMapTraits {
+  //! The type used to store the entries of arbitrary type.
+  typedef GenMapValue entry_value_type;
 
-#else
+  //! The type used as the map string to the entry value.
+  typedef std::map<std::string, entry_value_type> map_type;
+};
 
-/** Convenience using statement for std::decay */
-template <typename T>
-using decay_t = typename std::decay<T>::type;
-
-/** Convenience using statement for std::conditional */
-template <bool B, class T, class F>
-using conditional_t = typename std::conditional<B, T, F>::type;
-
-#endif  // KRIMS_HAVE_CXX14
+}  // namespace detail
 }  // namespace krims

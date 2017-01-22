@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 by the krims authors
+// Copyright (C) 2016-17 by the krims authors
 //
 // This file is part of krims.
 //
@@ -17,61 +17,61 @@
 // along with krims. If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "ParameterMap.hh"
+#include "GenMap.hh"
 
 namespace krims {
 
-ParameterMap& ParameterMap::operator=(ParameterMap other) {
+GenMap& GenMap::operator=(GenMap other) {
   m_location = std::move(other.m_location);
   m_container_ptr = std::move(other.m_container_ptr);
   return *this;
 }
 
-ParameterMap::ParameterMap(const ParameterMap& other) : ParameterMap() {
+GenMap::GenMap(const GenMap& other) : GenMap() {
   if (other.m_location == std::string("")) {
     // We are root, copy everything
-    m_container_ptr = std::make_shared<inner_map_type>(*other.m_container_ptr);
+    m_container_ptr = std::make_shared<map_type>(*other.m_container_ptr);
   } else {
     update(other);
   }
 }
 
-void ParameterMap::update(std::initializer_list<entry_type> il) {
+void GenMap::update(std::initializer_list<entry_type> il) {
   // Make each key a full path key and append/modify entry in map
   for (entry_type t : il) {
     (*m_container_ptr)[make_full_key(t.first)] = std::move(t.second);
   }
 }
 
-void ParameterMap::clear() {
+void GenMap::clear() {
   if (m_location == std::string("")) {
     // We are root, clear everything
     m_container_ptr->clear();
   } else {
     // Clear only our stuff
-    erase(begin_keys(), end_keys());
+    erase(begin(), end());
   }
 }
 
-void ParameterMap::update(const std::string& key, const ParameterMap& other) {
-  for (auto it = other.begin_keys(); it != other.end_keys(); ++it) {
+void GenMap::update(const std::string& key, const GenMap& other) {
+  for (auto it = other.begin(); it != other.end(); ++it) {
     // The iterator truncates the other key relative to the builtin
     // location of other for us. We then make it full for our location
     // and update.
-    (*m_container_ptr)[make_full_key(key + "/" + *it)] = it.m_iter->second;
+    (*m_container_ptr)[make_full_key(key + "/" + it->key())] = it->value_raw();
   }
 }
 
-void ParameterMap::update(const std::string& key, ParameterMap&& other) {
-  for (auto it = other.begin_keys(); it != other.end_keys(); ++it) {
+void GenMap::update(const std::string& key, GenMap&& other) {
+  for (auto it = other.begin(); it != other.end(); ++it) {
     // The iterator truncates the other key relative to the builtin
     // location of other for us. We then make it full for our location
     // and update.
-    (*m_container_ptr)[make_full_key(key + "/" + *it)] = std::move(it.m_iter->second);
+    (*m_container_ptr)[make_full_key(key + "/" + it->key())] = std::move(it->value_raw());
   }
 }
 
-std::string ParameterMap::make_full_key(const std::string& key) const {
+std::string GenMap::make_full_key(const std::string& key) const {
   assert_dbg(m_location[0] == '/' || m_location.length() == 0, krims::ExcInternalError());
   assert_dbg(m_location.back() != '/', krims::ExcInternalError());
 
@@ -111,56 +111,44 @@ std::string ParameterMap::make_full_key(const std::string& key) const {
     res += "/" + part;
   }
 
-  assert_dbg(res.back() != '/', krims::ExcInternalError());
-  assert_dbg(res[0] == '/' || res.length() == 0, krims::ExcInternalError());
+  assert_dbg(res.length() == 0 || res.back() != '/', krims::ExcInternalError());
+  assert_dbg(res.length() == 0 || res[0] == '/', krims::ExcInternalError());
 
   return res;
 }
 
-std::string ParameterMap::KeyIterator::strip_location_prefix(
-      const std::string& key) const {
-  // The first part needs to be exactly the location:
-  assert_dbg(0 == key.compare(0, m_location.size(), m_location), ExcInternalError());
+typename GenMap::iterator GenMap::begin(const std::string& path) {
+  const std::string path_full = make_full_key(path);
 
-  if (key.size() <= m_location.size()) {
-    return "/";
-  } else {
-    std::string res = key.substr(m_location.size());
-    assert_dbg(res[0] == '/' || res.length() == 0, ExcInternalError());
-    assert_dbg(res.back() != '/', ExcInternalError());
-    return res;
-  }
-}
-
-ParameterMap::KeyIterator ParameterMap::begin_keys(const std::string& path) const {
-  // obtain lower bound to the path location
+  // Obtain iterator to the first key-value pair, which has a
+  // key starting with the full path.
+  //
   // (since the keys are sorted alphabetically in the map
   //  the ones which follow next must all be below our current
-  //  location)
+  //  location or already well past it.)
+  auto it = starting_keys_begin(*m_container_ptr, path_full);
+  return iterator(std::move(it), path_full);
+}
 
+typename GenMap::const_iterator GenMap::cbegin(const std::string& path) const {
   const std::string path_full = make_full_key(path);
-  auto it = m_container_ptr->lower_bound(path_full);
-
-  // if it->first (the key) starts with the full path,
-  // then the subtree we care about actually exists at the position
-  // we found
-  if (0 == it->first.compare(0, path_full.length(), path_full)) {
-    return KeyIterator(std::move(it), path_full);
-  } else {
-    // we found the lower bound of the path, but it does not represent
-    // a subtree, hence return end:
-    return KeyIterator(std::end(*m_container_ptr), path_full);
-  }
+  auto it = starting_keys_begin(*m_container_ptr, path_full);
+  return const_iterator(std::move(it), path_full);
 }
 
-ParameterMap::KeyIterator ParameterMap::end_keys(const std::string& path) const {
-  // We call begin_keys and advance until we find the first key
-  // which is no longer part of this subtree (i.e. starts differently)
-  auto it = begin_keys(path);
-  for (; it.m_iter != std::end(*m_container_ptr); ++it) {
-    const std::string path_full = make_full_key(path);
-    if (0 != it.m_iter->first.compare(0, path_full.length(), path_full)) break;
-  }
-  return it;
+typename GenMap::iterator GenMap::end(const std::string& path) {
+  const std::string path_full = make_full_key(path);
+
+  // Obtain the first key which does no longer start with the pull path,
+  // i.e. where we are done processing the subpath.
+  auto it = starting_keys_end(*m_container_ptr, path_full);
+  return iterator(std::move(it), path_full);
 }
+
+typename GenMap::const_iterator GenMap::cend(const std::string& path) const {
+  const std::string path_full = make_full_key(path);
+  auto it = starting_keys_end(*m_container_ptr, path_full);
+  return const_iterator(std::move(it), path_full);
+}
+
 }  // namespace krims

@@ -39,7 +39,7 @@ parts of the library.
 - [Performing floating point comparisons](#performing-floating-point-comparisons)
 - [``Subscribable`` base class and ``SubscriptionPointer``](#subscribable-base-class-and-subscriptionpointer)
 - [Useful type properties and type transformations](#useful-type-properties-and-type-transformations)
-- [``ParameterMap``: A hierachical dictionary for managing data of arbitrary type.](#parametermap-a-hierachical-dictionary-for-managing-data-of-arbitrary-type)
+- [``GenMap``: A hierachical dictionary for managing data of arbitrary type.](#genmap-a-hierachical-dictionary-for-managing-data-of-arbitrary-type)
 - [Iterator utils](#iterator-utils)
 - [Circular buffer with maximum size](#circular-buffer-with-maximum-size)
 - [Useful helper functions to deal with tuples](#useful-helper-functions-to-deal-with-tuples)
@@ -206,7 +206,7 @@ int main() {
   of C++11. Especially in cases where large amounts of data
   (like big matrices) need to be accessed from various places
   in a code without being the owner of the data, this system is useful.
-- The ParameterMap (see below) has full support
+- The ``GenMap`` (see below) has full support
   for storing arbitrary subscribable objects by reference.
 
 ### Useful type properties and type transformations
@@ -219,29 +219,33 @@ int main() {
   One can manually flag a class as cheaply copyable by deriving it off
   the marker interface [``CheaplyCopyable_i``](src/krims/TypeUtils/CheaplyCopyable_i.hh).
 
-### ``ParameterMap``: A hierachical dictionary for managing data of arbitrary type.
-- The ParameterMap allows to store and access data of an arbitrary type
+### ``GenMap``: A hierachical dictionary for managing data of arbitrary type.
+- The GenMap allows to store and access data of an arbitrary type
   with the aid of ``std::string`` lookup keys.
 - Data is automatically either stored by-value
   (for cheaply copyable types like floating point values,
   integers or strings), as a ``std::shared_ptr`` or as a ``SubscriptionPointer``.
-- One can use ``std::initializer_list``s to easily construct or update ParameterMaps,
+- One can use ``std::initializer_list``s to easily construct or update GenMap,
   e.g.
 ```cpp
-ParameterMap map{ {"key": 3}, {"key2" : "value2" } };
+GenMap map{ {"key": 3}, {"key2" : "value2" } };
 auto i = std::make_shared<int>(15);
 map.update({"an integer", i});
 // or equivalently:
 map.update("an integer", i);
 ```
 - If one is happy to copy the data inside the map, the function ``update_copy``
-  is available, which effectively is a convenience for making and storing
+  is available, which effectively is a convenience function for making and storing
   a ``std::shared_ptr`` to the copy.
 - The data can be retrieved as a pointer or by reference.
   A default value can be provided for use if the key does not exist:
 ```cpp
 // Use default value 5 if key does not exist
 map.at("nonexistent", 5)
+
+// Use a default pointer to some other place
+// if key does not exist
+map.at_ptr("nonexistent", make_shared<int>(4));
 ```
   On retrieval of the value, the type needs to specified once again.
   If the type does not match the original type, an error is thrown
@@ -252,14 +256,30 @@ auto this_is_15 = map.at<int>("an integer");
 // Error, will abort program in Debug mode
 auto error = map.at<std::string>("an integer");
 ```
-- The ``ParameterMap`` has preliminary support for hierarchical storage:
+- The ``GenMap`` has a notion for hierarchical storage as well:
   Keys which contain a slash ``/`` are interpreted like a UNIX path.
   Using the ``submap`` function, one can navigate into a subpath,
   which offers the same interface as the original map.
   This way one can selectively shadow parts of the stored data
   and allow different parts of the program to transparently
   manage parameters or references to results of computations.
-- An example is located at [examples/ParameterMap_demo](examples/ParameterMap_demo).
+- Similar to ``std::map`` objects, a ``GenMap`` supports range-
+  based ``for`` loops and iteration over the map as well as
+  submaps, e.g.
+```cpp
+// Print all keys within the map
+for (auto& kv : map) {
+  std::cout << kv.key() << std::endl;
+}
+
+// Print a subtree, where we know that all 
+// entries are integer values:
+for (auto& kv : map.subtree("only_ints") {
+  std::cout << kv.key() << " "
+      << kv.value<int>() << std::endl;
+}
+```
+- An example is located at [examples/GenMap_demo](examples/GenMap_demo).
 
 ### Iterator utils
 - [``krims/IteratorUtils.hh``](src/krims/IteratorUtils.hh) includes classes for

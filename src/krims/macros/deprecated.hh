@@ -18,23 +18,14 @@
 //
 
 #pragma once
-#include <type_traits>
 
 namespace krims {
+
+//! Mark something as deprecated
 #ifdef KRIMS_HAVE_CXX14
-
-using std::decay_t;
-using std::conditional_t;
-
-#else
-
-/** Convenience using statement for std::decay */
-template <typename T>
-using decay_t = typename std::decay<T>::type;
-
-/** Convenience using statement for std::conditional */
-template <bool B, class T, class F>
-using conditional_t = typename std::conditional<B, T, F>::type;
-
+#define KRIMS_DEPRECATED(msg) [[deprecated(#msg)]]
+#else  // KRIMS_HAVE_CXX14
+#define KRIMS_DEPRECATED __attribute__((deprecated))
 #endif  // KRIMS_HAVE_CXX14
+
 }  // namespace krims
