@@ -53,6 +53,9 @@ class Range {
                   "The range object you attempted to use represents an empty range"
                   " and hence cannot be used in this way.");
 
+  /** \brief Construct an empty range */
+  Range() : m_first(0), m_last(0) {}
+
   /** \brief Construct a range
    *
    * Note that the interval is half-open, i.e. the range
