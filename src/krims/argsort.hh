@@ -24,6 +24,18 @@
 #include <vector>
 namespace krims {
 
+/** Argsort returns the index sequence, which would sort the range of elements provided.
+ *
+ * Performs an indirect sorting of the range provided by the two iterators.
+ * The vectors of indices returned gives the ordering of the iterator range,
+ * which would give a sorted range. By the default less is used
+ * as the comparator.
+ *
+ * E.g. It the range runs over the elements { "d", "a", "c", "b" }, then
+ * the returned indices would be { 1, 3, 2, 0 } (if less is used as the
+ * comparator).
+ *
+ **/
 template <typename RandomAccessIterator, typename Compare>
 std::vector<size_t> argsort(const RandomAccessIterator first,
                             const RandomAccessIterator last, Compare cmp) {
@@ -38,6 +50,7 @@ std::vector<size_t> argsort(const RandomAccessIterator first,
   return indices;
 }
 
+/** Sort a range using the argsort function with the default comparator (less). */
 template <typename RandomAccessIterator>
 std::vector<size_t> argsort(const RandomAccessIterator first,
                             const RandomAccessIterator last) {
