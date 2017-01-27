@@ -68,7 +68,7 @@ class NumComp {
 
   template <typename U>
   friend bool operator==(const NumComp& lhs, const U& rhs) {
-    return rhs == lhs;
+    return NumEqual<T, U>{lhs.m_tolerance, lhs.m_failure_action}(lhs.m_value, rhs);
   }
   //@}
 
