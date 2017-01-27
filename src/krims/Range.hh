@@ -32,7 +32,7 @@ class RangeIterator;
 /** A range of integral values
  *
  * \note Empty ranges are allowed, but calling any function in order to
- * access elements of the range(``first()``,``last()``, ``operator[]``)
+ * access elements of the range(``front()``,``back()``, ``operator[]``)
  * leads to undefined behaviour. In this case ``begin()`` is furthermore
  * equivalent to ``end()``.
  * */
@@ -264,7 +264,7 @@ std::ostream& operator<<(std::ostream& o, const Range<T>& r) {
   if (r.empty()) {
     o << "[0,0)";
   } else {
-    o << "[" << r.first() << "," << r.last() << ")";
+    o << "[" << r.lower_bound() << "," << r.upper_bound() << ")";
   }
   return o;
 }
