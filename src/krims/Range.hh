@@ -18,6 +18,7 @@
 //
 #pragma once
 #include "ExceptionSystem.hh"
+#include "macros/deprecated.hh"
 #include <cstddef>
 #include <iostream>
 #include <type_traits>
@@ -53,6 +54,9 @@ class Range {
                   "The range object you attempted to use represents an empty range"
                   " and hence cannot be used in this way.");
 
+  /** \brief Construct an empty range */
+  Range() : m_first(0), m_last(0) {}
+
   /** \brief Construct a range
    *
    * Note that the interval is half-open, i.e. the range
@@ -75,7 +79,9 @@ class Range {
    *
    * i.e. if this class represents [3,5) it returns 2.
    * */
-  size_type length() const;
+  size_type length() const {
+    return static_cast<diff_type>(m_last) - static_cast<diff_type>(m_first);
+  }
 
   /** \brief Return the effective number of elements in the range
    *
@@ -83,11 +89,29 @@ class Range {
    */
   size_type size() const { return length(); }
 
-  /** Get the first element, which is inclusive */
-  value_type first() const;
+  KRIMS_DEPRECATED("Use front() or lower_bound().")
+  value_type first() const { return m_first; }
 
-  /** Get the last element, which is exclusive */
-  value_type last() const;
+  KRIMS_DEPRECATED("Use back() or upper_bound().")
+  value_type last() const { return m_last; }
+
+  /** Get the first element of the range */
+  value_type front() const {
+    assert_dbg(!empty(), ExcEmptyRange());
+    return m_first;
+  }
+
+  /** Get the last element of the range  */
+  value_type back() const {
+    assert_dbg(!empty(), ExcEmptyRange());
+    return m_last - 1;
+  }
+
+  /** Return the lower bound of the range, which is inclusive. */
+  value_type lower_bound() const { return m_first; }
+
+  /** Return the lower bound of the range, which is exclusive. */
+  value_type upper_bound() const { return m_last; }
 
   /** Is this range empty */
   bool empty() const { return length() <= 0; }
@@ -99,10 +123,13 @@ class Range {
   value_type operator[](size_type i) const;
 
   /** Return an iterator to the first element of the range */
-  RangeIterator<T> begin() const;
+  RangeIterator<T> begin() const {
+    if (empty()) return end();
+    return RangeIterator<T>{m_first, m_last};
+  }
 
   /** Return an iterator to the last element of the range */
-  RangeIterator<T> end() const;
+  RangeIterator<T> end() const { return RangeIterator<T>{}; }
 
   /** \name Shifting operations */
   ///@{
@@ -212,38 +239,10 @@ Range<T> range(const T& t1, const T& t2) {
 //
 
 template <typename T>
-typename Range<T>::value_type Range<T>::first() const {
-  assert_dbg(!empty(), ExcEmptyRange());
-  return m_first;
-}
-
-template <typename T>
-typename Range<T>::value_type Range<T>::last() const {
-  assert_dbg(!empty(), ExcEmptyRange());
-  return m_last;
-}
-
-template <typename T>
-typename Range<T>::size_type Range<T>::length() const {
-  return static_cast<diff_type>(m_last) - static_cast<diff_type>(m_first);
-}
-
-template <typename T>
 typename Range<T>::value_type Range<T>::operator[](size_type i) const {
   assert_dbg(!empty(), ExcEmptyRange());
   assert_range(0u, i, length());
   return m_first + i;
-}
-
-template <typename T>
-RangeIterator<T> Range<T>::begin() const {
-  if (empty()) return end();
-  return RangeIterator<T>{m_first, m_last};
-}
-
-template <typename T>
-RangeIterator<T> Range<T>::end() const {
-  return RangeIterator<T>{};
 }
 
 template <typename T>

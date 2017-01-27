@@ -25,7 +25,7 @@ namespace krims {
 #ifdef KRIMS_HAVE_CXX14
 #define KRIMS_DEPRECATED(msg) [[deprecated(#msg)]]
 #else  // KRIMS_HAVE_CXX14
-#define KRIMS_DEPRECATED __attribute__((deprecated))
+#define KRIMS_DEPRECATED(msg) __attribute__((deprecated))
 #endif  // KRIMS_HAVE_CXX14
 
 }  // namespace krims

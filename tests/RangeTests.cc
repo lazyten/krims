@@ -38,6 +38,8 @@ struct RangeTests {
     if (is_valid) {
       range_type r{t1, t2};
       RC_ASSERT(r.length() == static_cast<size_type>(static_cast<ptrdiff_t>(t2) - t1));
+      RC_ASSERT(r.lower_bound() == t1);
+      RC_ASSERT(r.upper_bound() == t2);
     } else {
 #ifdef DEBUG
       RC_ASSERT_THROWS_AS((Range<T>{t1, t2}), krims::ExcTooLarge<T>);
@@ -66,9 +68,13 @@ struct RangeTests {
 #ifdef DEBUG
       typedef typename range_type::ExcEmptyRange exc_type;
       RC_ASSERT_THROWS_AS(r[acc], exc_type);
+      RC_ASSERT_THROWS_AS(r.front(), exc_type);
+      RC_ASSERT_THROWS_AS(r.back(), exc_type);
 #endif
     } else {
       RC_ASSERT(r[acc] == start + acc);
+      RC_ASSERT(r.front() == start);
+      RC_ASSERT(r.back() == start + length - 1);
     }
   }
 
