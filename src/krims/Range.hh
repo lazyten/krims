@@ -89,11 +89,13 @@ class Range {
    */
   size_type size() const { return length(); }
 
-  KRIMS_DEPRECATED("Use front() or lower_bound().")
-  value_type first() const { return m_first; }
+  KRIMS_DEPRECATED("Use front() or lower_bound().") value_type first() const {
+    return m_first;
+  }
 
-  KRIMS_DEPRECATED("Use back() or upper_bound().")
-  value_type last() const { return m_last; }
+  KRIMS_DEPRECATED("Use back() or upper_bound().") value_type last() const {
+    return m_last;
+  }
 
   /** Get the first element of the range */
   value_type front() const {
