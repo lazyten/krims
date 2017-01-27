@@ -95,6 +95,20 @@ NumComp<T> numcomp_return(const T& value) {
   return NumComp<T>(value).failure_action(NumCompActionType::Return);
 }
 
+/** Helper function to make a NumComp<T> object which is guaranteed to throw
+ *
+ * If not ThrowVerbose is chosen as the default setting the comparison will
+ * only throw normally (i.e. less verbose).
+ * */
+template <typename T>
+NumComp<T> numcomp_throw(const T& value) {
+  if (NumCompConstants::default_failure_action == NumCompActionType::ThrowVerbose) {
+    return numcomp(value).failure_action(NumCompActionType::ThrowVerbose);
+  } else {
+    return NumComp<T>(value).failure_action(NumCompActionType::ThrowNormal);
+  }
+}
+
 //
 // ----------------------------------------------------------------------------
 //
