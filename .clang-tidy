@@ -1,7 +1,6 @@
 ---
 Checks:          'clang-diagnostic-*,clang-analyzer-*,-clang-analyzer-alpha*,modernize-*,performance-*,-modernize-make-unique,-modernize-use-using'
 WarningsAsErrors: ''
-HeaderFilterRegex: ''
 AnalyzeTemporaryDtors: false
 User:            michaelfherbst
 CheckOptions:    

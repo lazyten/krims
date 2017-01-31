@@ -113,6 +113,8 @@ function(SCT_parse_add_clang_target_args)
 	# HEADER_FILES:   List of all header files in the dirs
 	# SOURCE_FILES:   List of all source files in the dirs
 	#                 (takes the current language into account)
+	# DIR_TARGETS:    List of all targets in the dirs
+	#                 (only filled for cmake 3.7 and above, else empty)
 	#
 	# Note that this is an internal function.
 
@@ -159,13 +161,13 @@ to process for source files and headers.")
 	else()
 		# Better version for cmake >= 3.7.0 -> Works by first getting
 		# a list of targets and then their source files explicitly.
-		set(TARGETS "")
+		set(DIR_TARGETS "")
 		foreach(dir ${SCT_DIRECTORIES})
 			SCT_get_targets_recursive(TAR ${dir})
-			set(TARGETS ${TARGETS} ${TAR})
+			set(DIR_TARGETS ${TARGETS} ${TAR})
 		endforeach()
 
-		foreach (target ${TARGETS})
+		foreach (target ${DIR_TARGETS})
 			get_target_property(T_SOURCES ${target} SOURCES)
 			get_target_property(T_DIR ${target} SOURCE_DIR)
 			foreach(src ${T_SOURCES})
@@ -178,6 +180,7 @@ to process for source files and headers.")
 	# Export findings
 	set(SOURCE_FILES "${SOURCE_FILES}" PARENT_SCOPE)
 	set(HEADER_FILES "${HEADER_FILES}" PARENT_SCOPE)
+	set(DIR_TARGETS "${DIR_TARGETS}" PARENT_SCOPE)
 endfunction(SCT_parse_add_clang_target_args)
 
 #
@@ -264,21 +267,51 @@ is set to \"OFF\", since then no compile_commands.json file is produced.")
 so cannot setup clang tidy targets.")
 	endif()
 
-	add_custom_target(clang-tidy-check-${TARGET_NAME}
-		${CLANG_TIDY} -p "${PROJECT_BINARY_DIR}" -export-fixes="${CMAKE_CURRENT_BINARY_DIR}/fixes/tidy-fixes.yaml" ${SOURCE_FILES}
+	set(FIXDIR ${PROJECT_BINARY_DIR}/fixes)
+
+	# Command to determine what fixes should be done
+	add_custom_command(OUTPUT ${FIXDIR}/tidy-fixes.yaml
+		COMMAND
+		mkdir -p "${FIXDIR}"
+		COMMAND
+		${CLANG_TIDY} -p "${PROJECT_BINARY_DIR}" -export-fixes=${FIXDIR}/clang-tidy-${TARGET_NAME}.yaml ${SOURCE_FILES}
+		COMMAND
+		touch ${FIXDIR}/tidy-fixes.yaml
+		##
+		DEPENDS "${SOURCE_FILES}"
 		WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-		COMMENT "Check whether source files of ${TARGET_NAME} and export possible fixes."
+		COMMENT "Detect problems with source files of ${TARGET_NAME} using clang-tidy."
 		VERBATIM
 	)
 
-	add_custom_target(clang-tidy-fix-${TARGET_NAME}
-		DEPENDS clang-tidy-check-${TARGET_NAME}
-		${CLANG_APPLY_REPLACEMENTS} -format -style-config="${PROJECT_SOURCE_DIR}" -remove-change-desc-files "${CMAKE_CURRENT_BINARY_DIR}/fixes"
+	# Command to apply the fixes
+	add_custom_command(OUTPUT ${FIXDIR}/last-fixes-apply
+		COMMAND
+		${CLANG_APPLY_REPLACEMENTS} -format -style-config="${PROJECT_SOURCE_DIR}" "${FIXDIR}"
+		COMMAND
+		touch ${FIXDIR}/last-fixes-apply
+		##
+		DEPENDS ${FIXDIR}/tidy-fixes.yaml
 		WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-		COMMENT "Apply all exported fixes for the target ${TARGET_NAME}"
+		COMMENT "Fix problems detected for ${TARGET_NAME}'s sources."
 		VERBATIM
 	)
-message(STATUS "Successfully set up targets \"clang-tidy-check-${TARGET_NAME}\" and \"clang-tidy-fix-${TARGET_NAME}\".")
+
+	# Target to detect the fixes
+	add_custom_target(clang-tidy-${TARGET_NAME}
+		DEPENDS ${FIXDIR}/tidy-fixes.yaml
+		##
+		# Test whether the fixes file is empty or not.
+		# If it is non-empty we return with a non-zero exit code
+		COMMAND test ! -s ${FIXDIR}/tidy-fixes.yaml
+	)
+
+	# Target to apply the fixes
+	add_custom_target(clang-tidy-${TARGET_NAME}-fix
+		DEPENDS ${FIXDIR}/last-fixes-apply
+	)
+
+	message(STATUS "Successfully set up targets \"clang-tidy-${TARGET_NAME}\" and \"clang-tidy-${TARGET_NAME}-fix\".")
 endfunction()
 
 function(add_available_clang_targets_for)
