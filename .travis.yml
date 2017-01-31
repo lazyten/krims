@@ -60,7 +60,7 @@ matrix:
       - sudo apt-get update -qq
       - sudo apt-get install -y ninja-build clang-3.9 libstdc++-4.9-dev clang-tidy-3.9
       compiler: clang
-      env: CC_COMPILER="clang-3.9" CXX_COMPILER="clang++-3.9" TEST_REGEX="krims_tests_DEBUG"
+      env: CC_COMPILER="clang-3.9" CXX_COMPILER="clang++-3.9" TEST_REGEX="krims_tests_DEBUG" TIDY_TARGET="clang-tidy-krims"
     #
     # gcc-4.8 (c++11 and without tests, since rapidcheck does not compile like this)
     - install:
@@ -88,3 +88,4 @@ script:
            -GNinja ..
   - cmake --build  . -- -j ${CORES}
   - if [ "${TEST_REGEX}" ]; then ctest --output-on-failure -R ${TEST_REGEX}; else true; fi
+  - if [ "${TIDY_TARGET}" ]; then cmake --build . --target ${TIDY_TARGET}; else true; fi
