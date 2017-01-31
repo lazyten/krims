@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 by the krims authors
+// Copyright (C) 2016-17 by the krims authors
 //
 // This file is part of krims.
 //
@@ -27,7 +27,7 @@ namespace tests {
 using namespace rc;
 
 template <typename Iterator>
-void showValue(const CircularIterator<Iterator>& it, std::ostream& os) {
+void showValue(const CircularIterator<Iterator>& it, std::ostream& os) {  // NOLINT
   os << "Position element: " << *it.position() << std::endl
      << "Begin element: " << *it.iteration_range().first << std::endl;
 }
@@ -43,7 +43,7 @@ TEST_CASE("CircularIteratorTests", "[CircularIterator]") {
   SECTION("Incrementing and decrementing an empty range") {
     auto test = [](std::vector<testtype> v) {
       size_t pos = 0;
-      if (v.size() > 0) {
+      if (!v.empty()) {
         pos = *gen::inRange<size_t>(0, v.size()).as("position of the empty range.");
       }
 
@@ -157,7 +157,7 @@ TEST_CASE("CircularIteratorTests", "[CircularIterator]") {
   SECTION("Finite iteration around arbitrary vector with offset.") {
     auto test = [](std::vector<testtype> v) {
       size_t startpos = 0;
-      if (v.size() > 0) {
+      if (!v.empty()) {
         startpos = *gen::inRange<size_t>(0, v.size()).as("position to start the circle");
       }
 
@@ -194,5 +194,5 @@ TEST_CASE("CircularIteratorTests", "[CircularIterator]") {
     REQUIRE(rc::check("CircularIterator: Iteration around vector with offset", test));
   }
 }  // TEST_CASE
-}  // namespace test
+}  // namespace tests
 }  // namespace krims

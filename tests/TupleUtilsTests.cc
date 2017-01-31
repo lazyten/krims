@@ -1,5 +1,5 @@
-//
-// Copyright (C) 2016 by the krims authors
+
+// Copyright (C) 2016-17 by the krims authors
 //
 // This file is part of krims.
 //
@@ -24,10 +24,10 @@
 namespace krims {
 namespace tests {
 namespace tuple_utils_tests {
-struct multfac {
+struct Multfac {
   int fac;
 
-  multfac(int fac_) : fac(fac_) {}
+  Multfac(int fac_) : fac(fac_) {}
 
   template <typename T>
   void operator()(T& t) {
@@ -35,9 +35,9 @@ struct multfac {
   }
 };
 
-struct addinto {
+struct Addinto {
   double& into;
-  addinto(double& into_) : into(into_) {}
+  Addinto(double& into_) : into(into_) {}
 
   template <typename T>
   void operator()(const T& t) {
@@ -45,28 +45,28 @@ struct addinto {
   }
 };
 
-struct add {
+struct Add {
   template <typename T, typename U>
   auto operator()(const T& t, const U& u) -> decltype(u + t) {
     return u + t;
   }
 };
 
-struct minus {
+struct Minus {
   template <typename T>
   T operator()(const T& t) {
     return -t;
   }
 };
 
-struct greaterzero {
+struct Greaterzero {
   template <typename T>
   bool operator()(T& t) {
     return (t > 0);
   }
 };
 
-}  // namespace tuple utils tests
+}  // namespace tuple_utils_tests
 
 using namespace rc;
 
@@ -144,11 +144,11 @@ TEST_CASE("TupleUtils tests", "[TupleUtils]") {
       auto t = *gen::arbitrary<std::tuple<>>().as("Tuple");
 
       auto fac = *gen::arbitrary<int>().as("Multiplication factor");
-      tuple_for_each(tuple_utils_tests::multfac{fac}, t);
+      tuple_for_each(tuple_utils_tests::Multfac{fac}, t);
 
       // Accumulating sum.
       double sum{0};
-      tuple_for_each(tuple_utils_tests::addinto{sum}, t);
+      tuple_for_each(tuple_utils_tests::Addinto{sum}, t);
       RC_ASSERT(sum == 0);
     };
 
@@ -163,13 +163,13 @@ TEST_CASE("TupleUtils tests", "[TupleUtils]") {
 
       std::tuple<type1> t = torig;
       auto fac = *gen::arbitrary<int>().as("Multiplication factor");
-      tuple_for_each(tuple_utils_tests::multfac{fac}, t);
+      tuple_for_each(tuple_utils_tests::Multfac{fac}, t);
       RC_ASSERT(std::get<0>(torig) * fac == std::get<0>(t));
 
       // Accumulating sum.
       double sum{0};
       std::tuple<const type1> tcopy = torig;
-      tuple_for_each(tuple_utils_tests::addinto{sum}, tcopy);
+      tuple_for_each(tuple_utils_tests::Addinto{sum}, tcopy);
       RC_ASSERT(sum == std::get<0>(torig));
     };
 
@@ -185,14 +185,14 @@ TEST_CASE("TupleUtils tests", "[TupleUtils]") {
 
       std::tuple<type1, type2> t = torig;
       auto fac = *gen::arbitrary<int>().as("Multiplication factor");
-      tuple_for_each(tuple_utils_tests::multfac{fac}, t);
+      tuple_for_each(tuple_utils_tests::Multfac{fac}, t);
       RC_ASSERT(std::get<0>(torig) * fac == std::get<0>(t));
       RC_ASSERT(std::get<1>(torig) * fac == std::get<1>(t));
 
       // Accumulating sum.
       double sum{0};
       std::tuple<type1, const type2> tcopy = torig;
-      tuple_for_each(tuple_utils_tests::addinto{sum}, tcopy);
+      tuple_for_each(tuple_utils_tests::Addinto{sum}, tcopy);
       RC_ASSERT(sum == std::get<0>(torig) + std::get<1>(torig));
     };
 
@@ -209,7 +209,7 @@ TEST_CASE("TupleUtils tests", "[TupleUtils]") {
 
       std::tuple<type1, type2, type3> t = torig;
       auto fac = *gen::arbitrary<int>().as("Multiplication factor");
-      tuple_for_each(tuple_utils_tests::multfac{fac}, t);
+      tuple_for_each(tuple_utils_tests::Multfac{fac}, t);
       RC_ASSERT(std::get<0>(torig) * fac == std::get<0>(t));
       RC_ASSERT(std::get<1>(torig) * fac == std::get<1>(t));
       RC_ASSERT(std::get<2>(torig) * fac == std::get<2>(t));
@@ -217,7 +217,7 @@ TEST_CASE("TupleUtils tests", "[TupleUtils]") {
       // Accumulating sum.
       double sum{0};
       std::tuple<type1, const type2, type3> tcopy = torig;
-      tuple_for_each(tuple_utils_tests::addinto{sum}, tcopy);
+      tuple_for_each(tuple_utils_tests::Addinto{sum}, tcopy);
       RC_ASSERT(sum == std::get<0>(torig) + std::get<1>(torig) + std::get<2>(torig));
     };
 
@@ -235,7 +235,7 @@ TEST_CASE("TupleUtils tests", "[TupleUtils]") {
 
       std::tuple<type1, type2, type3, type4> t = torig;
       auto fac = *gen::arbitrary<int>().as("Multiplication factor");
-      tuple_for_each(tuple_utils_tests::multfac{fac}, t);
+      tuple_for_each(tuple_utils_tests::Multfac{fac}, t);
       RC_ASSERT(std::get<0>(torig) * fac == std::get<0>(t));
       RC_ASSERT(std::get<1>(torig) * fac == std::get<1>(t));
       RC_ASSERT(std::get<2>(torig) * fac == std::get<2>(t));
@@ -244,7 +244,7 @@ TEST_CASE("TupleUtils tests", "[TupleUtils]") {
       // Accumulating sum.
       double sum{0};
       std::tuple<type1, const type2, type3, const type4> tcopy = torig;
-      tuple_for_each(tuple_utils_tests::addinto{sum}, tcopy);
+      tuple_for_each(tuple_utils_tests::Addinto{sum}, tcopy);
       RC_ASSERT(sum ==
                 std::get<0>(torig) + std::get<1>(torig) + std::get<2>(torig) +
                       std::get<3>(torig));
@@ -262,13 +262,13 @@ TEST_CASE("TupleUtils tests", "[TupleUtils]") {
     auto test = [&]() {
       auto t1 = *gen::arbitrary<std::tuple<type1, type2, type3, type4>>().as("Tuple 1");
       auto t2 = *gen::arbitrary<std::tuple<type1, type4, type3, type2>>().as("Tuple 2");
-      auto res_add = tuple_map(tuple_utils_tests::add{}, t1, t2);
+      auto res_add = tuple_map(tuple_utils_tests::Add{}, t1, t2);
       RC_ASSERT(std::get<0>(t1) + std::get<0>(t2) == std::get<0>(res_add));
       RC_ASSERT(std::get<1>(t1) + std::get<1>(t2) == std::get<1>(res_add));
       RC_ASSERT(std::get<2>(t1) + std::get<2>(t2) == std::get<2>(res_add));
       RC_ASSERT(std::get<3>(t1) + std::get<3>(t2) == std::get<3>(res_add));
 
-      auto res_minus = tuple_map(tuple_utils_tests::minus{}, t1);
+      auto res_minus = tuple_map(tuple_utils_tests::Minus{}, t1);
       RC_ASSERT(std::get<0>(t1) == -std::get<0>(res_minus));
       RC_ASSERT(std::get<1>(t1) == -std::get<1>(res_minus));
       RC_ASSERT(std::get<2>(t1) == -std::get<2>(res_minus));
@@ -286,12 +286,12 @@ TEST_CASE("TupleUtils tests", "[TupleUtils]") {
     auto test = [&]() {
       auto t1 = *gen::arbitrary<std::tuple<type1, type2, type3>>().as("Tuple 1");
       auto t2 = *gen::arbitrary<std::tuple<type1, type3, type2>>().as("Tuple 2");
-      auto res_add = tuple_map(tuple_utils_tests::add{}, t1, t2);
+      auto res_add = tuple_map(tuple_utils_tests::Add{}, t1, t2);
       RC_ASSERT(std::get<0>(t1) + std::get<0>(t2) == std::get<0>(res_add));
       RC_ASSERT(std::get<1>(t1) + std::get<1>(t2) == std::get<1>(res_add));
       RC_ASSERT(std::get<2>(t1) + std::get<2>(t2) == std::get<2>(res_add));
 
-      auto res_minus = tuple_map(tuple_utils_tests::minus{}, t1);
+      auto res_minus = tuple_map(tuple_utils_tests::Minus{}, t1);
       RC_ASSERT(std::get<0>(t1) == -std::get<0>(res_minus));
       RC_ASSERT(std::get<1>(t1) == -std::get<1>(res_minus));
       RC_ASSERT(std::get<2>(t1) == -std::get<2>(res_minus));
@@ -307,11 +307,11 @@ TEST_CASE("TupleUtils tests", "[TupleUtils]") {
     auto test = [&]() {
       auto t1 = *gen::arbitrary<std::tuple<type1, type2>>().as("Tuple 1");
       auto t2 = *gen::arbitrary<std::tuple<type2, type1>>().as("Tuple 2");
-      auto res_add = tuple_map(tuple_utils_tests::add{}, t1, t2);
+      auto res_add = tuple_map(tuple_utils_tests::Add{}, t1, t2);
       RC_ASSERT(std::get<0>(t1) + std::get<0>(t2) == std::get<0>(res_add));
       RC_ASSERT(std::get<1>(t1) + std::get<1>(t2) == std::get<1>(res_add));
 
-      auto res_minus = tuple_map(tuple_utils_tests::minus{}, t1);
+      auto res_minus = tuple_map(tuple_utils_tests::Minus{}, t1);
       RC_ASSERT(std::get<0>(t1) == -std::get<0>(res_minus));
       RC_ASSERT(std::get<1>(t1) == -std::get<1>(res_minus));
     };
@@ -325,9 +325,9 @@ TEST_CASE("TupleUtils tests", "[TupleUtils]") {
     auto test = [&]() {
       auto t1 = *gen::arbitrary<std::tuple<type1>>().as("Tuple 1");
       auto t2 = *gen::arbitrary<std::tuple<type1>>().as("Tuple 2");
-      auto res_add = tuple_map(tuple_utils_tests::add{}, t1, t2);
+      auto res_add = tuple_map(tuple_utils_tests::Add{}, t1, t2);
       RC_ASSERT(std::get<0>(t1) + std::get<0>(t2) == std::get<0>(res_add));
-      auto res_minus = tuple_map(tuple_utils_tests::minus{}, t1);
+      auto res_minus = tuple_map(tuple_utils_tests::Minus{}, t1);
       RC_ASSERT(std::get<0>(t1) == -std::get<0>(res_minus));
     };
 
@@ -335,5 +335,5 @@ TEST_CASE("TupleUtils tests", "[TupleUtils]") {
   }  // Section tuple_map_1
 
 }  // TEST_CASE
-}  // namespace test
+}  // namespace tests
 }  // namespace krims

@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 by the krims authors
+// Copyright (C) 2016-17 by the krims authors
 //
 // This file is part of krims.
 //
@@ -140,7 +140,7 @@ struct RangeTests {
   }
 };
 
-}  // Range tests
+}  // namespace range_tests
 
 TEST_CASE("Range tests", "[range]") {
   using namespace range_tests;
@@ -178,5 +178,5 @@ TEST_CASE("Range tests", "[range]") {
   // TODO test operators +=, -=, -, + on ranges and value types.
 
 }  // TEST_CASE
-}  // namespace test
+}  // namespace tests
 }  // namespace krims

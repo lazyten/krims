@@ -133,7 +133,7 @@ class GenMap : public Subscribable {
    * ``this`` and ``map``, wherease modification of entries via ``update``
    * only effects the GenMap object on which the method is called.
    * */
-  void update(const std::string& key, const GenMap& map);
+  void update(const std::string& key, const GenMap& other);
 
   /** \brief Update many entries using another GenMap
    *
@@ -141,7 +141,7 @@ class GenMap : public Subscribable {
    * I.e. if key == "blubber" and the map \t map contairs "foo" and
    * "bar", then "blubber/foo" and "blubber/bar" will be updated.
    * */
-  void update(const std::string& key, GenMap&& map);
+  void update(const std::string& key, GenMap&& other);
 
   /** \brief Update many entries using another GenMap
    *

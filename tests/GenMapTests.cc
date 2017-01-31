@@ -36,7 +36,7 @@ struct DummySubscribable : public Subscribable, public std::array<T, 4> {
     this->at(3) = d4;
   }
 };
-}
+} // namespace genmap_tests
 
 TEST_CASE("GenMap tests", "[genmap]") {
   using namespace genmap_tests;
@@ -593,7 +593,7 @@ TEST_CASE("GenMap tests", "[genmap]") {
     GenMap subm = m.submap("tree");
     GenMap subn = n.submap("house");
 
-    CHECK(subn.at<bool>("window") == true);
+    CHECK(subn.at<bool>("window"));
     CHECK(subn.at<std::string>("open") == "14-15");
     CHECK(subn.at<int>("value") == 14);
     CHECK(subm.at<int>("i") == i);
@@ -605,11 +605,11 @@ TEST_CASE("GenMap tests", "[genmap]") {
 
     CHECK(subm.at<int>("i") == i);
     CHECK(subm.at<int>("value") == 14);
-    CHECK(subm.at<bool>("window") == true);
+    CHECK(subm.at<bool>("window"));
     CHECK(subm.at<std::string>("open") == "14-15");
     CHECK(m.at<int>("tree/value") == 14);
     CHECK(m.at<std::string>("tree/open") == "14-15");
-    CHECK(m.at<bool>("tree/window") == true);
+    CHECK(m.at<bool>("tree/window"));
 
     m.update("tree/value", 42);
     CHECK(subm.at<int>("value") == 42);
@@ -660,7 +660,7 @@ TEST_CASE("GenMap tests", "[genmap]") {
     CHECK(itrefm == std::end(refm));
 
     CHECK(m.at<int>("mapn/house/value") == 14);
-    CHECK(m.at<bool>("mapn/house/window") == true);
+    CHECK(m.at<bool>("mapn/house/window"));
     CHECK(m.at<std::string>("mapn/house/open") == "14-15");
   }
 
@@ -671,5 +671,5 @@ TEST_CASE("GenMap tests", "[genmap]") {
   // TODO Test mass update from initialiser list
 
 }  // TEST_CASE
-}  // namespace test
+}  // namespace tests
 }  // namespace krims

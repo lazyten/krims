@@ -23,12 +23,6 @@
 
 namespace krims {
 
-/** All exceptions which are defined in krims are both very basic and live in
- * the krims::exception namespace. This has the advantage that a simple "using
- * krims::exceptions" is enough to have all of these in the current context,
- * which makes using them a lot easier. */
-namespace exceptions {
-
 //
 // Numerics
 //
@@ -195,8 +189,4 @@ DefExceptionMsg(ExcIO, "An input/output error has occurred.");
  */
 DefException1(ExcFileNotOpen, char*, << "Could not open file " << arg1);
 
-}  // namespace exceptions
-
-// Import exceptions into krims namespace for easier usage.
-using namespace exceptions;
 }  // namespace krims

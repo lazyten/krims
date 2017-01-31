@@ -23,6 +23,13 @@
 #include <string>
 
 namespace krims {
+namespace detail {
+/** Function which enforces a throw-by-value paradigm */
+template <typename Exc>
+void throw_by_value(const Exc& exc) {
+  throw typename std::remove_reference<Exc>::type(exc);
+}
+}
 
 /** Options how to deal with exceptions.
  *
@@ -62,7 +69,7 @@ class AssertDbgEffect {
       auto __exc__cept = exception;                                            \
       __exc__cept.add_exc_data(__FILE__, __LINE__, __PRETTY_FUNCTION__, #cond, \
                                #exception, false);                             \
-      throw __exc__cept;                                                       \
+      ::krims::detail::throw_by_value(__exc__cept);                            \
     }                                                                          \
   }
 // add_exc_data's last argument specifies whether we are ok with using expensive

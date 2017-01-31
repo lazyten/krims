@@ -20,6 +20,7 @@
 ## ---------------------------------------------------------------------
 
 cmake_minimum_required(VERSION 3.0.0)
+cmake_policy(VERSION 3.0.0)
 
 # Set the module path
 list(APPEND CMAKE_MODULE_PATH  "${CMAKE_CURRENT_LIST_DIR}/cmake/modules")
@@ -43,7 +44,6 @@ option(KRIMS_ENABLE_EXAMPLES "Build krims examples" ON)
 # Project setup
 
 # enable the new version feature introduced in cmake 3.0.0
-cmake_policy(SET CMP0048 NEW)
 project(krims VERSION 0.0.0)
 message("\n# Configuring ${PROJECT_NAME}\n#")
 
@@ -84,7 +84,15 @@ if(KRIMS_ENABLE_EXAMPLES)
 endif()
 
 ##########################################################################
-# Finally install package:
+# Setup extra targets for clang tools
+include(SetupClangTargets)
+add_available_clang_targets_for(krims
+	# Directories to work on
+	# (i.e. where sources and headers of this project are located)
+	DIRECTORIES src tests examples
+)
+
+# Install package:
 include(cmake/install_modules_and_packages.cmake)
 
 # and print a closing message

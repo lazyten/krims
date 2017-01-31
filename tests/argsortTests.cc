@@ -94,5 +94,5 @@ TEST_CASE("argsort function", "[argsort]") {
     REQUIRE(check("Argsort with greater as comparator", test));
   }  // Test argsort with default comparator
 }
-}  // tests
-}  // krims
+} // namespace tests
+} // namespace krims
