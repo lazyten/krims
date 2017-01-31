@@ -268,30 +268,34 @@ so cannot setup clang tidy targets.")
 	endif()
 
 	set(FIXDIR ${PROJECT_BINARY_DIR}/fixes)
+	set(FIXFILE ${FIXDIR}/clang-tidy-${TARGET_NAME}.yaml)
+	set(APPLYFILE ${FIXDIR}/last-fixes-apply)
 
 	# Command to determine what fixes should be done
-	add_custom_command(OUTPUT ${FIXDIR}/tidy-fixes.yaml
+	add_custom_command(OUTPUT ${FIXFILE}
 		COMMAND
 		mkdir -p "${FIXDIR}"
 		COMMAND
-		${CLANG_TIDY} -p "${PROJECT_BINARY_DIR}" -export-fixes=${FIXDIR}/clang-tidy-${TARGET_NAME}.yaml ${SOURCE_FILES}
+		rm -f ${FIXFILE}
 		COMMAND
-		touch ${FIXDIR}/tidy-fixes.yaml
+		${CLANG_TIDY} -p "${PROJECT_BINARY_DIR}" -export-fixes=${FIXFILE} ${SOURCE_FILES}
+		COMMAND
+		touch ${FIXFILE}
 		##
-		DEPENDS "${SOURCE_FILES}"
+		DEPENDS ${SOURCE_FILES} ${PROJECT_SOURCE_DIR}/.clang-tidy
 		WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
 		COMMENT "Detect problems with source files of ${TARGET_NAME} using clang-tidy."
 		VERBATIM
 	)
 
 	# Command to apply the fixes
-	add_custom_command(OUTPUT ${FIXDIR}/last-fixes-apply
+	add_custom_command(OUTPUT ${APPLYFILE}
 		COMMAND
-		${CLANG_APPLY_REPLACEMENTS} -format -style-config="${PROJECT_SOURCE_DIR}" "${FIXDIR}"
+		${CLANG_APPLY_REPLACEMENTS} -format -style=file -style-config="${PROJECT_SOURCE_DIR}" "${FIXDIR}"
 		COMMAND
-		touch ${FIXDIR}/last-fixes-apply
+		touch ${APPLYFILE}
 		##
-		DEPENDS ${FIXDIR}/tidy-fixes.yaml
+		DEPENDS ${FIXFILE}
 		WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
 		COMMENT "Fix problems detected for ${TARGET_NAME}'s sources."
 		VERBATIM
@@ -299,16 +303,17 @@ so cannot setup clang tidy targets.")
 
 	# Target to detect the fixes
 	add_custom_target(clang-tidy-${TARGET_NAME}
-		DEPENDS ${FIXDIR}/tidy-fixes.yaml
+		DEPENDS ${FIXFILE}
 		##
 		# Test whether the fixes file is empty or not.
 		# If it is non-empty we return with a non-zero exit code
-		COMMAND test ! -s ${FIXDIR}/tidy-fixes.yaml
+		COMMAND test ! -s ${FIXFILE}
+		VERBATIM
 	)
 
 	# Target to apply the fixes
 	add_custom_target(clang-tidy-${TARGET_NAME}-fix
-		DEPENDS ${FIXDIR}/last-fixes-apply
+		DEPENDS ${APPLYFILE}
 	)
 
 	message(STATUS "Successfully set up targets \"clang-tidy-${TARGET_NAME}\" and \"clang-tidy-${TARGET_NAME}-fix\".")
