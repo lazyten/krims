@@ -27,10 +27,6 @@
 
 include(CMakeParseArguments)
 
-# Quite some clang tools need the compile_commands.json file in the build dir,
-# so we set it here (Does no harm if not interpreted.)
-option(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-
 #
 # Find executables of clang tools
 #
@@ -328,9 +324,12 @@ function(add_available_clang_targets_for)
 	endif()
 
 	if (NOT CMAKE_VERSION VERSION_LESS 3.5.0
-			AND CMAKE_EXPORT_COMPILE_COMMANDS
 			AND NOT CLANG_TIDY MATCHES "NOTFOUND"
 			AND NOT CLANG_APPLY_REPLACEMENTS MATCHES "NOTFOUND")
+
+		# Since exporting of compile commands is required,
+		# set it to on.
+		set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 		add_clang_tidy_target(${ARGV})
 	endif()
 endfunction(add_available_clang_targets_for)
