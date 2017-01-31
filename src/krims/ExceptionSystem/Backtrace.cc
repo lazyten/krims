@@ -84,16 +84,16 @@ void Backtrace::split_backtrace_string(const char* symbol, Frame& frame) const {
   const char* pos_sqbrcl = strchr(symbol, ']');
 
   // Extract the address:
-  if (pos_sqbrop != NULL && pos_sqbrcl != NULL && pos_sqbrop < pos_sqbrcl) {
+  if (pos_sqbrop != nullptr && pos_sqbrcl != nullptr && pos_sqbrop < pos_sqbrcl) {
     const size_t len = pos_sqbrcl - pos_sqbrop - 1;
     frame.address = std::string(pos_sqbrop + 1, len);
   }
 
   // Extract the executable path
-  if (pos_bracketop != NULL) {
+  if (pos_bracketop != nullptr) {
     const size_t len = pos_bracketop - symbol;
     frame.executable_name = std::string(symbol, len);
-  } else if (pos_sqbrop != NULL) {
+  } else if (pos_sqbrop != nullptr) {
     // There is a space after the executable name
     // and before the opening [
     const size_t len = pos_sqbrop - symbol - 1;
@@ -102,16 +102,16 @@ void Backtrace::split_backtrace_string(const char* symbol, Frame& frame) const {
 
   // Check whether functionname+offset is the empty string
   // or none of "(" or ")" exists:
-  if (pos_bracketop == NULL || pos_bracketcl == NULL ||
+  if (pos_bracketop == nullptr || pos_bracketcl == nullptr ||
       pos_bracketcl == pos_bracketop + 1) {
     // In this case -rdynamic has been forgotten and hence we
     // cannot lookup the function name symbol.
-    frame.function_name = "? (add flag \"-rdynamic\" on linking)";
+    frame.function_name = R"(? (add flag "-rdynamic" on linking))";
     return;
   }
 
   // Extract the function name:
-  if (pos_bracketop != NULL && pos_plus != NULL && pos_bracketop < pos_plus) {
+  if (pos_bracketop != nullptr && pos_plus != nullptr && pos_bracketop < pos_plus) {
     const size_t len = pos_plus - pos_bracketop - 1;
     frame.function_name = std::string(pos_bracketop + 1, len);
     frame.function_name = demangled_string(frame.function_name);
@@ -133,8 +133,8 @@ void Backtrace::determine_file_line(const char* executable_name, const char* add
 
   // Allocate memory for addr2line call:
   const size_t maxlen = 4096;
-  char* codefile = new char[maxlen];
-  char* number = new char[maxlen];
+  auto* codefile = new char[maxlen];
+  auto* number = new char[maxlen];
 
   // call and interpret:
   int ret = krims::addr2line(executable_name, address, maxlen, codefile, number);
@@ -195,7 +195,7 @@ void Backtrace::parse_backtrace() const {
 
   for (int raw_i = initframe; raw_i < m_n_raw_frames; ++raw_i) {
     // Generate a new frame:
-    m_parsed_frames.push_back(Frame{});
+    m_parsed_frames.emplace_back();
     Frame& frame = m_parsed_frames.back();
 
     split_backtrace_string(stacktrace[raw_i], frame);

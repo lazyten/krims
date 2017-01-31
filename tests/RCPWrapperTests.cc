@@ -74,12 +74,20 @@ TEST_CASE("RCPWrapperTests", "[RCPWrapper]") {
     RCPWrapper<SimpleSubscribableChild> ptrwrap(sshared);
 
     // Copy constructor
-    RCPWrapper<SimpleSubscribableChild> subwrap2(subwrap);
-    RCPWrapper<SimpleSubscribableChild> ptrwrap2(ptrwrap);
+    // (The NOLINT comment suppresses clang-tidy warnings about the unnecessary copy)
+    RCPWrapper<SimpleSubscribableChild> subwrap2(subwrap);  // NOLINT
+    RCPWrapper<SimpleSubscribableChild> ptrwrap2(ptrwrap);  // NOLINT
     REQUIRE(subwrap2.is_shared_ptr() == false);
     REQUIRE(ptrwrap2.is_shared_ptr() == true);
     REQUIRE(subwrap2->data == 1);
     REQUIRE(ptrwrap2->data == 5);
+
+    // Modify data and check that original affected as well.
+    subwrap2->data = 42;
+    ptrwrap2->data = 43;
+
+    REQUIRE(subwrap->data == 42);
+    REQUIRE(ptrwrap->data == 43);
   }  // RCPWrapper copy constructor
 
   SECTION("Conversion from RCPWrapper to shared and subscription pointer") {

@@ -21,6 +21,7 @@
 #include <krims/Subscribable.hh>
 #include <krims/SubscriptionPointer.hh>
 #include <memory>
+#include <utility>
 #include <rapidcheck.h>
 #include <rapidcheck/state.h>
 
@@ -73,8 +74,8 @@ struct SubscriptionSystemUnderTest {
   // Constructor and destructor
   //
   /** Generate a system under test with a few objects but no pointers. */
-  SubscriptionSystemUnderTest(const std::vector<SubscribableType>& objects_)
-        : objects{objects_}, pointers{} {}
+  SubscriptionSystemUnderTest(std::vector<SubscribableType> objects_)
+      : objects{std::move(objects_)}, pointers{} {}
 
   ~SubscriptionSystemUnderTest() {
     // Make sure the pointers get destroyed before the objects
@@ -184,7 +185,8 @@ struct SubscriptionModel {
     size_t object_index;
 
     pointer_model() = default;
-    explicit pointer_model(std::string pid) : id(pid), object_index(invalid_index){};
+    explicit pointer_model(std::string pid)
+          : id(std::move(pid)), object_index(invalid_index){};
   };
 
   //
@@ -229,8 +231,7 @@ struct SubscriptionModel {
   /** Proper copy constructor taking care of sanely copying the data in
    *  the pointer_model and not destroying the reference count of the
    *  objects.*/
-  SubscriptionModel(const SubscriptionModel& other)
-        : pointers{other.pointers}, objects{other.objects} {}
+  SubscriptionModel(const SubscriptionModel &other) = default;
 
   //! Check if pointer id has been used by one of the pointers before
   bool is_pointer_id_used(const std::string& id) const {

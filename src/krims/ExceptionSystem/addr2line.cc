@@ -57,20 +57,27 @@ int addr2line(const char* execname, const char* addr, const size_t maxlen, char*
   close(pipefd[1]);
 
   // Read data from the pipe
-  ssize_t len = read(pipefd[0], codefile, maxlen);
+  const ssize_t len = read(pipefd[0], codefile, maxlen);
   close(pipefd[0]);
-  if (len == 0) {
-    // eof encountered when reading from pipe
+
+  // Wait for addr2line to be done
+  if (waitpid(pid, nullptr, 0) != pid) {
+    // error wrong pid exited ... no way we can recover
+    std::abort();
+  }
+
+  if (len <= 0) {
+    // eof or error encountered when reading from pipe
     return -1;
   }
 
-  // Put a null at the end
-  codefile[len] = 0;
-
-  // Wait for addr2line to be done
-  if (waitpid(pid, NULL, 0) != pid) {
-    // error wrong pid exited ... no way we can recover
-    std::abort();
+  // Make sure that we have a null-terminated string:
+  // Note that the cast will always work, since len <= 0
+  // has returned already.
+  if (static_cast<size_t>(len) < maxlen) {
+    codefile[len] = 0;
+  } else {
+    codefile[len - 1] = 0;
   }
 
   // Ignore tailing newline:
@@ -81,12 +88,16 @@ int addr2line(const char* execname, const char* addr, const size_t maxlen, char*
 
   // Find first colon and split there:
   char* colon = strchr(codefile, ':');
-  if (colon == NULL) {
+  if (colon == nullptr) {
     // ":" not found, use everything for codefile.
     return 0;
   } else {
     // colon points to the first occurrence of ":"
-    strcpy(number, colon + 1);
+    strncpy(number, colon + 1, maxlen);
+
+    // Assure that number ends on a 0:
+    number[maxlen - 1] = 0;
+
     *colon = 0;
     return 0;
   }

@@ -150,7 +150,8 @@ int main() {
   print_map(map);
 
   std::cout << "#" << std::endl;
-  std::cout << "# Modify submap with modify_map_other(map.submap(\"sub\")" << std::endl;
+  std::cout << R"(# Modify submap with modify_map_other(map.submap("sub"))"
+            << std::endl;
   std::cout << "#" << std::endl;
 
   GenMap submap = map.submap("sub");

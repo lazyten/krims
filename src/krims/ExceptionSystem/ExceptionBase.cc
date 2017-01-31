@@ -70,8 +70,8 @@ void ExceptionBase::print_extra(std::ostream& out) const noexcept { out << "(non
 void ExceptionBase::print_exc_data(std::ostream& out) const noexcept {
   out << "The assertion" << std::endl
       << "   " << m_failed_condition << std::endl
-      << "failed in line " << m_line << " of file \"" << m_file
-      << "\" while executing the function" << std::endl
+      << "failed in line " << m_line << R"( of file ")" << m_file
+      << R"(" while executing the function)" << std::endl
       << "   " << m_function << std::endl
       << "This raised the exception" << std::endl
       << "   " << m_name << std::endl;
@@ -119,8 +119,7 @@ void ExceptionBase::print_stacktrace(std::ostream& out) const {
 
   if (!m_backtrace.determine_file_line()) {
     out << std::endl
-        << "Hint: Use \"addr2line -e <executable> <address>\" to get "
-           "file and line number in backtrace."
+        << R"(Hint: Use "addr2line -e <executable> <address>" to get file and line number in backtrace.)"
         << std::endl;
   }
 }
