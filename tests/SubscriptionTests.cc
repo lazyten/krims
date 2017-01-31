@@ -1186,13 +1186,13 @@ TEST_CASE("Subscription and SubscriptionPointer system", "[subscription]") {
             typedef AssignRemovePointer<subscribable_type> op_AssignRm;
 
             // Define generator for commands:
-            auto genCommands =
+            auto gen_commands =
                   state::gen::execOneOfWithArgs<op_CreateObj, op_CreateEmpty, op_Reset,
                                                 op_Remove, op_Redirect, op_CpRm,
                                                 op_AssignRm>;
 
             // Run it through rapidcheck
-            state::check(model, sut, genCommands());
+            state::check(model, sut, gen_commands());
           };
 
     REQUIRE(rc::check("Random function test of subscriber-subscription model.",

@@ -42,10 +42,10 @@ TEST_CASE("DereferenceIteratorTests", "[DereferenceIterator]") {
 
   SECTION("Test DereferenceIterator of normal std::vector iterator") {
     auto test = [] {
-      typedef std::vector<std::shared_ptr<testtype>> conttype;
-      conttype v = *gen::container<conttype>(
-                          gen::makeShared<testtype>(gen::arbitrary<testtype>()))
-                          .as("Test container");
+      typedef std::vector<std::shared_ptr<testtype>> cont_type;
+      cont_type v = *gen::container<cont_type>(
+                           gen::makeShared<testtype>(gen::arbitrary<testtype>()))
+                           .as("Test container");
 
       auto it = std::begin(v);
       DereferenceIterator<decltype(it)> itbegin(it);
@@ -70,10 +70,10 @@ TEST_CASE("DereferenceIteratorTests", "[DereferenceIterator]") {
 
   SECTION("Test DereferenceIterator of constant std::vector iterator") {
     auto test = [] {
-      typedef std::vector<std::shared_ptr<testtype>> conttype;
-      conttype v = *gen::container<conttype>(
-                          gen::makeShared<testtype>(gen::arbitrary<testtype>()))
-                          .as("Test container");
+      typedef std::vector<std::shared_ptr<testtype>> cont_type;
+      cont_type v = *gen::container<cont_type>(
+                           gen::makeShared<testtype>(gen::arbitrary<testtype>()))
+                           .as("Test container");
 
       auto it = v.cbegin();
       DereferenceIterator<decltype(it)> itbegin(it);
@@ -96,15 +96,15 @@ TEST_CASE("DereferenceIteratorTests", "[DereferenceIterator]") {
 
   SECTION("Check that pre- and post-decrement/increment agree") {
     auto test = [] {
-      typedef std::vector<std::shared_ptr<testtype>> conttype;
-      conttype v = *gen::container<conttype>(
-                          gen::makeShared<testtype>(gen::arbitrary<testtype>()))
-                          .as("Test container");
+      typedef std::vector<std::shared_ptr<testtype>> cont_type;
+      cont_type v = *gen::container<cont_type>(
+                           gen::makeShared<testtype>(gen::arbitrary<testtype>()))
+                           .as("Test container");
 
       RC_PRE(v.size() > 0u);
       size_t pos = *gen::inRange<size_t>(0, v.size()).as("position to offset to");
 
-      DereferenceIterator<typename conttype::iterator> it(std::begin(v));
+      DereferenceIterator<typename cont_type::iterator> it(std::begin(v));
       it += pos;
 
       auto itp1 = ++it;
@@ -126,15 +126,15 @@ TEST_CASE("DereferenceIteratorTests", "[DereferenceIterator]") {
 
   SECTION("Check that ++(--it) and --(++it)) are identical.") {
     auto test = [] {
-      typedef std::vector<std::shared_ptr<testtype>> conttype;
-      conttype v = *gen::container<conttype>(
-                          gen::makeShared<testtype>(gen::arbitrary<testtype>()))
-                          .as("Test container");
+      typedef std::vector<std::shared_ptr<testtype>> cont_type;
+      cont_type v = *gen::container<cont_type>(
+                           gen::makeShared<testtype>(gen::arbitrary<testtype>()))
+                           .as("Test container");
 
       RC_PRE(v.size() > 0u);
       size_t pos = *gen::inRange<size_t>(0, v.size()).as("position to offset to");
 
-      DereferenceIterator<typename conttype::iterator> it(std::begin(v));
+      DereferenceIterator<typename cont_type::iterator> it(std::begin(v));
       it += pos;
 
       auto res1 = --(++it);
@@ -159,15 +159,15 @@ TEST_CASE("DereferenceIteratorTests", "[DereferenceIterator]") {
 
   SECTION("Check offset lookup and +n/-n") {
     auto test = [] {
-      typedef std::vector<std::shared_ptr<testtype>> conttype;
-      conttype v = *gen::container<conttype>(
-                          gen::makeShared<testtype>(gen::arbitrary<testtype>()))
-                          .as("Test container");
+      typedef std::vector<std::shared_ptr<testtype>> cont_type;
+      cont_type v = *gen::container<cont_type>(
+                           gen::makeShared<testtype>(gen::arbitrary<testtype>()))
+                           .as("Test container");
 
       RC_PRE(v.size() > 0u);
       size_t pos = *gen::inRange<size_t>(0, v.size()).as("position to offset to");
 
-      typedef DereferenceIterator<typename conttype::iterator> it_type;
+      typedef DereferenceIterator<typename cont_type::iterator> it_type;
       const it_type itorig(std::begin(v));
 
       it_type it = itorig;

@@ -90,7 +90,7 @@ std::string GenMap::make_full_key(const std::string& key) const {
     if (start == end) continue;
 
     // Extract the part we deal with in this iteration:
-    const std::string part = key.substr(start, end - start);
+    std::string part = key.substr(start, end - start);
 
     // Update start for next iteration:
     start += part.length();
@@ -127,13 +127,13 @@ typename GenMap::iterator GenMap::begin(const std::string& path) {
   //  the ones which follow next must all be below our current
   //  location or already well past it.)
   auto it = starting_keys_begin(*m_container_ptr, path_full);
-  return iterator(std::move(it), path_full);
+  return iterator(it, path_full);
 }
 
 typename GenMap::const_iterator GenMap::cbegin(const std::string& path) const {
   const std::string path_full = make_full_key(path);
   auto it = starting_keys_begin(*m_container_ptr, path_full);
-  return const_iterator(std::move(it), path_full);
+  return const_iterator(it, path_full);
 }
 
 typename GenMap::iterator GenMap::end(const std::string& path) {
@@ -142,13 +142,13 @@ typename GenMap::iterator GenMap::end(const std::string& path) {
   // Obtain the first key which does no longer start with the pull path,
   // i.e. where we are done processing the subpath.
   auto it = starting_keys_end(*m_container_ptr, path_full);
-  return iterator(std::move(it), path_full);
+  return iterator(it, path_full);
 }
 
 typename GenMap::const_iterator GenMap::cend(const std::string& path) const {
   const std::string path_full = make_full_key(path);
   auto it = starting_keys_end(*m_container_ptr, path_full);
-  return const_iterator(std::move(it), path_full);
+  return const_iterator(it, path_full);
 }
 
 }  // namespace krims

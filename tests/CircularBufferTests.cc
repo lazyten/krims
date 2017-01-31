@@ -207,8 +207,8 @@ void exectute_random_test() {
   sut_type sut{max_size};
 
   // Generate command sequence and execute random state test
-  auto genCommands = rc::state::gen::execOneOfWithArgs<Commands...>;
-  state::check(model, sut, genCommands());
+  auto gen_commands = rc::state::gen::execOneOfWithArgs<Commands...>;
+  state::check(model, sut, gen_commands());
 }
 
 }  // namespace circular_buffer_tests
@@ -221,13 +221,13 @@ TEST_CASE("Circular Iterator and Circular Buffer", "[circular_buffer]") {
   using namespace circular_buffer_tests;
 
   // The type to do the tests with
-  typedef int testtype;
+  typedef int test_type;
 
   SECTION("Pushing elements back into circular buffer.") {
-    auto test = [](std::vector<testtype> v) {
+    auto test = [](std::vector<test_type> v) {
       RC_PRE(v.size() > 0u);
 
-      CircularBuffer<testtype> buf{v.size() + 5};
+      CircularBuffer<test_type> buf{v.size() + 5};
       for (auto elem : v) {
         buf.push_back(elem);
       }
@@ -256,17 +256,17 @@ TEST_CASE("Circular Iterator and Circular Buffer", "[circular_buffer]") {
 
   SECTION("Random function test of circular buffer") {
     // Typedef the operations
-    typedef PushBack<testtype> op_PushBack;
-    typedef PushFront<testtype> op_PushFront;
-    typedef Clear<testtype> op_Clear;
-    typedef ChangeMaxSize<testtype> op_ChangeMaxSize;
+    typedef PushBack<test_type> op_PushBack;
+    typedef PushFront<test_type> op_PushFront;
+    typedef Clear<test_type> op_Clear;
+    typedef ChangeMaxSize<test_type> op_ChangeMaxSize;
 
-    REQUIRE(
-          rc::check("Random function test of circular buffer with Clear",
-                    exectute_random_test<testtype, op_PushBack, op_PushFront, op_Clear>));
+    REQUIRE(rc::check(
+          "Random function test of circular buffer with Clear",
+          exectute_random_test<test_type, op_PushBack, op_PushFront, op_Clear>));
     REQUIRE(rc::check(
           "Random function test of circular buffer with ChangeMaxSize",
-          exectute_random_test<testtype, op_PushBack, op_PushFront, op_ChangeMaxSize>));
+          exectute_random_test<test_type, op_PushBack, op_PushFront, op_ChangeMaxSize>));
   }  // Random function test
 
 }  // TEST_CASE
