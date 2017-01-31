@@ -100,7 +100,7 @@ std::string GenMap::make_full_key(const std::string& key) const {
       continue;
     } else if (part == "..") {
       // If ".." path part, then pop the most recently added path part if any.
-      if (pathparts.size() != 0) pathparts.pop_back();
+      if (!pathparts.empty()) pathparts.pop_back();
     } else {
       pathparts.push_back(std::move(part));
     }

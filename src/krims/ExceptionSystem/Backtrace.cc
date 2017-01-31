@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 by the krims authors
+// Copyright (C) 2016-17 by the krims authors
 //
 // This file is part of krims.
 //
@@ -120,10 +120,7 @@ void Backtrace::split_backtrace_string(const char* symbol, Frame& frame) const {
 
 void Backtrace::determine_file_line(const char* executable_name, const char* address,
                                     Frame& frame) const {
-#ifndef KRIMS_ADDR2LINE_AVAILABLE
-  // Nothing we can do: addr2line is not available:
-  return;
-#else
+#ifdef KRIMS_ADDR2LINE_AVAILABLE
   if (strcmp(executable_name, Frame::unknown.c_str()) == 0 ||
       strcmp(address, Frame::unknown.c_str()) == 0) {
     // One of the arguments is equal to unknown, so we cannot call addr2line on
@@ -148,9 +145,9 @@ void Backtrace::determine_file_line(const char* executable_name, const char* add
   // Free memory
   delete[] number;
   delete[] codefile;
-#endif
+#endif  // KRIMS_ADDR2LINE_AVAILABLE
 }
-#endif
+#endif  // KRIMS_HAVE_GLIBC_STACKTRACE
 
 void Backtrace::parse_backtrace() const {
   // If parsing was already done or there are no frames, return
@@ -173,17 +170,17 @@ void Backtrace::parse_backtrace() const {
   // from krims which gets called when processing an exception.
   int initframe = 0;
   for (int frame = m_n_raw_frames - 1; frame >= 0; --frame) {
-    if (std::strstr(stacktrace[frame], "krims") &&
-        std::strstr(stacktrace[frame], "ExceptionBase") &&
-        std::strstr(stacktrace[frame], "add_exc_data")) {
+    if ((std::strstr(stacktrace[frame], "krims") != nullptr) &&
+        (std::strstr(stacktrace[frame], "ExceptionBase") != nullptr) &&
+        (std::strstr(stacktrace[frame], "add_exc_data") != nullptr)) {
       // The current call frame is responsible for adding the exception data
       // from the assert macros. so we are interested in the next one
       // (i.e. the one closer to main)
       initframe = frame + 1;
       break;
-    } else if (std::strstr(stacktrace[frame], "krims") &&
-               std::strstr(stacktrace[frame], "Backtrace") &&
-               std::strstr(stacktrace[frame], "obtain_backtrace")) {
+    } else if ((std::strstr(stacktrace[frame], "krims") != nullptr) &&
+               (std::strstr(stacktrace[frame], "Backtrace") != nullptr) &&
+               (std::strstr(stacktrace[frame], "obtain_backtrace") != nullptr)) {
       // If the above is not triggered, but we find this current frame,
       // then a different mechanism was used than the assert macros.
       // As a fallback we start displaying from the next frame (i.e.

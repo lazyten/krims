@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 by the krims authors
+// Copyright (C) 2016-17 by the krims authors
 //
 // This file is part of krims.
 //
@@ -79,7 +79,7 @@ void ExceptionBase::print_exc_data(std::ostream& out) const noexcept {
 
 void ExceptionBase::print_stacktrace(std::ostream& out) const {
   // If we have no backtrace, print nothing.
-  if (m_backtrace.frames().size() == 0) return;
+  if (m_backtrace.frames().empty()) return;
 
   // Determine length of longest function name:
   size_t maxfunclen = 8;  // length of string "function"
@@ -155,4 +155,4 @@ std::string ExceptionBase::generate_message() const noexcept {
   }
 }
 
-}  // krims
+}  // namespace krims

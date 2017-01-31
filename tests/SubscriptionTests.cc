@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 by the krims authors
+// Copyright (C) 2016-17 by the krims authors
 //
 // This file is part of krims.
 //
@@ -21,9 +21,9 @@
 #include <krims/Subscribable.hh>
 #include <krims/SubscriptionPointer.hh>
 #include <memory>
-#include <utility>
 #include <rapidcheck.h>
 #include <rapidcheck/state.h>
+#include <utility>
 
 // have an extra verbose output for rapidcheck function tests:
 //#define HAVE_SUBSCRIPTION_RC_CLASSIFY
@@ -75,7 +75,7 @@ struct SubscriptionSystemUnderTest {
   //
   /** Generate a system under test with a few objects but no pointers. */
   SubscriptionSystemUnderTest(std::vector<SubscribableType> objects_)
-      : objects{std::move(objects_)}, pointers{} {}
+        : objects{std::move(objects_)}, pointers{} {}
 
   ~SubscriptionSystemUnderTest() {
     // Make sure the pointers get destroyed before the objects
@@ -165,7 +165,7 @@ struct SubscriptionSystemUnderTest {
 template <typename SubscribableType>
 struct SubscriptionModel {
   //! struct mimicing a Subscribable
-  struct subscribable_model {
+  struct SubscribableModel {
     /** Collection of strings giving us the list
      * of subscribing objects */
     std::list<std::string> subscribers;
@@ -177,15 +177,15 @@ struct SubscriptionModel {
   constexpr static size_t invalid_index = size_t(-1);
 
   //! struct mimicing a Subscription Pointer
-  struct pointer_model {
+  struct PointerModel {
     //! id of the pointer
     std::string id;
 
     //! Object we point to
-    size_t object_index;
+    size_t object_index{};
 
-    pointer_model() = default;
-    explicit pointer_model(std::string pid)
+    PointerModel() = default;
+    explicit PointerModel(std::string pid)
           : id(std::move(pid)), object_index(invalid_index){};
   };
 
@@ -193,10 +193,10 @@ struct SubscriptionModel {
   // Data members
   //
   //! The list of subscribers in the model
-  std::vector<pointer_model> pointers;
+  std::vector<PointerModel> pointers;
 
   //! The list of objects in the test system:
-  std::vector<subscribable_model> objects;
+  std::vector<SubscribableModel> objects;
 
   //
   // Constructor and destructor
@@ -210,7 +210,7 @@ struct SubscriptionModel {
         : pointers{}, objects{objects_.size()} {
 
     auto construct_model = [](const SubscribableType& o) {
-      subscribable_model m;
+      SubscribableModel m;
       m.data = o;
       return m;
     };
@@ -229,14 +229,14 @@ struct SubscriptionModel {
   }
 
   /** Proper copy constructor taking care of sanely copying the data in
-   *  the pointer_model and not destroying the reference count of the
+   *  the PointerModel and not destroying the reference count of the
    *  objects.*/
-  SubscriptionModel(const SubscriptionModel &other) = default;
+  SubscriptionModel(const SubscriptionModel& other) = default;
 
   //! Check if pointer id has been used by one of the pointers before
   bool is_pointer_id_used(const std::string& id) const {
     // predicate to check that the id of a pointer agrees
-    auto check_id = [&](const pointer_model& m) { return m.id == id; };
+    auto check_id = [&](const PointerModel& m) { return m.id == id; };
 
     // See if any of the pointers has the same id.
     return std::any_of(std::begin(pointers), std::end(pointers), check_id);
@@ -260,7 +260,7 @@ struct SubscriptionModel {
   /** Assert that an assertion is true for all objects in this model
    *  versus the system under test.
    *
-   *  The ObjectAssertion is supposed to take an subscribable_model
+   *  The ObjectAssertion is supposed to take an SubscribableModel
    *  and a SubscribableType object and assert via RC_ASSERT that
    *  the condition is fulfilled for each such pair.
    *
@@ -286,7 +286,7 @@ struct SubscriptionModel {
   void assert_have_all_ids_of(
         const SubscriptionSystemUnderTest<SubscribableType>& sut) const {
 #ifdef DEBUG
-    auto assertion_on_pair = [](const subscribable_model& mod_obj,
+    auto assertion_on_pair = [](const SubscribableModel& mod_obj,
                                 const SubscribableType& sut_obj) {
       // get the list of subscribers from the sut.
       auto sut_subscriptions = sut_obj.subscribers();
@@ -316,7 +316,7 @@ struct SubscriptionModel {
    */
   void assert_all_ids_in(const SubscriptionSystemUnderTest<SubscribableType>& sut) const {
 #ifdef DEBUG
-    auto assertion_on_pair = [](const subscribable_model& mod_obj,
+    auto assertion_on_pair = [](const SubscribableModel& mod_obj,
                                 const SubscribableType& sut_obj) {
       // get the list of subscribers from the sut.
       auto sut_subscriptions = sut_obj.subscribers();
@@ -357,7 +357,7 @@ struct SubscriptionModel {
   /** Assert that the pointer are equivalent. */
   static void assert_equal_pointer(
         const SubscriptionSystemUnderTest<SubscribableType>& sut,
-        const SubscriptionPointer<SubscribableType>& sp, const pointer_model& mp) {
+        const SubscriptionPointer<SubscribableType>& sp, const PointerModel& mp) {
 
     // The index of the object we point to:
     size_t mto = mp.object_index;
@@ -457,7 +457,7 @@ struct CreateObjectPointer
     RC_PRE(!model.is_pointer_id_used(id));
 
     // Create new model pointer
-    typename model_type::pointer_model pm;
+    typename model_type::PointerModel pm;
     pm.id = id;
     pm.object_index = obj_index;
 
@@ -582,7 +582,7 @@ struct RedirectPointer
     RC_PRE(model.pointers.size() > ptr_index);
     RC_PRE(model.pointers[ptr_index].object_index != obj_index);
 
-    typename model_type::pointer_model& pm = model.pointers[ptr_index];
+    typename model_type::PointerModel& pm = model.pointers[ptr_index];
     std::string id = pm.id;
 
     // delete the id from the currently pointed-to object subscribers list
@@ -631,7 +631,7 @@ struct RedirectPointer
     RC_ASSERT(res);
 
     // Check that the subscriptions agree
-    auto assertion_on_pair = [&](const typename model_type::subscribable_model& mod_obj,
+    auto assertion_on_pair = [&](const typename model_type::SubscribableModel& mod_obj,
                                  const SubscribableType& sut_obj) {
       // get the list of subscribers from the sut.
       auto sut_subscriptions = sut_obj.subscribers();
@@ -680,7 +680,7 @@ struct ResetPointer : rc::state::Command<SubscriptionModel<SubscribableType>,
     // check we have enough pointers to remove this one:
     RC_PRE(model.pointers.size() > ptr_index);
 
-    typename model_type::pointer_model& pm = model.pointers[ptr_index];
+    typename model_type::PointerModel& pm = model.pointers[ptr_index];
     std::string id = pm.id;
 
     if (pm.object_index != model_type::invalid_index) {
@@ -747,7 +747,7 @@ struct RemovePointer : rc::state::Command<SubscriptionModel<SubscribableType>,
     // check we have enough pointers to remove this one:
     RC_PRE(model.pointers.size() > ptr_index);
 
-    typename model_type::pointer_model& pm = model.pointers[ptr_index];
+    typename model_type::PointerModel& pm = model.pointers[ptr_index];
     std::string id = pm.id;
 
     if (pm.object_index != model_type::invalid_index) {
@@ -1202,5 +1202,5 @@ TEST_CASE("Subscription and SubscriptionPointer system", "[subscription]") {
   // TODO test comparison operators of SubscriptionPointer
 
 }  // TEST_CASE
-}  // namespace test
+}  // namespace tests
 }  // namespace krims

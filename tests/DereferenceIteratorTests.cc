@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 by the krims authors
+// Copyright (C) 2016-17 by the krims authors
 //
 // This file is part of krims.
 //
@@ -27,7 +27,7 @@ namespace tests {
 using namespace rc;
 
 template <typename Iterator>
-void showValue(const DereferenceIterator<Iterator>& it, std::ostream& o) {
+void showValue(const DereferenceIterator<Iterator>& it, std::ostream& o) {  // NOLINT
   o << "Inner iterator: " << it.operator->() << std::endl
     << "element: " << *it << std::endl;
 }
@@ -197,5 +197,5 @@ TEST_CASE("DereferenceIteratorTests", "[DereferenceIterator]") {
   }
 
 }  // TEST_CASE
-}  // namespace test
+}  // namespace tests
 }  // namespace krims

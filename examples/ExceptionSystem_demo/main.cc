@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 by the krims authors
+// Copyright (C) 2016-17 by the krims authors
 //
 // This file is part of krims.
 //
@@ -75,10 +75,10 @@ void part5() {
   assert_element_sizes(vvec, 2);
 }
 
-class testclass_part6 : public krims::Subscribable {};
+class TestclassPart6 : public krims::Subscribable {};
 void part6() {
-  krims::SubscriptionPointer<testclass_part6> bptr("part6");
-  testclass_part6 b;
+  krims::SubscriptionPointer<TestclassPart6> bptr("part6");
+  TestclassPart6 b;
   bptr.reset(b);
 }
 

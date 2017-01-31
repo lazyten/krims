@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 by the krims authors
+// Copyright (C) 2016-17 by the krims authors
 //
 // This file is part of krims.
 //
@@ -114,21 +114,21 @@ class Backtrace {
   /**
    *   array of pointers that contains the raw stack trace
    */
-  void* m_raw_backtrace[n_max_frames];
+  void* m_raw_backtrace[n_max_frames]{};
 #endif
 
   /** The actual number of raw backtrace frames we obtained in m_raw_backtrace.
    *  In case no frames can be obtained. This number is always zero.*/
-  int m_n_raw_frames;
+  int m_n_raw_frames = 0;
 
   /** std::vector of Entry objects which contains the parsed stack trace. */
   mutable std::vector<Frame> m_parsed_frames;
 
   /** Flag to hold whether the parsing has been done */
-  mutable bool m_parsing_done;
+  mutable bool m_parsing_done = false;
 
   /** Did the parsing process determine the file path and line numbers. */
-  bool m_determine_file_line;
+  bool m_determine_file_line = false;
 };
 
 }  // namespace krims

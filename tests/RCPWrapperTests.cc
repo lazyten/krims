@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 by the krims authors
+// Copyright (C) 2016-17 by the krims authors
 //
 // This file is part of krims.
 //
@@ -59,8 +59,8 @@ TEST_CASE("RCPWrapperTests", "[RCPWrapper]") {
     RCPWrapper<SimpleSubscribableChild> subwrap(ssub);
     RCPWrapper<SimpleSubscribableChild> ptrwrap(sshared);
 
-    REQUIRE(subwrap.is_shared_ptr() == false);
-    REQUIRE(ptrwrap.is_shared_ptr() == true);
+    REQUIRE(!subwrap.is_shared_ptr());
+    REQUIRE(ptrwrap.is_shared_ptr());
     REQUIRE(subwrap->data == 1);
     REQUIRE(ptrwrap->data == 5);
 
@@ -77,8 +77,8 @@ TEST_CASE("RCPWrapperTests", "[RCPWrapper]") {
     // (The NOLINT comment suppresses clang-tidy warnings about the unnecessary copy)
     RCPWrapper<SimpleSubscribableChild> subwrap2(subwrap);  // NOLINT
     RCPWrapper<SimpleSubscribableChild> ptrwrap2(ptrwrap);  // NOLINT
-    REQUIRE(subwrap2.is_shared_ptr() == false);
-    REQUIRE(ptrwrap2.is_shared_ptr() == true);
+    REQUIRE(!subwrap2.is_shared_ptr());
+    REQUIRE(ptrwrap2.is_shared_ptr());
     REQUIRE(subwrap2->data == 1);
     REQUIRE(ptrwrap2->data == 5);
 
@@ -122,5 +122,5 @@ TEST_CASE("RCPWrapperTests", "[RCPWrapper]") {
   }  // RCPWrapper from shared and subscription pointers
 
 }  // TEST_CASE
-}  // namespace test
+}  // namespace tests
 }  // namespace krims

@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 by the krims authors
+// Copyright (C) 2016-17 by the krims authors
 //
 // This file is part of krims.
 //
@@ -46,9 +46,9 @@ int addr2line(const char* execname, const char* addr, const size_t maxlen, char*
     dup2(pipefd[1], STDOUT_FILENO);
     dup2(pipefd[1], STDERR_FILENO);
 
-    // Call addr2line
-    if (execlp("addr2line", "addr2line", addr, "-e", execname,
-               reinterpret_cast<void*>(NULL)) == -1) {
+    // Call addr2line (NOLINT: ignore the lines for clang-tidy)
+    if (execlp("addr2line", "addr2line", addr, "-e", execname,  // NOLINT
+               reinterpret_cast<void*>(NULL)) == -1) {          // NOLINT
       std::abort();
     }
   }
@@ -82,7 +82,7 @@ int addr2line(const char* execname, const char* addr, const size_t maxlen, char*
 
   // Ignore tailing newline:
   char* newline = strchr(codefile, '\n');
-  if (newline) {
+  if (newline != nullptr) {
     *newline = 0;
   }
 

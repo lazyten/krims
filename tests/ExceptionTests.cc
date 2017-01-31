@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 by the krims authors
+// Copyright (C) 2016-17 by the krims authors
 //
 // This file is part of krims.
 //
@@ -196,5 +196,5 @@ TEST_CASE("Exception system", "[exception]") {
     //      test for assert_save_conversion_to
   }
 }
-}  // tests
-}  // krims
+}  // namespace tests
+}  // namespace krims

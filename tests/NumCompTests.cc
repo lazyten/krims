@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 by the krims authors
+// Copyright (C) 2016-17 by the krims authors
 //
 // This file is part of krims.
 //
@@ -163,5 +163,5 @@ TEST_CASE("NumComp tests", "[NumComp]") {
   }  // SECTION Test is_equal with extremely sloppy tolerance
 
 }  // TEST_CASE
-}  // namespace test
+}  // namespace tests
 }  // namespace krims

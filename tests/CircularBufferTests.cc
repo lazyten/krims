@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 by the krims authors
+// Copyright (C) 2016-17 by the krims authors
 //
 // This file is part of krims.
 //
@@ -270,5 +270,5 @@ TEST_CASE("Circular Iterator and Circular Buffer", "[circular_buffer]") {
   }  // Random function test
 
 }  // TEST_CASE
-}  // namespace test
+}  // namespace tests
 }  // namespace krims
