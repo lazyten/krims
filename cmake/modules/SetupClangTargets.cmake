@@ -179,6 +179,59 @@ to process for source files and headers.")
 	set(DIR_TARGETS "${DIR_TARGETS}" PARENT_SCOPE)
 endfunction(SCT_parse_add_clang_target_args)
 
+function(SCT_get_compdb COMPDB_FILE)
+	# Dump the compilation database and set the passed variable
+	# to the location where it was dumped
+
+	if (CMAKE_VERSION VERSION_GREATER 3.5.0)
+		# Version 1: CMake can dump the compilation database by itself
+
+		if (NOT CMAKE_EXPORT_COMPILE_COMMANDS)
+			message(FATAL_ERROR "Clang-tidy is not available if \"CMAKE_EXPORT_COMPILE_COMMANDS\" \
+is set to \"OFF\", since then no compile_commands.json file is produced.")
+		endif()
+
+		# We need to do nothing special => set COMPDB_FILE to empty.
+		set(${COMPDB_FILE} "${PROJECT_BINARY_DIR}/compile_commands.json" PARENT_SCOPE)
+		return()
+	elseif (NOT CMAKE_GENERATOR STREQUAL "Ninja")
+		message(FATAL_ERROR "Generating the compilation database is only possilbe \
+if Ninja is used to build the project or if the cmake version is above 3.5.0. \
+Some clang targets are hence not available in your conifguration.")
+	endif()
+
+	# Version 2: Ninja can dump the compilation commands for us
+
+	set(${COMPDB_FILE} ${PROJECT_BINARY_DIR}/compile_commands.json)
+	set(GENSCRIPT ${PROJECT_BINARY_DIR}/dump_compdb.sh)
+	file(WRITE ${GENSCRIPT}
+"#!/bin/sh
+
+ERRMSG=\"Cannot generate compilation database using ${CMAKE_MAKE_PROGRAM}: \"
+if ! ${CMAKE_MAKE_PROGRAM} -t list | grep -q compdb; then
+echo $ERRMSG Could not find expected subcommand.
+exit 1
+fi
+
+if ! which awk >/dev/null 2>&1; then
+echo $ERRMSG Did not find an awk executable.
+exit 1
+fi
+
+${CMAKE_MAKE_PROGRAM} -t compdb `awk '/rule.*CXX_COMPILER__/ { print $2 }' rules.ninja` > \"${${COMPDB_FILE}}\"
+"
+	)
+
+	# Command to output compilation database
+	add_custom_command(OUTPUT ${${COMPDB_FILE}}
+		COMMAND /bin/sh ${GENSCRIPT}
+		WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+		COMMENT "Generate compilation database"
+		DEPENDS rules.ninja
+	)
+
+	set(${COMPDB_FILE} "${${COMPDB_FILE}}" PARENT_SCOPE)
+endfunction()
 #
 # ------------------------------------------------------------------
 # External macros
@@ -248,20 +301,15 @@ function(add_clang_tidy_target TARGET_NAME)
 	#
 	# Checks
 	#
-	if (CMAKE_VERSION VERSION_LESS 3.5.0)
-		message(FATAL_ERROR "Clang-tidy targets are not available if cmake version is below 3.5.0.")
-	endif()
-	cmake_minimum_required(VERSION 3.5.0)
-
-	if (NOT CMAKE_EXPORT_COMPILE_COMMANDS)
-		message(FATAL_ERROR "Clang-tidy is not available if \"CMAKE_EXPORT_COMPILE_COMMANDS\" \
-is set to \"OFF\", since then no compile_commands.json file is produced.")
-	endif()
-
 	if (CLANG_TIDY MATCHES "NOTFOUND" OR CLANG_APPLY_REPLACEMENTS MATCHES "NOTFOUND")
 		message(FATAL_ERROR "clang-tidy and/or clang-apply-replacements executable not found, \
 so cannot setup clang tidy targets.")
 	endif()
+
+	#
+	# Dump compilation database
+	#
+	SCT_get_compdb(COMPDB)
 
 	set(FIXDIR ${PROJECT_BINARY_DIR}/fixes)
 	set(FIXFILE ${FIXDIR}/clang-tidy-${TARGET_NAME}.yaml)
@@ -278,7 +326,7 @@ so cannot setup clang tidy targets.")
 		COMMAND
 		touch ${FIXFILE}
 		##
-		DEPENDS ${SOURCE_FILES} ${PROJECT_SOURCE_DIR}/.clang-tidy
+		DEPENDS ${SOURCE_FILES} ${PROJECT_SOURCE_DIR}/.clang-tidy ${COMPDB}
 		WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
 		COMMENT "Detect problems with source files of ${TARGET_NAME} using clang-tidy."
 		VERBATIM
@@ -323,13 +371,17 @@ function(add_available_clang_targets_for)
 		add_clang_format_target(${ARGV})
 	endif()
 
-	if (NOT CMAKE_VERSION VERSION_LESS 3.5.0
-			AND NOT CLANG_TIDY MATCHES "NOTFOUND"
-			AND NOT CLANG_APPLY_REPLACEMENTS MATCHES "NOTFOUND")
+	if (NOT CLANG_TIDY MATCHES "NOTFOUND"
+		AND NOT CLANG_APPLY_REPLACEMENTS MATCHES "NOTFOUND")
 
-		# Since exporting of compile commands is required,
-		# set it to on.
-		set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-		add_clang_tidy_target(${ARGV})
+		if(CMAKE_VERSION VERSION_GREATER 3.5.0
+			OR CMAKE_GENERATOR STREQUAL "Ninja")
+
+			# Since exporting of compile commands is required,
+			# if cmake is greater than 3.5.0 we set it to ON
+			# explicilty here.
+			set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+			add_clang_tidy_target(${ARGV})
+		endif()
 	endif()
 endfunction(add_available_clang_targets_for)
