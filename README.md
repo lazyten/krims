@@ -35,6 +35,7 @@ parts of the library.
 
 - [CMake module ``DebugReleaseBuild``](#cmake-module-debugreleasebuild)
 - [CMake module ``WriteVersionHeader``](#cmake-module-writeversionheader)
+- [CMake module ``SetupClangTargets``](#cmake-module-setupclangtargets)
 - [The exception system](#the-exception-system)
 - [Performing floating point comparisons](#performing-floating-point-comparisons)
 - [``Subscribable`` base class and ``SubscriptionPointer``](#subscribable-base-class-and-subscriptionpointer)
@@ -90,6 +91,40 @@ drb_target_link_libraries(ALL mylib dependency1 dependency2)
 - The syntax is ``write_version_header file [NAME namesp] [VERSION version_string]``
 - The resulting data is put into the namespace ``namesp::detail``.
 - If ``NAME`` or ``VERSION`` are not provided, the current project name and version are used.
+
+### CMake module ``SetupClangTargets``
+- Add targets to easily run certain clang tools on the project
+- Currently reformatting a project using ``clang-format`` and
+  checking for common coding errors unsing ``clang-tidy`` is
+  supported. Fixing errors from ``clang-tidy`` automatically
+  (i.e. ``clang-tidy -fix``) is supported as well.
+- For example: The code
+```CMake
+include(SetupClangTargets)
+add_available_clang_targets_for(myproject
+	DIRECTORIES src tests
+)
+```
+  will setup the targets ``clang-format-myproject``,
+  ``clang-tidy-myproject`` and ``clang-tidy-myproject-fix``.
+- These targets will all work on the header and source files,
+  which are located inside the directories ``src``
+  and ``tests``.  
+  Note, that these directories should have been
+  added to the project using CMake's ``add_subdirectories``
+  *already*. In other words it is advisable to call
+  ``add_available_clang_targets_for`` somewhere at the
+  bottom of the project's  ``CMakeLists.txt``.
+- The format target ``clang-format-myproject``
+  will reformat all files of the project according to the
+  selected formatting guidelines in the appropriate
+  ``.clang-format`` file.
+- ``clang-tidy-myproject`` performs the configured
+  ``clang-tidy``-checks and displays detected problems.
+  If fixes are available to the problems, they can be
+  applied with ``clang-tidy-myproject-fix`` automatically.
+  Note that these two targets are only available on
+  CMake 3.5 or higher.
 
 ### The exception system
 - Available via the header [``<krims/ExceptionSystem.hh>``](src/krims/ExceptionSystem.hh).
