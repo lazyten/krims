@@ -367,8 +367,6 @@ so cannot setup clang tidy targets.")
 		file(RELATIVE_PATH TMP ${CMAKE_SOURCE_DIR} ${src})
 		set(REL_SOURCE_FILES ${REL_SOURCE_FILES} ${TMP})
 	endforeach()
-	message(WARNING "${REL_SOURCE_FILES}")
-	message(WARNING "${CLANG_TIDY} -- ${CLANG_APPLY_REPLACEMENTS} -- ${RUN_CLANG_TIDY}")
 
 	# TODO Incorporate and use run-clang-tidy.py
 	#      The best way to achieve this would be to dump
@@ -386,8 +384,6 @@ so cannot setup clang tidy targets.")
 		mkdir -p "${FIXDIR}"
 		COMMAND
 		rm -f ${FIXFILE}
-		COMMAND
-		echo ${CLANG_TIDY} -p "${CMAKE_BINARY_DIR}" -export-fixes=${FIXFILE} ${REL_SOURCE_FILES}
 		COMMAND
 		${CLANG_TIDY} -p "${CMAKE_BINARY_DIR}" -export-fixes=${FIXFILE} ${REL_SOURCE_FILES}
 		COMMAND
