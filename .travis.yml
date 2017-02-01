@@ -61,6 +61,6 @@ script:
            -DRC_ENABLE_TESTS=OFF -DAUTOCHECKOUT_MISSING_REPOS=ON
            -DKRIMS_ENABLE_EXPERIMENTAL=ON
            -GNinja ..
-  - if [ "${TIDY_TARGET}" -a "$TRAVIS_PULL_REQUEST" != "false" ]; then cmake --build . --target ${TIDY_TARGET}; else true; fi
   - cat rules.ninja
+  - if [ "${TIDY_TARGET}" -a "$TRAVIS_PULL_REQUEST" != "false" ]; then cmake --build . --target ${TIDY_TARGET}; else true; fi
   - grep file compile_commands.json

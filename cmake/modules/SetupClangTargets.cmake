@@ -244,8 +244,13 @@ if ! which awk >/dev/null 2>&1; then
 	exit 1
 fi
 
-\"${CMAKE_MAKE_PROGRAM}\" -t compdb \\
-	`awk '/rule.*CXX_COMPILER__/ { print $2 }' \"${NINJARULES}\"` > \"${COMPDB_FILE}\"
+RULES=`awk '/rule.*CXX_COMPILER(__|$)/ { print $2 }' \"${NINJARULES}\"`
+if [ -z \"$RULES\" ]; then
+	echo Error extracting rules from \"${NINJARULES}\".
+	exit 1
+fi
+
+\"${CMAKE_MAKE_PROGRAM}\" -t compdb $RULES > \"${COMPDB_FILE}\"
 "
 		)
 
