@@ -88,4 +88,4 @@ script:
            -GNinja ..
   - cmake --build  . -- -j ${CORES}
   - if [ "${TEST_REGEX}" ]; then ctest --output-on-failure -R ${TEST_REGEX}; else true; fi
-  - if [ "${TIDY_TARGET}" ]; then cmake --build . --target ${TIDY_TARGET}; else true; fi
+  - if [ "${TIDY_TARGET}" -a "$TRAVIS_PULL_REQUEST" != "false" ]; then cmake --build . --target ${TIDY_TARGET}; else true; fi

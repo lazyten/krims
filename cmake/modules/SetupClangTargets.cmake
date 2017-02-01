@@ -193,6 +193,11 @@ is set to \"OFF\", since then no compile_commands.json file is produced.")
 
 		# We need to do nothing special => set COMPDB_FILE to empty.
 		set(${COMPDB_FILE} "${PROJECT_BINARY_DIR}/compile_commands.json" PARENT_SCOPE)
+
+		# This dummy command is needed to make ninja happy in case we need this
+		# as a dependency onto something else (like for example the clang-tidy
+		# command.
+		add_custom_command(OUTPUT ${COMPDB_FILE} COMMAND true)
 		return()
 	elseif (NOT CMAKE_GENERATOR STREQUAL "Ninja")
 		message(FATAL_ERROR "Generating the compilation database is only possilbe \
@@ -204,6 +209,7 @@ Some clang targets are hence not available in your conifguration.")
 
 	set(${COMPDB_FILE} ${PROJECT_BINARY_DIR}/compile_commands.json)
 	set(GENSCRIPT ${PROJECT_BINARY_DIR}/dump_compdb.sh)
+	set(NINJAFILE ${PROJECT_BINARY_DIR}/rules.ninja)
 	file(WRITE ${GENSCRIPT}
 "#!/bin/sh
 
@@ -218,16 +224,21 @@ echo $ERRMSG Did not find an awk executable.
 exit 1
 fi
 
-${CMAKE_MAKE_PROGRAM} -t compdb `awk '/rule.*CXX_COMPILER__/ { print $2 }' rules.ninja` > \"${${COMPDB_FILE}}\"
+${CMAKE_MAKE_PROGRAM} -t compdb `awk '/rule.*CXX_COMPILER__/ { print $2 }' ${NINJAFILE}` > \"${${COMPDB_FILE}}\"
 "
 	)
+
+	# We need this dummy target such that ninja is happy
+	# for the dependencies of the compdb generation command
+	# below.
+	add_custom_command(OUTPUT ${NINJAFILE} COMMAND true)
 
 	# Command to output compilation database
 	add_custom_command(OUTPUT ${${COMPDB_FILE}}
 		COMMAND /bin/sh ${GENSCRIPT}
 		WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
 		COMMENT "Generate compilation database"
-		DEPENDS rules.ninja
+		DEPENDS ${NINJAFILE}
 	)
 
 	set(${COMPDB_FILE} "${${COMPDB_FILE}}" PARENT_SCOPE)
