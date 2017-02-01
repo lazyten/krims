@@ -363,6 +363,7 @@ so cannot setup clang tidy targets.")
 		set(REL_SOURCE_FILES ${REL_SOURCE_FILES} ${TMP})
 	endforeach()
 	message(WARNING "${REL_SOURCE_FILES}")
+	message(WARNING "${CLANG_TIDY} -- ${CLANG_APPLY_REPLACEMENTS} -- ${RUN_CLANG_TIDY}")
 
 	# TODO Incorporate and use run-clang-tidy.py
 	#      The best way to achieve this would be to dump
