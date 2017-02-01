@@ -381,6 +381,8 @@ so cannot setup clang tidy targets.")
 		COMMAND
 		rm -f ${FIXFILE}
 		COMMAND
+		echo ${CLANG_TIDY} -p "${CMAKE_BINARY_DIR}" -export-fixes=${FIXFILE} ${REL_SOURCE_FILES}
+		COMMAND
 		${CLANG_TIDY} -p "${CMAKE_BINARY_DIR}" -export-fixes=${FIXFILE} ${REL_SOURCE_FILES}
 		COMMAND
 		touch ${FIXFILE}
