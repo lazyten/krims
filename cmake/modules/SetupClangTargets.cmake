@@ -433,13 +433,13 @@ function(add_available_clang_targets_for)
 		add_clang_format_target(${ARGV})
 	endif()
 
-	if (NOT CLANG_TIDY MATCHES "NOTFOUND"
-		AND NOT CLANG_APPLY_REPLACEMENTS MATCHES "NOTFOUND")
+	if(CMAKE_VERSION VERSION_GREATER 3.5.0
+		OR CMAKE_GENERATOR STREQUAL "Ninja")
 
-		if(CMAKE_VERSION VERSION_GREATER 3.5.0
-			OR CMAKE_GENERATOR STREQUAL "Ninja")
+		add_generate_compdb_target()
+		if (NOT CLANG_TIDY MATCHES "NOTFOUND"
+			AND NOT CLANG_APPLY_REPLACEMENTS MATCHES "NOTFOUND")
 
-			add_generate_compdb_target()
 			add_clang_tidy_target(${ARGV})
 		endif()
 	endif()
