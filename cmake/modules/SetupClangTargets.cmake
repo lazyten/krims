@@ -362,6 +362,7 @@ so cannot setup clang tidy targets.")
 		file(RELATIVE_PATH TMP ${CMAKE_SOURCE_DIR} ${src})
 		set(REL_SOURCE_FILES ${REL_SOURCE_FILES} ${TMP})
 	endforeach()
+	message(WARNING "${REL_SOURCE_FILES}")
 
 	# TODO Incorporate and use run-clang-tidy.py
 	#      The best way to achieve this would be to dump
