@@ -39,6 +39,7 @@ set(PackageModuleLocation share/cmake)
 # setup global options (needs to be done before call to project())
 option(KRIMS_ENABLE_TESTS "Build krims tests" ON)
 option(KRIMS_ENABLE_EXAMPLES "Build krims examples" ON)
+option(CMAKE_EXPORT_COMPILE_COMMANDS "Enable/Disable output of compile commands during generation." ON)
 
 ##########################################################################
 # Project setup

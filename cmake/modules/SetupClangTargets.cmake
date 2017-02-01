@@ -30,7 +30,8 @@ include(CMakeParseArguments)
 #
 # Find executables of clang tools
 #
-if (CMAKE_CXX_COMPILER_VERSION) 
+if (CMAKE_CXX_COMPILER_VERSION AND
+		CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 	# Split version into list
 	string(REPLACE "." ";" SPLIT_VERSION ${CMAKE_CXX_COMPILER_VERSION})
 
@@ -39,6 +40,7 @@ if (CMAKE_CXX_COMPILER_VERSION)
 	set(ALTERNATE_SUFFIX "-${PART}")
 	list(GET SPLIT_VERSION 1 PART)
 	set(ALTERNATE_SUFFIX "${ALTERNATE_SUFFIX}.${PART}")
+	set(EXTRA_PATHS "/usr/lib/llvm-3.9/bin" "/usr/lib/llvm-3.9/share/clang/")
 
 	unset(SPLIT_VERSION)
 	unset(PART)
@@ -46,17 +48,26 @@ endif()
 
 find_program(CLANG_TIDY
 	NAMES clang-tidy clang-tidy${ALTERNATE_SUFFIX}
+	PATHS ${EXTRA_PATHS}
 	DOC "Full path to clang-tidy"
 )
 find_program(CLANG_APPLY_REPLACEMENTS
 	NAMES clang-apply-replacements clang-apply-replacements${ALTERNATE_SUFFIX}
+	PATHS ${EXTRA_PATHS}
 	DOC "Full path to clang-apply-replacements"
+)
+find_program(RUN_CLANG_TIDY
+	NAMES run-clang-tidy run-clang-tidy${ALTERNATE_SUFFIX}
+	PATHS ${EXTRA_PATHS}
+	DOC "Full path to run-clang-tidy"
 )
 find_program(CLANG_FORMAT
 	NAMES clang-format clang-format${ALTERNATE_SUFFIX}
+	PATHS ${EXTRA_PATHS}
 	DOC "Full path to clang-format"
 )
 unset(ALTERNATE_SUFFIX)
+unset(EXTRA_PATHS)
 
 #
 # ------------------------------------------------------------------
@@ -195,12 +206,17 @@ function(add_generate_compdb_target)
 		return()
 	endif()
 
-	set(COMPDB_FILE "${PROJECT_BINARY_DIR}/compile_commands.json")
+	set(COMPDB_FILE "${CMAKE_BINARY_DIR}/compile_commands.json")
 
 	if (CMAKE_VERSION VERSION_GREATER 3.5.0)
-		# Version 1: CMake can dump the compilation database by itself
-		# So we just switch it on.
-		set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+		# Version 1: CMake can dump the compilation database by itself.
+		#            We just assert the user switched it on.
+
+		if (NOT CMAKE_EXPORT_COMPILE_COMMANDS)
+			message(FATAL_ERROR "generate-compdb needs the cmake flag \
+\"CMAKE_EXPORT_COMPILE_COMMANDS\" to be set to \"ON\". \
+Please change this in your cmake cache or set this option to \"ON\" before setting up any projects.")
+		endif()
 
 		# This dummy command is needed to make ninja happy in case we need this
 		# as a dependency for something else (like for example the clang-tidy
@@ -212,8 +228,8 @@ function(add_generate_compdb_target)
 		#            This involves a sequance of non-trival commands,
 		#            so we dump a script to do that.
 
-		set(GENSCRIPT ${PROJECT_BINARY_DIR}/dump_compdb.sh)
-		set(NINJAFILE ${PROJECT_BINARY_DIR}/rules.ninja)
+		set(GENSCRIPT ${CMAKE_BINARY_DIR}/dump_compdb.sh)
+		set(NINJARULES ${CMAKE_BINARY_DIR}/rules.ninja)
 		file(WRITE ${GENSCRIPT}
 "#!/bin/sh
 
@@ -228,21 +244,22 @@ if ! which awk >/dev/null 2>&1; then
 	exit 1
 fi
 
-${CMAKE_MAKE_PROGRAM} -t compdb `awk '/rule.*CXX_COMPILER__/ { print $2 }' ${NINJAFILE}` > \"${COMPDB_FILE}\"
+\"${CMAKE_MAKE_PROGRAM}\" -t compdb \\
+	`awk '/rule.*CXX_COMPILER__/ { print $2 }' \"${NINJARULES}\"` > \"${COMPDB_FILE}\"
 "
 		)
 
 		# We need this dummy target such that ninja is happy
 		# for the dependencies of the compdb generation command
 		# below.
-		add_custom_command(OUTPUT ${NINJAFILE} COMMAND true)
+		add_custom_command(OUTPUT ${NINJARULES} COMMAND true)
 
 		# Use script in a custom command to output compilation db
 		add_custom_command(OUTPUT ${COMPDB_FILE}
 			COMMAND /bin/sh ${GENSCRIPT}
-			WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+			WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
 			COMMENT "Generate compilation database"
-			DEPENDS ${NINJAFILE}
+			DEPENDS ${NINJARULES}
 		)
 	else()
 		message(FATAL_ERROR "Generating the compilation database is only possilbe \
@@ -328,11 +345,33 @@ so cannot setup clang tidy targets.")
 	# Dump compilation database
 	#
 	add_generate_compdb_target()
-	set(COMPDB ${PROJECT_BINARY_DIR}/compile_commands.json)
+	set(COMPDB ${CMAKE_BINARY_DIR}/compile_commands.json)
 
-	set(FIXDIR ${PROJECT_BINARY_DIR}/fixes)
+	set(FIXDIR ${CMAKE_BINARY_DIR}/fixes)
 	set(FIXFILE ${FIXDIR}/clang-tidy-${TARGET_NAME}.yaml)
 	set(APPLYFILE ${FIXDIR}/last-fixes-apply)
+
+	# Make source files relative to cmake source dir
+	# This way all files are still unique (even if we have
+	# subprojects), but this part should be in the
+	# compilation database regardless of the way the paths
+	# are stored (CMake does it with absolute paths,
+	# the file generated from Ninja uses relative paths)
+	set(REL_SOURCE_FILES "")
+	foreach(src ${SOURCE_FILES})
+		file(RELATIVE_PATH TMP ${CMAKE_SOURCE_DIR} ${src})
+		set(REL_SOURCE_FILES ${REL_SOURCE_FILES} ${TMP})
+	endforeach()
+
+	# TODO Incorporate and use run-clang-tidy.py
+	#      The best way to achieve this would be to dump
+	#      a python script, which includes the run-clang-tidy
+	#      and instead of applying the fixes just writes them
+	#      to our fixes file instead. The apply step can then
+	#      be delayed and done using clang-apply-replacements
+	#      in a separate target as we do now.
+	#      The main advantage of run-clang-tidy is that it can
+	#      work in parallel on multiple files.
 
 	# Command to determine what fixes should be done
 	add_custom_command(OUTPUT ${FIXFILE}
@@ -341,7 +380,7 @@ so cannot setup clang tidy targets.")
 		COMMAND
 		rm -f ${FIXFILE}
 		COMMAND
-		${CLANG_TIDY} -p "${PROJECT_BINARY_DIR}" -export-fixes=${FIXFILE} ${SOURCE_FILES}
+		${CLANG_TIDY} -p "${CMAKE_BINARY_DIR}" -export-fixes=${FIXFILE} ${REL_SOURCE_FILES}
 		COMMAND
 		touch ${FIXFILE}
 		##
@@ -396,6 +435,7 @@ function(add_available_clang_targets_for)
 		if(CMAKE_VERSION VERSION_GREATER 3.5.0
 			OR CMAKE_GENERATOR STREQUAL "Ninja")
 
+			add_generate_compdb_target()
 			add_clang_tidy_target(${ARGV})
 		endif()
 	endif()
