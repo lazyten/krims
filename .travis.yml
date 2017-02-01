@@ -61,4 +61,5 @@ script:
            -DKRIMS_ENABLE_EXPERIMENTAL=ON
            -GNinja ..
   - if [ "${TIDY_TARGET}" -a "$TRAVIS_PULL_REQUEST" != "false" ]; then cmake --build . --target ${TIDY_TARGET}; else true; fi
-  - grep file compile_commands.json
+  - ls
+  - grep file /home/travis/build/compile_commands.json
