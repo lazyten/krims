@@ -54,6 +54,7 @@ matrix:
 
 script:
   - cmake --version
+  - ninja --version
   - mkdir build && cd build
   - cmake -DCMAKE_CXX_COMPILER=${CXX_COMPILER} -DCMAKE_C_COMPILER=${CC_COMPILER}
            -DCMAKE_BUILD_TYPE=DebugRelease ${EXTRA_OPTS}
@@ -62,4 +63,5 @@ script:
            -GNinja ..
   - if [ "${TIDY_TARGET}" -a "$TRAVIS_PULL_REQUEST" != "false" ]; then cmake --build . --target ${TIDY_TARGET}; else true; fi
   - ls
-  - grep file /home/travis/build/compile_commands.json
+  - pwd
+  - grep file compile_commands.json
