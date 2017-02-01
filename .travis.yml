@@ -62,6 +62,5 @@ script:
            -DKRIMS_ENABLE_EXPERIMENTAL=ON
            -GNinja ..
   - if [ "${TIDY_TARGET}" -a "$TRAVIS_PULL_REQUEST" != "false" ]; then cmake --build . --target ${TIDY_TARGET}; else true; fi
-  - head -n 110  rules.ninja | tail -n 30
-  - head compile_commands.json
+  - cat rules.ninja
   - grep file compile_commands.json
