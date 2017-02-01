@@ -51,14 +51,14 @@ matrix:
     #
     # Clang 3.9 (has c++14)
     - install:
-      # Repo for g++-4.9 (libstdc++ of gcc 4.8 is buggy)
+      # Repo for libstdc++-4.9-dev (libstdc++ of gcc 4.8 is buggy)
       - sudo add-apt-repository -y "ppa:ubuntu-toolchain-r/test"
-      # Repo for clang-3.8
+      # Repo for clang-3.9
       - sudo wget -O - http://llvm.org/apt/llvm-snapshot.gpg.key | sudo apt-key add -
       - sudo add-apt-repository -y "deb http://llvm.org/apt/trusty/ llvm-toolchain-trusty-3.9 main"
       # Update and install
       - sudo apt-get update -qq
-      - sudo apt-get install -y ninja-build clang-3.9 libstdc++-4.9-dev clang-tidy-3.9
+      - sudo apt-get install -y ninja-build clang-3.9 libstdc++-4.9-dev
       compiler: clang
       env: CC_COMPILER="clang-3.9" CXX_COMPILER="clang++-3.9" TEST_REGEX="krims_tests_DEBUG"
     #
@@ -77,13 +77,32 @@ matrix:
       - sudo apt-get install -y ninja-build g++-5
       compiler: gcc
       env: CC_COMPILER="gcc-5" CXX_COMPILER="g++-5" TEST_REGEX="krims_tests_"
+    #
+    # Clang-tidy 3.9
+    - install:
+      # Repo for libstdc++-4.9-dev (libstdc++ of gcc 4.8 is buggy)
+      - sudo add-apt-repository -y "ppa:ubuntu-toolchain-r/test"
+      # Repo for clang-3.9 and clang-tidy-3.9
+      - sudo wget -O - http://llvm.org/apt/llvm-snapshot.gpg.key | sudo apt-key add -
+      - sudo add-apt-repository -y "deb http://llvm.org/apt/trusty/ llvm-toolchain-trusty-3.9 main"
+      # Update and install
+      - sudo apt-get update -qq
+      - sudo apt-get install -y ninja-build clang-3.9 libstdc++-4.9-dev clang-tidy-3.9
+      compiler: clang
+      env: CC_COMPILER="clang-3.9" CXX_COMPILER="clang++-3.9" PERFORM_COMPILE=no TIDY_TARGET="clang-tidy-krims"
+  allow_failures:
+    - compiler: clang
+      env: CC_COMPILER="clang-3.9" CXX_COMPILER="clang++-3.9" PERFORM_COMPILE=no TIDY_TARGET="clang-tidy-krims"
 
 script:
+  - cmake --version
+  - ninja --version
   - mkdir build && cd build
   - cmake -DCMAKE_CXX_COMPILER=${CXX_COMPILER} -DCMAKE_C_COMPILER=${CC_COMPILER}
            -DCMAKE_BUILD_TYPE=DebugRelease ${EXTRA_OPTS}
            -DRC_ENABLE_TESTS=OFF -DAUTOCHECKOUT_MISSING_REPOS=ON
            -DKRIMS_ENABLE_EXPERIMENTAL=ON
            -GNinja ..
-  - cmake --build  . -- -j ${CORES}
+  - if [ "${PERFORM_COMPILE}" != "no" ]; then cmake --build  . -- -j ${CORES}; else true; fi
   - if [ "${TEST_REGEX}" ]; then ctest --output-on-failure -R ${TEST_REGEX}; else true; fi
+  - if [ "${TIDY_TARGET}" -a "$TRAVIS_PULL_REQUEST" != "false" ]; then cmake --build . --target ${TIDY_TARGET}; else true; fi

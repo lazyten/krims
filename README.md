@@ -124,7 +124,8 @@ add_available_clang_targets_for(myproject
   If fixes are available to the problems, they can be
   applied with ``clang-tidy-myproject-fix`` automatically.
   Note that these two targets are only available on
-  CMake 3.5 or higher.
+  CMake above 3.5.0 or if ``ninja`` is used to perform
+  the build.
 
 ### The exception system
 - Available via the header [``<krims/ExceptionSystem.hh>``](src/krims/ExceptionSystem.hh).
