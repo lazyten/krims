@@ -55,12 +55,12 @@ matrix:
 script:
   - cmake --version
   - mkdir build && cd build
-  - cmake -DCMAKE_CXX_COMPILER=${CXX_COMPILER} -DCMAKE_C_COMPILER=${CC_COMPILER}
-           -DCMAKE_BUILD_TYPE=DebugRelease ${EXTRA_OPTS}
-           -DRC_ENABLE_TESTS=OFF -DAUTOCHECKOUT_MISSING_REPOS=ON
-           -DKRIMS_ENABLE_EXPERIMENTAL=ON
-           -GNinja ..
+    #- cmake -DCMAKE_CXX_COMPILER=${CXX_COMPILER} -DCMAKE_C_COMPILER=${CC_COMPILER}
+    #       -DCMAKE_BUILD_TYPE=DebugRelease ${EXTRA_OPTS}
+    #       -DRC_ENABLE_TESTS=OFF -DAUTOCHECKOUT_MISSING_REPOS=ON
+    #       -DKRIMS_ENABLE_EXPERIMENTAL=ON
+    #       -GNinja ..
   - cmake --build  . -- -j ${CORES}
   - if [ "${TEST_REGEX}" ]; then ctest --output-on-failure -R ${TEST_REGEX}; else true; fi
   - if [ "${TIDY_TARGET}" -a "$TRAVIS_PULL_REQUEST" != "false" ]; then cmake --build . --target ${TIDY_TARGET}; else true; fi
-  - grep file build/compile_commands.json
+  - grep file compile_commands.json
