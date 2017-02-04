@@ -251,7 +251,7 @@ function(add_generate_compdb_target)
 		if (NOT CMAKE_EXPORT_COMPILE_COMMANDS)
 			message(FATAL_ERROR "generate-compdb needs the cmake flag \
 \"CMAKE_EXPORT_COMPILE_COMMANDS\" to be set to \"ON\". \
-Please change this in your cmake cache or set this option to \"ON\" before setting up any projects.")
+Please change this in your cmake cache or set this option to \"ON\" before setting up any targets.")
 		endif()
 
 		# This dummy command is needed to make ninja happy in case we need this
