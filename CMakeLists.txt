@@ -39,7 +39,6 @@ set(PackageModuleLocation share/cmake)
 # setup global options (needs to be done before call to project())
 option(KRIMS_ENABLE_TESTS "Build krims tests" ON)
 option(KRIMS_ENABLE_EXAMPLES "Build krims examples" ON)
-option(CMAKE_EXPORT_COMPILE_COMMANDS "Enable/Disable output of compile commands during generation." ON)
 
 ##########################################################################
 # Project setup
@@ -61,6 +60,11 @@ enable_testing()
 # Determine and setup compiler flags, enforcing C++11
 drb_setup_compiler_flags(11)
 
+# Export compile commands if cmake supports it.
+if (CMAKE_VERSION VERSION_GREATER 3.5.0)
+	set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+endif()
+
 # setup hard dependencies
 include(cmake/setup_dependencies.cmake)
 
@@ -76,7 +80,7 @@ add_subdirectory(src)
 set(KRIMS_SUBDIRS src)
 
 # Add subdirectories for the testing.
-if(KRIMS_ENABLE_TESTS) 
+if(KRIMS_ENABLE_TESTS)
 	add_subdirectory(tests)
 	set(KRIMS_SUBDIRS ${KRIMS_SUBDIRS} tests)
 endif()
