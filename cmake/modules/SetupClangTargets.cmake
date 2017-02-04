@@ -25,6 +25,42 @@
 # Available are things like formatting or checks for coding conventions
 # and/or tiny bugs.
 
+# TODO Maybe split this module up into a parsing step which adds available
+#      files to a list and prepares everything for a subdirectory
+#      and an actuall add step, which adds the targets.
+#
+#      this has the advantages:
+#         - Can call parsing step at multiple places to just make a
+#           note that these files are important
+#         - When adding the target we could have a different target
+#           for each file (i.e. parallel clang-format and clang-tidy)
+#         - The adding step *could* be done automatically at generation
+#           time or so if cmake has hooks for this.
+#
+#     Have one target which is created once per all projects (i.e.
+#     at generation time or so: **clang-tidy-all**, which calls smaller
+#     targets, like clang-tidy-krims-src, clang-tidy-krims-test, ...
+#     those are added individually on a per-subdirectory basis in each
+#     projects.
+#
+#     So in krims' cmake list we would have 
+#        add_subdirectory(src)
+#        add_clang_targets(krims-src DIRECTORIES src)
+#
+#        # Add subdirectories for the testing.
+#        if(KRIMS_ENABLE_TESTS) 
+#        	add_subdirectory(tests)
+#        	add_clang_targets(krims-tests DIRECTORIES tests)
+#        endif()
+#
+#        # Add subdirectories for the examples.
+#        if(KRIMS_ENABLE_EXAMPLES)
+#        	add_subdirectory(examples)
+#        	add_clang_targets(krims-tests DIRECTORIES examples)
+#        endif()
+#
+#     and the generator would add clang-tidy-all and clang-tidy-format.
+
 include(CMakeParseArguments)
 
 #

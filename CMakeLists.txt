@@ -73,15 +73,18 @@ include(cmake/setup_optional.cmake)
 # The src directory does most of the work: Here the library is build and
 # installation is configured.
 add_subdirectory(src)
+set(KRIMS_SUBDIRS src)
 
 # Add subdirectories for the testing.
 if(KRIMS_ENABLE_TESTS) 
 	add_subdirectory(tests)
+	set(KRIMS_SUBDIRS ${KRIMS_SUBDIRS} tests)
 endif()
 
 # Add subdirectories for the examples.
 if(KRIMS_ENABLE_EXAMPLES)
 	add_subdirectory(examples)
+	set(KRIMS_SUBDIRS ${KRIMS_SUBDIRS} examples)
 endif()
 
 ##########################################################################
@@ -90,7 +93,7 @@ include(SetupClangTargets)
 add_available_clang_targets_for(krims
 	# Directories to work on
 	# (i.e. where sources and headers of this project are located)
-	DIRECTORIES src tests examples
+	DIRECTORIES ${KRIMS_SUBDIRS}
 )
 
 # Install package:
