@@ -31,6 +31,7 @@
 
 namespace krims {
 
+std::atomic<bool> Backtrace::enabled{true};
 const std::string Backtrace::Frame::unknown = "?";
 
 #ifdef KRIMS_HAVE_GLIBC_STACKTRACE
@@ -42,36 +43,39 @@ Backtrace::Backtrace() : m_parsed_frames{} {}
 #endif  // KRIMS_HAVE_GLIBC_STACKTRACE
 
 void Backtrace::obtain_backtrace(const bool use_expensive) {
-#ifndef KRIMS_HAVE_GLIBC_STACKTRACE
-  // If we do not have a GLIBC stacktrace, there is no reason to do anything
-  // here.
-  m_parsing_done = true;
+  // Clear the parsed frames if any:
   m_parsed_frames.clear();
-  m_n_raw_frames = 0;
 
-  // Fake-use parameter
-  (void)use_expensive;
-  return;
+#ifdef KRIMS_HAVE_GLIBC_STACKTRACE
+  const bool do_backtrace = enabled;
 #else
+  const bool do_backtrace = false;
+#endif  // KRIMS_HAVE_GLIBC_STACKTRACE
+
+  if (!do_backtrace) {
+    m_parsing_done = true;
+    m_n_raw_frames = 0;
+
+    // Fake-use parameter and return
+    (void)use_expensive;
+    return;
+  }
+
+#ifdef KRIMS_HAVE_GLIBC_STACKTRACE
   // If the system supports it, get a stacktrace how we got here
   // We defer the symbol lookup via backtrace_symbols() since
   // this loads external libraries which can take up to seconds
   // on some machines.
   // See generate_stacktrace() for the place where this is done.
   m_n_raw_frames = backtrace(m_raw_backtrace, n_max_frames);
+  m_parsing_done = false;
 
 #ifdef KRIMS_ADDR2LINE_AVAILABLE
   // We have addr2line, hence we will make use of it if the user wants expensive
   // methods to be used when parsing the stacktrace.
   m_determine_file_line = use_expensive;
-#else
-  // Fake-use parameter
-  (void)use_expensive;
 #endif  // KRIMS_ADDR2LINE_AVAILABLE
-
-  m_parsed_frames.clear();
-  m_parsing_done = false;
-#endif  // not KRIMS_HAVE_GLIBC_STACKTRACE
+#endif  // KRIMS_HAVE_GLIBC_STACKTRACE
 }
 
 #ifdef KRIMS_HAVE_GLIBC_STACKTRACE

@@ -21,5 +21,6 @@
 
 // Include this header to get the krims exception system.
 
+#include "ExceptionSystem/Backtrace.hh"
 #include "ExceptionSystem/Exceptions.hh"
 #include "ExceptionSystem/exception_helper_macros.hh"

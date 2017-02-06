@@ -19,6 +19,7 @@
 
 #pragma once
 #include "addr2line.hh"
+#include <atomic>
 #include <string>
 #include <vector>
 
@@ -30,6 +31,19 @@ namespace krims {
 
 class Backtrace {
  public:
+  /** Is backtracing in exceptions overall enabled?
+   *
+   * In some rare cases this could lead to a segmentation fault
+   * (e.g. if the stack itself is corrupted) and disabling this
+   * might therefore be helpful in these cases.
+   *
+   * The behaviour of this class is then equivalent to cases where
+   * backtracing is not supported at all.
+   *
+   * By default this value is true.
+   */
+  static std::atomic<bool> enabled;
+
   // Struct to represent one frame in the Backtrace
   struct Frame {
     //! Static string to describe an unknown piece of information in the frame

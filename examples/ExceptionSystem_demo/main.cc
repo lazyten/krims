@@ -96,10 +96,16 @@ void part7() {
   map.at<bool>("data");
 }
 
+void part8() {
+  krims::Backtrace::enabled = false;
+  krims::GenMap map;
+  map.at<bool>("data");
+}
+
 int main(int argc, char** argv) {
   std::cout << "Using krims version " << krims::version::version_string() << std::endl;
 
-  const int partmax = 7;
+  const int partmax = 8;
 
   if (argc != 2) {
     print_error(partmax);
@@ -121,6 +127,7 @@ int main(int argc, char** argv) {
   if (part-- == 0) part5();
   if (part-- == 0) part6();
   if (part-- == 0) part7();
+  if (part-- == 0) part8();
 
   return 0;
 }
