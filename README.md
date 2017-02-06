@@ -233,7 +233,7 @@ int main() {
   zero, an Exception is raised via the krims exception system.
   In other words the reference counting only happens in the
   Debug version of the library.
-- Note that the classes are *not* yet thread-safe.
+- Note, that the classes are designed to be *thread-safe*.
 - The implementation is provided it the headers
   [``<krims/Subscribable.hh>``](src/krims/Subscribable.hh)
   and

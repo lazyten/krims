@@ -22,8 +22,10 @@
 #include "SubscriptionPointer.hh"
 #include "demangle.hh"
 #include <algorithm>
+#include <atomic>
 #include <list>
 #include <memory>
+#include <mutex>
 #include <sstream>
 #include <string>
 #include <typeinfo>
@@ -175,7 +177,8 @@ class Subscribable {
       //       have dangling pointers in the SubscriptionPointer classes
       //       after this has occurred. There is no way we can get out of
       //       this gracefully.
-      assert_abort(false, ExcStillUsed(m_classname, m_subscribers.size(), s.str()));
+      const std::string classname = m_classname.size() == 0 ? "(unknown)" : m_classname;
+      assert_abort(false, ExcStillUsed(classname, m_subscribers.size(), s.str()));
     }
   }
 #endif
@@ -197,14 +200,13 @@ class Subscribable {
     for (auto it = std::begin(m_subscribers); it != std::end(m_subscribers); ++it) {
       // check if the pointers agree
       if (it->get() == id_ptr.get()) {
-        // TODO This part is not thread-safe
-        //
-        //      Have a mutex to guard the erase
+        std::lock_guard<std::mutex> guard(m_mut_subscr);
         m_subscribers.erase(it);
         return;
       }
     }
-    assert_dbg(false, ExcUnknownSubscriberId(*id_ptr, m_classname));
+    const std::string classname = m_classname.size() == 0 ? "(unknown)" : m_classname;
+    assert_dbg(false, ExcUnknownSubscriberId(*id_ptr, classname));
   }
 
   /** Get a subscription
@@ -215,17 +217,14 @@ class Subscribable {
    * @note Does only exist in DEBUG mode
    * */
   void subscribe(const std::shared_ptr<const std::string>& id_ptr) const {
-    // TODO This part is not thread-safe
-    //
-    //      Have a mutex to guard the push and the actual setting
-    //      of the classname.
+    // Make sure only one thread at a time executes this function:
+    std::lock_guard<std::mutex> guard(m_mut_subscr);
 
     // Set classname here, since this is actually executed by the
     // precise object we subscribe to and not the generic Subscribable
     // class. So here we have the "proper" type available in this.
-    const std::string expected_classname = demangled_string(typeid(*this).name());
-    if (m_classname != expected_classname) {
-      m_classname = expected_classname;
+    if (m_classname.size() == 0) {
+      m_classname = demangled_string(typeid(*this).name());
     }
 
     m_subscribers.push_front(id_ptr);
@@ -239,6 +238,9 @@ class Subscribable {
    */
   mutable std::list<std::shared_ptr<const std::string>> m_subscribers;
 
+  /** Mutex to guard m_subscribers */
+  mutable std::mutex m_mut_subscr;
+
   /**
    * Name of the actual child Subscribable class
    * Set on call of the subscribe function
@@ -246,7 +248,7 @@ class Subscribable {
    * Marked as mutable in order to allow to subscribe / unsubscribe from
    * const references as well.
    * */
-  mutable std::string m_classname{"(unknown)"};
+  mutable std::string m_classname{};
 #endif
 };
 
