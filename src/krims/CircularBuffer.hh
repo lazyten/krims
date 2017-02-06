@@ -25,6 +25,23 @@
 
 namespace krims {
 
+namespace detail {
+
+/** Wrapper around the container class which discards the calls to reserve() for
+ * containers different than std::vector */
+template <typename Container>
+struct CircularBufferContainerWrapper : public Container {
+  using Container::Container;
+  void reserve(size_t) {}
+};
+
+/** Specialisation for std::vector which does not discard the reserve() */
+template <typename T>
+struct CircularBufferContainerWrapper<std::vector<T>> : public std::vector<T> {
+  using std::vector<T>::vector;
+};
+}
+
 template <typename T, typename Container = std::list<T>>
 class CircularBuffer {
  public:
@@ -47,7 +64,9 @@ class CircularBuffer {
    * \param max_size  The maximal size of the buffer
    * */
   CircularBuffer(size_type max_size)
-        : CircularBuffer{max_size, std::initializer_list<T>{}} {}
+        : CircularBuffer{max_size, std::initializer_list<T>{}} {
+    assert_sufficiently_tested((std::is_same<container_type, std::list<T>>::value));
+  }
 
   /** \name Constructor
    *
@@ -162,7 +181,7 @@ class CircularBuffer {
 
  private:
   //! Storage for the buffer
-  container_type m_storage;
+  detail::CircularBufferContainerWrapper<container_type> m_storage;
 
   //! Maximal size
   size_type m_max_size;
@@ -195,7 +214,7 @@ void CircularBuffer<T, Container>::push_front(value_type val) {
   size_t ssize = m_storage.size();
   if (ssize == 0) {
     // Just push front and update iterator
-    m_storage.push_front(std::move(val));
+    m_storage.push_back(std::move(val));
     m_first = circular_begin(m_storage, 0);
   } else {
     // Push and update m_first circular iterator.
@@ -245,43 +264,54 @@ void CircularBuffer<T, Container>::max_size(size_type msize) {
     // Clear all elements of the buffer:
     m_storage.clear();
     m_first = circular_begin(m_storage, 0);
-  } else if (msize < m_storage.size()) {
-    // We have to bin some elements of the buffer
-    typedef typename container_type::iterator cont_iter;
-
-    // The element after the one to be deleted is
-    // the element past the last one in the new array.
-    // In the circular sense, this is m_first
-    iterator end_remove_range = m_first;
-
-    // The first element we want to delete is the one that does
-    // not fit inside the msize and is located the furthest away from the start.
-    // This is the same as first advanced by msize times.
-    iterator begin_remove_range = std::next(m_first, msize);
-
-    // Delete elements at the back of the container.
-    //
-    // The idea is to first find the end of the first deletetion operaton,
-    // by checking whatever comes first: end_remove_range or
-    // std::end(m_storage)
-    cont_iter del_begin = begin_remove_range.position();
-    cont_iter del_end = del_begin;
-    for (; del_end != std::end(m_storage) && del_end != end_remove_range.position();
-         ++del_end) {
-      // Update the begin_remove_range,
-      // such that we are prepared for the next step
-      ++begin_remove_range;
-    }
-    m_storage.erase(del_begin, del_end);
-
-    // Delete remaining elements which sit at the front
-    del_begin = begin_remove_range.position();
-    del_end = end_remove_range.position();
-    m_storage.erase(del_begin, del_end);
-
-    // Update m_first:
-    m_first = circular_begin(m_storage, m_first.position());
+    return;
+  } else if (msize >= m_storage.size()) {
+    // Just increase storage reservation:
+    m_storage.reserve(msize);
+    return;
   }
+
+  // We have to bin some elements of the buffer
+
+  // The element after the one to be deleted is
+  // the element past the last one in the new array.
+  // In the circular sense, this is m_first
+  const iterator end_remove_range = m_first;
+
+  // The first element we want to delete is the one that does
+  // not fit inside the msize and is located the furthest away from the start.
+  // This is the same as first advanced by msize times.
+  const iterator begin_remove_range = std::next(m_first, msize);
+
+  // The deletion is done in two steps. First we delete from
+  // begin_remove_range to the end of the container and then
+  // the remaining elements at the front. If the end is not hit, then we are
+  // done with one operation only.
+  using cont_iter = typename container_type::iterator;
+  const cont_iter del_begin = begin_remove_range.position();
+  const cont_iter del_end = [&] {
+    auto it = del_begin;
+    while (it != std::end(m_storage) && it != end_remove_range.position()) {
+      ++it;
+    }
+    return it;
+  }();
+
+  cont_iter after_erase = m_storage.erase(del_begin, del_end);
+  if (del_end == std::end(m_storage)) {
+    // We need the second deletion:
+    after_erase = m_storage.erase(std::begin(m_storage), end_remove_range.position());
+  }
+
+  // Update m_first:
+  if (after_erase == std::end(m_storage)) {
+    m_first = circular_begin(m_storage, 0);
+  } else {
+    m_first = circular_begin(m_storage, after_erase);
+  }
+
+  // Update storage reservation
+  m_storage.reserve(msize);
 }
 
 }  // namespace krims

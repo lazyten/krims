@@ -203,7 +203,7 @@ void exectute_random_test() {
   typedef CircularBuffer<T> sut_type;
   model_type model{};
   model.max_size = max_size;
-  model.data = data;
+  model.data = std::move(data);
   sut_type sut{max_size};
 
   // Generate command sequence and execute random state test
@@ -217,19 +217,21 @@ void exectute_random_test() {
 // ---------------------------------------------------------------
 //
 
-TEST_CASE("Circular Iterator and Circular Buffer", "[circular_buffer]") {
+TEST_CASE("Circular Buffer", "[circular_buffer]") {
   using namespace circular_buffer_tests;
 
   // The type to do the tests with
   typedef int test_type;
 
-  SECTION("Pushing elements back into circular buffer.") {
+  SECTION("Pushing elements into circular buffer.") {
     auto test = [](std::vector<test_type> v) {
       RC_PRE(v.size() > 0u);
 
       CircularBuffer<test_type> buf{v.size() + 5};
+      CircularBuffer<test_type> buf2{v.size() + 5};
       for (auto elem : v) {
         buf.push_back(elem);
+        buf2.push_front(elem);
       }
 
       // Access with iterators
@@ -245,6 +247,13 @@ TEST_CASE("Circular Iterator and Circular Buffer", "[circular_buffer]") {
         RC_ASSERT(*it == v[i]);
       }
       RC_ASSERT(i == v.size());
+
+      // Compare buffers generated from push_front and push_back
+      auto it2 = std::begin(buf2);
+      std::advance(it2, v.size() - 1);
+      for (auto it1 = std::begin(buf); it1 != std::end(buf); ++it1, --it2) {
+        RC_ASSERT(*it1 == *it2);
+      }
     };
 
     REQUIRE(rc::check("Pushing elements into circular buffer", test));
