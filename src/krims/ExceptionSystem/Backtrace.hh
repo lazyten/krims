@@ -37,30 +37,22 @@ class Backtrace {
 
     /** The name of the executable of the current backtrace entry (or '?' if not
     known) **/
-    std::string executable_name;
+    std::string executable_name = unknown;
 
     /** The address of the backtrace symbol inside the exectuable (or '?' if not
     known) **/
-    std::string address;
+    std::string address = unknown;
 
     /** The name of the function of the current backtrace entry (or '?' if not
     known) **/
-    std::string function_name;
+    std::string function_name = unknown;
 
     //! The path to the file of the current backtrace entry (or '?' if not
     //! known)
-    std::string codefile;
+    std::string codefile = unknown;
 
     //! The line number of the current backtrace entry (or '?' if not known)
-    std::string line_number;
-
-    //! Construct a frame.
-    Frame()
-          : executable_name{unknown},
-            address{unknown},
-            function_name{unknown},
-            codefile{unknown},
-            line_number{unknown} {}
+    std::string line_number = unknown;
   };
 
   /** The maximal number of backtrace frames we can obtain and use */
@@ -68,9 +60,6 @@ class Backtrace {
 
   /** Construct the class and allocate some memory. */
   Backtrace();
-
-  /** Default destructor */
-  ~Backtrace() = default;
 
   /** \brief Obtain a backtrace at the current position.
    *
@@ -114,7 +103,7 @@ class Backtrace {
   /**
    *   array of pointers that contains the raw stack trace
    */
-  void* m_raw_backtrace[n_max_frames]{};
+  void* m_raw_backtrace[n_max_frames];
 #endif
 
   /** The actual number of raw backtrace frames we obtained in m_raw_backtrace.

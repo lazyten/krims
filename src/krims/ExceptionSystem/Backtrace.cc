@@ -33,11 +33,13 @@ namespace krims {
 
 const std::string Backtrace::Frame::unknown = "?";
 
-Backtrace::Backtrace() : m_parsed_frames{} {
 #ifdef KRIMS_HAVE_GLIBC_STACKTRACE
+Backtrace::Backtrace() : m_raw_backtrace{}, m_parsed_frames{} {
   m_parsed_frames.reserve(n_max_frames);
-#endif
 }
+#else
+Backtrace::Backtrace() : m_parsed_frames{} {}
+#endif  // KRIMS_HAVE_GLIBC_STACKTRACE
 
 void Backtrace::obtain_backtrace(const bool use_expensive) {
 #ifndef KRIMS_HAVE_GLIBC_STACKTRACE
@@ -65,11 +67,11 @@ void Backtrace::obtain_backtrace(const bool use_expensive) {
 #else
   // Fake-use parameter
   (void)use_expensive;
-#endif
+#endif  // KRIMS_ADDR2LINE_AVAILABLE
 
   m_parsed_frames.clear();
   m_parsing_done = false;
-#endif
+#endif  // not KRIMS_HAVE_GLIBC_STACKTRACE
 }
 
 #ifdef KRIMS_HAVE_GLIBC_STACKTRACE
