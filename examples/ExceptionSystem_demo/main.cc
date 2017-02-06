@@ -18,7 +18,7 @@
 //
 
 #include <krims/ExceptionSystem.hh>
-#include <krims/SubscriptionPointer.hh>
+#include <krims/GenMap.hh>
 #include <krims/version.hh>
 #include <sstream>
 #include <vector>
@@ -34,6 +34,8 @@ void part0() {
   int i = -3;
   // Assert that i is greater than 0
   assert_greater(0, i);
+
+  (void)i;
 }
 
 void part1() {
@@ -44,6 +46,8 @@ void part1() {
 
   i = 6;
   assert_range(0, i, 6);
+
+  (void)i;
 }
 
 void part2() {
@@ -55,6 +59,9 @@ void part2() {
 
   i = 6;
   assert_equal(i, j);
+
+  (void)i;
+  (void)j;
 }
 
 void part3() {
@@ -66,6 +73,8 @@ void part4() {
   // Abort if a non-finite number is encountered.
   double i = 3. / 0.;
   assert_finite(i);
+
+  (void)i;
 }
 
 void part5() {
@@ -82,10 +91,15 @@ void part6() {
   bptr.reset(b);
 }
 
+void part7() {
+  krims::GenMap map;
+  map.at<bool>("data");
+}
+
 int main(int argc, char** argv) {
   std::cout << "Using krims version " << krims::version::version_string() << std::endl;
 
-  const int partmax = 6;
+  const int partmax = 7;
 
   if (argc != 2) {
     print_error(partmax);
@@ -106,6 +120,7 @@ int main(int argc, char** argv) {
   if (part-- == 0) part4();
   if (part-- == 0) part5();
   if (part-- == 0) part6();
+  if (part-- == 0) part7();
 
   return 0;
 }
