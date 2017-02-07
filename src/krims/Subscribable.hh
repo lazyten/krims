@@ -236,10 +236,10 @@ class Subscribable {
    * Marked as mutable in order to allow to subscribe / unsubscribe from
    * const references as well.
    */
-  mutable std::list<std::shared_ptr<const std::string>> m_subscribers;
+  mutable std::list<std::shared_ptr<const std::string>> m_subscribers{};
 
   /** Mutex to guard m_subscribers */
-  mutable std::mutex m_mut_subscr;
+  mutable std::mutex m_mut_subscr{};
 
   /**
    * Name of the actual child Subscribable class
