@@ -21,3 +21,8 @@
 
 add_executable(exception_demo main.cc)
 setup_example_target(exception_demo PREFER_DEBUG)
+
+# Link with threading library (we need this for example 8)
+set(CMAKE_THREAD_PREFER_PTHREAD ON)
+find_package(Threads)
+target_link_libraries(exception_demo ${CMAKE_THREAD_LIBS_INIT})

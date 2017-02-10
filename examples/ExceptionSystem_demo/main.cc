@@ -21,6 +21,7 @@
 #include <krims/GenMap.hh>
 #include <krims/version.hh>
 #include <sstream>
+#include <thread>
 #include <vector>
 
 using namespace krims;
@@ -107,10 +108,20 @@ void part8() {
   // present at all.
   //
   krims::GenMap map;
-  map.at<bool>("data");
+  auto run = [&]() {
+    std::this_thread::sleep_for(std::chrono::seconds(2));
+    map.at<bool>("data");
+  };
+
+  std::thread first(run);
+  std::thread second(run);
+
+  first.join();
+  second.join();
 }
 
 int main(int argc, char** argv) {
+
   std::cout << "Using krims version " << krims::version::version_string() << std::endl;
 
   const int partmax = 8;
