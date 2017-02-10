@@ -159,8 +159,7 @@ class Subscribable {
  protected:
 #ifdef DEBUG
   /** Assert that this has no subscriptions made to it.
-   * If this is not the case, than abort the program via
-   * assert_abort.
+   * If this is not the case, than we throw via assert_throw.
    *
    * @note In RELEASE mode this function does not exist.
    */
@@ -178,7 +177,7 @@ class Subscribable {
       //       after this has occurred. There is no way we can get out of
       //       this gracefully.
       const std::string classname = m_classname.size() == 0 ? "(unknown)" : m_classname;
-      assert_abort(false, ExcStillUsed(classname, m_subscribers.size(), s.str()));
+      assert_throw(false, ExcStillUsed(classname, m_subscribers.size(), s.str()));
     }
   }
 #endif
