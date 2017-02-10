@@ -25,6 +25,10 @@
 
 using namespace krims;
 
+// Use the usual trick to get the compiler to initialise the exception system
+// as early as possible.
+const bool init_exception_system{krims::ExceptionSystem::initialise<>()};
+
 void print_error(int partmax) {
   std::cerr << "Need a number between " << 0 << " and " << partmax
             << " as the only argument: The exception which is triggered." << std::endl;
@@ -92,12 +96,16 @@ void part6() {
 }
 
 void part7() {
+  // Try to retrieve data from a ParameterMap which is not
+  // present at all.
   krims::GenMap map;
   map.at<bool>("data");
 }
 
 void part8() {
-  krims::Backtrace::enabled = false;
+  // Try to retrieve data from a ParameterMap which is not
+  // present at all.
+  //
   krims::GenMap map;
   map.at<bool>("data");
 }

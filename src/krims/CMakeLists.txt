@@ -23,15 +23,16 @@
 # set the source files.
 #
 set(KRIMS_SOURCES
-	version.cc
 	demangle.cc
 	ExceptionSystem/addr2line.cc
 	ExceptionSystem/Backtrace.cc
 	ExceptionSystem/ExceptionBase.cc
-	ExceptionSystem/exception_defs.cc
+	ExceptionSystem/ExceptionSystem.cc
+	ExceptionSystem/terminate_handler.cc
 	GenMap.cc
-	NumComp/NumCompException.cc
 	NumComp/NumCompConstants.cc
+	NumComp/NumCompException.cc
+	version.cc
 )
 
 # Dump the current version as an include file.

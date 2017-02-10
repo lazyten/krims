@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 by the krims authors
+// Copyright (C) 2017 by the krims authors
 //
 // This file is part of krims.
 //
@@ -17,16 +17,11 @@
 // along with krims. If not, see <http://www.gnu.org/licenses/>.
 //
 
-#define CATCH_CONFIG_RUNNER
-#include <catch.hpp>
-#include <krims/ExceptionSystem.hh>
+#include "ExceptionSystem.hh"
 
-// Use the usual trick to get the compiler to initialise the exception system
-// as early as possible.
-const bool init_exception_system{krims::ExceptionSystem::initialise<>()};
+namespace krims {
 
-int main(int argc, char* const argv[]) {
-  // Run catch:
-  int result = Catch::Session().run(argc, argv);
-  return result;
-}
+ExceptionVerbosity ExceptionSystem::verbosity_ = ExceptionVerbosity::SUMMARY;
+std::mutex ExceptionSystem::mutex_{};
+
+}  // namespace krims
