@@ -138,6 +138,7 @@ add_available_clang_targets_for(myproject
   are predefined and only take a single line of code.
 - Checking is usually done using the ``assert_dbg`` macro, which expands
   to an empty statement in Release mode.
+- The whole system is suitable for multi-threaded applications.
 - Helper macros to quickly define Exceptions are available.
   See [src/krims/ExceptionSystem/Exceptions.hh](src/krims/ExceptionSystem/Exceptions.hh)
   for predefined examples.
