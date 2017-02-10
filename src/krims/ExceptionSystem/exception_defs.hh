@@ -20,7 +20,6 @@
 #pragma once
 #include "ExceptionBase.hh"
 #include <iostream>
-#include <mutex>
 #include <string>
 
 namespace krims {
