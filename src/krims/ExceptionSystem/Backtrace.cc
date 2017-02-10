@@ -240,8 +240,8 @@ std::ostream& operator<<(std::ostream& out, const Backtrace& bt) {
 
     // Was the determine_file_line call to addr2line successful?
     const bool file_line_successful =
-          frame.codefile.size() > 0 && frame.codefile[0] != '?' &&
-          frame.line_number.size() > 0 && frame.line_number[0] != '?';
+          !frame.codefile.empty() && frame.codefile[0] != '?' &&
+          !frame.line_number.empty() && frame.line_number[0] != '?';
 
     if (bt.determine_file_line() && file_line_successful) {
       out << frame.codefile << "  :  " << frame.line_number;

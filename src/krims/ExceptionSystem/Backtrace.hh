@@ -115,6 +115,6 @@ class Backtrace {
   bool m_determine_file_line = false;
 };
 
-std::ostream& operator<<(std::ostream& o, const Backtrace& bt);
+std::ostream& operator<<(std::ostream& out, const Backtrace& bt);
 
 }  // namespace krims
