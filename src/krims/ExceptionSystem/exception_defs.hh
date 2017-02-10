@@ -56,8 +56,12 @@ void throw_by_value(Exception e) {
  * @note Active in DEBUG and RELEASE mode.
  * \note This macro is deprecated
  */
-#define assert_abort(cond, exception) \
-  { assert_throw(cond, exception); }
+#define assert_abort(cond, exception)                                           \
+  _Pragma(                                                                      \
+        "GCC warning \"'assert_abort' macro is deprecated. Use 'assert_throw' " \
+        "instead.\"") {                                                         \
+    assert_throw(cond, exception);                                              \
+  }
 
 /** Assert a condition and if it fails (evaluates to false), generate an
  * exception (the 2nd argument).
