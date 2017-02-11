@@ -17,16 +17,16 @@
 // along with krims. If not, see <http://www.gnu.org/licenses/>.
 //
 
+// Setup the krims exception system
+#define KRIMS_INIT_EXCEPTION_SYSTEM
+#include <krims/ExceptionSystem.hh>
+
 #include <iomanip>
 #include <iostream>
 #include <krims/GenMap.hh>
 #include <krims/version.hh>
 
 using namespace krims;
-
-// Use the usual trick to get the compiler to initialise the exception system
-// as early as possible.
-const bool init_exception_system{ExceptionSystem::initialise<>()};
 
 // Some boring class.
 struct A {

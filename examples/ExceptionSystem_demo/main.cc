@@ -17,18 +17,17 @@
 // along with krims. If not, see <http://www.gnu.org/licenses/>.
 //
 
+// Setup the krims exception system
+#define KRIMS_INIT_EXCEPTION_SYSTEM
 #include <krims/ExceptionSystem.hh>
+
+#include <future>
 #include <krims/GenMap.hh>
 #include <krims/version.hh>
 #include <sstream>
-#include <thread>
 #include <vector>
 
 using namespace krims;
-
-// Use the usual trick to get the compiler to initialise the exception system
-// as early as possible.
-const bool init_exception_system{krims::ExceptionSystem::initialise<>()};
 
 void print_error(int partmax) {
   std::cerr << "Need a number between " << 0 << " and " << partmax
@@ -97,27 +96,22 @@ void part6() {
 }
 
 void part7() {
-  // Try to retrieve data from a ParameterMap which is not
-  // present at all.
+  // Access GenMap element which is not present.
   krims::GenMap map;
   map.at<bool>("data");
 }
 
 void part8() {
-  // Try to retrieve data from a ParameterMap which is not
-  // present at all.
-  //
-  krims::GenMap map;
-  auto run = [&]() {
+  // Concurrently access GenMap element which is not present.
+  auto run = [](const krims::GenMap& map) {
     std::this_thread::sleep_for(std::chrono::seconds(2));
     map.at<bool>("data");
   };
 
-  std::thread first(run);
-  std::thread second(run);
-
-  first.join();
-  second.join();
+  krims::GenMap map;
+  auto ret = std::async(run, map);
+  run(map);
+  ret.get();
 }
 
 int main(int argc, char** argv) {

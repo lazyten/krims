@@ -21,6 +21,10 @@
 
 // Include this header to get the krims exception system.
 
+// Note: This header should always be the first, since it initialises
+// the exception system in case the user wants this so
+// (via defining KRIMS_INIT_EXCEPTION_SYSTEM)
 #include "ExceptionSystem/ExceptionSystem.hh"
+
 #include "ExceptionSystem/Exceptions.hh"
 #include "ExceptionSystem/exception_helper_macros.hh"

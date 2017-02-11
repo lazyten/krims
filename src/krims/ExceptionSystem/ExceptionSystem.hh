@@ -83,4 +83,20 @@ struct ExceptionSystem {
   */
 };
 
+#ifdef KRIMS_INIT_EXCEPTION_SYSTEM
+// Initialise a (possibly unused) global by calling ExceptionSystem::initialise.
+//
+// The rationale behind this is, that globals are initialised even *before* the
+// main() function gets called and hence that the system is hence up and running
+// in case some other global initialisation throws already.
+//
+// We mark the global such that the compilers do not complain about it being
+// unused and we enwrap everything in a macro to make it easier to use it.
+// The user just needs to define KRIMS_INIT_EXCEPTION_SYSTEM and include this header
+// to get going.
+
+__attribute__((unused)) const bool exception_system_initialised{
+      ExceptionSystem::initialise<KRIMS_INIT_EXCEPTION_SYSTEM>()};
+#endif  // defined KRIMS_INIT_EXCEPTION_SYSTEM
+
 }  // namespace krims

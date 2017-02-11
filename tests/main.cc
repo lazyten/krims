@@ -17,16 +17,10 @@
 // along with krims. If not, see <http://www.gnu.org/licenses/>.
 //
 
-#define CATCH_CONFIG_RUNNER
-#include <catch.hpp>
+// Setup the krims exception system for the tests.
+#define KRIMS_INIT_EXCEPTION_SYSTEM
 #include <krims/ExceptionSystem.hh>
 
-// Use the usual trick to get the compiler to initialise the exception system
-// as early as possible.
-const bool init_exception_system{krims::ExceptionSystem::initialise<>()};
-
-int main(int argc, char* const argv[]) {
-  // Run catch:
-  int result = Catch::Session().run(argc, argv);
-  return result;
-}
+// Let catch define a main function here automatically.
+#define CATCH_CONFIG_MAIN
+#include <catch.hpp>
