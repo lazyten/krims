@@ -50,7 +50,7 @@ template <ExceptionVerbosity Verbosity>
 
   try {
     // Rethrow to recognise type and deal with exception:
-    rethrow_exception(exc);
+    std::rethrow_exception(exc);
   } catch (const std::exception& exc) {
     std::cerr << exc.what();
   } catch (...) {
