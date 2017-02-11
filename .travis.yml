@@ -41,11 +41,11 @@ matrix:
   include:
     # Clang 3.5 with only c++11 support enforced.
     - install:
-      # Repo for g++-4.9 (to avoid buggy libstdc++)
+      # Repo for libstdc++-4.9-dev (libstdc++ of gcc 4.8 is buggy)
       - sudo add-apt-repository -y "ppa:ubuntu-toolchain-r/test"
       # Update and install
       - sudo apt-get update -qq
-      - sudo apt-get install -y ninja-build g++-4.9
+      - sudo apt-get install -y ninja-build libstdc++-4.9-dev
       compiler: clang
       env: CC_COMPILER="clang" CXX_COMPILER="clang++" TEST_REGEX="krims_tests_" EXTRA_OPTS="-DDRB_MAXIMUM_CXX_STANDARD=11"
     #
