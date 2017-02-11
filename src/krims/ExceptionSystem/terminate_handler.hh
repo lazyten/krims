@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 by the krims authors
+// Copyright (C) 2017 by the krims authors
 //
 // This file is part of krims.
 //
@@ -17,10 +17,13 @@
 // along with krims. If not, see <http://www.gnu.org/licenses/>.
 //
 
-// Setup the krims exception system for the tests.
-#define KRIMS_INIT_EXCEPTION_SYSTEM
-#include <krims/ExceptionSystem.hh>
+#pragma once
+#include "ExceptionVerbosity.hh"
 
-// Let catch define a main function here automatically.
-#define CATCH_CONFIG_MAIN
-#include <catch.hpp>
+namespace krims {
+
+/** The terminate handler used by the krims exception system */
+template <ExceptionVerbosity verbosity>
+[[noreturn]] void terminate_handler();
+
+}  // namespace krims

@@ -19,6 +19,7 @@
 
 #include "Backtrace.hh"
 #include "krims/demangle.hh"
+#include <iomanip>
 #include <sstream>
 
 #ifdef KRIMS_HAVE_GLIBC_STACKTRACE
@@ -31,7 +32,6 @@
 
 namespace krims {
 
-std::atomic<bool> Backtrace::enabled{true};
 const std::string Backtrace::Frame::unknown = "?";
 
 #ifdef KRIMS_HAVE_GLIBC_STACKTRACE
@@ -46,36 +46,28 @@ void Backtrace::obtain_backtrace(const bool use_expensive) {
   // Clear the parsed frames if any:
   m_parsed_frames.clear();
 
-#ifdef KRIMS_HAVE_GLIBC_STACKTRACE
-  const bool do_backtrace = enabled;
-#else
-  const bool do_backtrace = false;
-#endif  // KRIMS_HAVE_GLIBC_STACKTRACE
+#ifndef KRIMS_HAVE_GLIBC_STACKTRACE
+  m_n_raw_frames = 0;
 
-  if (!do_backtrace) {
-    m_parsing_done = true;
-    m_n_raw_frames = 0;
-
-    // Fake-use parameter and return
-    (void)use_expensive;
-    return;
-  }
-
-#ifdef KRIMS_HAVE_GLIBC_STACKTRACE
+  // Fake-use parameter and return
+  (void)use_expensive;
+  return;
+#else  // not KRIMS_HAVE_GLIBC_STACKTRACE
   // If the system supports it, get a stacktrace how we got here
   // We defer the symbol lookup via backtrace_symbols() since
   // this loads external libraries which can take up to seconds
   // on some machines.
   // See generate_stacktrace() for the place where this is done.
   m_n_raw_frames = backtrace(m_raw_backtrace, n_max_frames);
-  m_parsing_done = false;
 
 #ifdef KRIMS_ADDR2LINE_AVAILABLE
   // We have addr2line, hence we will make use of it if the user wants expensive
   // methods to be used when parsing the stacktrace.
   m_determine_file_line = use_expensive;
 #endif  // KRIMS_ADDR2LINE_AVAILABLE
-#endif  // KRIMS_HAVE_GLIBC_STACKTRACE
+#endif  // not KRIMS_HAVE_GLIBC_STACKTRACE
+
+  parse_backtrace();
 }
 
 #ifdef KRIMS_HAVE_GLIBC_STACKTRACE
@@ -84,10 +76,12 @@ void Backtrace::split_backtrace_string(const char* symbol, Frame& frame) const {
   //     executable(functionname+offset) [address]
   // Try to extract the functionname and the address
   const char* pos_bracketop = strchr(symbol, '(');
-  const char* pos_bracketcl = strchr(symbol, ')');
-  const char* pos_plus = strchr(symbol, '+');
-  const char* pos_sqbrop = strchr(symbol, '[');
-  const char* pos_sqbrcl = strchr(symbol, ']');
+  const char* start = pos_bracketop == nullptr ? symbol : pos_bracketop;
+
+  const char* pos_bracketcl = strchr(start, ')');
+  const char* pos_plus = strchr(start, '+');
+  const char* pos_sqbrop = strchr(start, '[');
+  const char* pos_sqbrcl = strchr(start, ']');
 
   // Extract the address:
   if (pos_sqbrop != nullptr && pos_sqbrcl != nullptr && pos_sqbrop < pos_sqbrcl) {
@@ -155,13 +149,9 @@ void Backtrace::determine_file_line(const char* executable_name, const char* add
 }
 #endif  // KRIMS_HAVE_GLIBC_STACKTRACE
 
-void Backtrace::parse_backtrace() const {
+void Backtrace::parse_backtrace() {
   // If parsing was already done or there are no frames, return
-  if (m_parsing_done) return;
   if (m_n_raw_frames <= 0) return;
-
-  // Now we parse it all:
-  m_parsing_done = true;
 
 #ifdef KRIMS_HAVE_GLIBC_STACKTRACE
   // We have deferred the symbol lookup to this point to avoid costly
@@ -177,22 +167,20 @@ void Backtrace::parse_backtrace() const {
   int initframe = 0;
   for (int frame = m_n_raw_frames - 1; frame >= 0; --frame) {
     if ((std::strstr(stacktrace[frame], "krims") != nullptr) &&
-        (std::strstr(stacktrace[frame], "ExceptionBase") != nullptr) &&
-        (std::strstr(stacktrace[frame], "add_exc_data") != nullptr)) {
+        (std::strstr(stacktrace[frame], "detail") != nullptr) &&
+        (std::strstr(stacktrace[frame], "throw_by_value") != nullptr)) {
       // The current call frame is responsible for adding the exception data
       // from the assert macros. so we are interested in the next one
       // (i.e. the one closer to main)
       initframe = frame + 1;
       break;
-    } else if ((std::strstr(stacktrace[frame], "krims") != nullptr) &&
-               (std::strstr(stacktrace[frame], "Backtrace") != nullptr) &&
-               (std::strstr(stacktrace[frame], "obtain_backtrace") != nullptr)) {
-      // If the above is not triggered, but we find this current frame,
-      // then a different mechanism was used than the assert macros.
-      // As a fallback we start displaying from the next frame (i.e.
-      // the one closer to main)
+    }
+    if (std::strstr(stacktrace[frame], "__cxa_call_unexpected") != nullptr) {
+      // The current frame indicates that an unexpected exception was
+      // caught. This is certainly already inside the exception handling
+      // part of the c++ library. So we set the init frame to the next
+      // frame, but we do not break in case we find something better.
       initframe = frame + 1;
-      break;
     }
   }
 
@@ -213,6 +201,63 @@ void Backtrace::parse_backtrace() const {
   // Free the memory glibc malloced for the stacktrace:
   free(stacktrace);
 #endif
+}
+
+std::ostream& operator<<(std::ostream& out, const Backtrace& bt) {
+  // If we have no backtrace, print nothing.
+  if (bt.frames().empty()) {
+    std::cerr << "Sorry, no backtrace available" << std::endl;
+    return out;
+  }
+
+  // Determine length of longest function name:
+  size_t maxfunclen = 8;  // length of string "function"
+  for (const auto& frame : bt.frames()) {
+    maxfunclen = std::max(maxfunclen, frame.function_name.length());
+  }
+
+  // If the Function is longer than 80 columns than just print them as is
+  // (otherwise we get too much empty space)
+  if (maxfunclen > 80) maxfunclen = 8;
+
+  // TODO Better table format
+  //      Colour!
+
+  // Print heading of the backtrace table:
+  out << "## " << std::setw(maxfunclen) << std::left << "function" << std::right << " @ ";
+  if (bt.determine_file_line()) {
+    out << "    file    :  linenr" << std::endl;
+  } else {
+    out << " executable :  address" << std::endl;
+  }
+  out << "--------------------------------------" << std::endl << std::endl;
+
+  for (size_t i = 0; i < bt.frames().size(); ++i) {
+    const Backtrace::Frame& frame = bt.frames()[i];
+
+    out << std::setw(2) << i << " " << std::setw(maxfunclen) << std::left
+        << frame.function_name << std::right << " @ ";
+
+    // Was the determine_file_line call to addr2line successful?
+    const bool file_line_successful =
+          !frame.codefile.empty() && frame.codefile[0] != '?' &&
+          !frame.line_number.empty() && frame.line_number[0] != '?';
+
+    if (bt.determine_file_line() && file_line_successful) {
+      out << frame.codefile << "  :  " << frame.line_number;
+    } else {
+      out << frame.executable_name << "  :  " << frame.address;
+    }
+    out << std::endl;
+  }
+
+  if (!bt.determine_file_line()) {
+    out << std::endl
+        << R"(Hint: Use "addr2line -e <executable> <address>" to get file and line number in backtrace.)"
+        << std::endl;
+  }
+
+  return out;
 }
 
 }  // namespace krims

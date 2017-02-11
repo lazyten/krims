@@ -17,7 +17,11 @@
 // along with krims. If not, see <http://www.gnu.org/licenses/>.
 //
 
+// Setup the krims exception system
+#define KRIMS_INIT_EXCEPTION_SYSTEM
 #include <krims/ExceptionSystem.hh>
+
+#include <future>
 #include <krims/GenMap.hh>
 #include <krims/version.hh>
 #include <sstream>
@@ -92,17 +96,26 @@ void part6() {
 }
 
 void part7() {
+  // Access GenMap element which is not present.
   krims::GenMap map;
   map.at<bool>("data");
 }
 
 void part8() {
-  krims::Backtrace::enabled = false;
+  // Concurrently access GenMap element which is not present.
+  auto run = [](const krims::GenMap& map) {
+    std::this_thread::sleep_for(std::chrono::seconds(2));
+    map.at<bool>("data");
+  };
+
   krims::GenMap map;
-  map.at<bool>("data");
+  auto ret = std::async(run, map);
+  run(map);
+  ret.get();
 }
 
 int main(int argc, char** argv) {
+
   std::cout << "Using krims version " << krims::version::version_string() << std::endl;
 
   const int partmax = 8;

@@ -23,37 +23,14 @@
 #include <string>
 
 namespace krims {
+
 namespace detail {
-/** Function which enforces a throw-by-value paradigm */
-template <typename Exc>
-void throw_by_value(Exc&& exc) {
-  throw typename std::remove_reference<Exc>::type(std::move(exc));
+/** Wrapper to make sure, that an exception is really thrown by value */
+template <typename Exception>
+void throw_by_value(Exception e) {
+  throw typename std::remove_cv<Exception>::type(e);
 }
-}
-
-/** Options how to deal with exceptions.
- *
- * THROW: Throw the exception
- * ABORT: Print it and abort the program
- */
-enum class ExceptionEffect : char { THROW, ABORT };
-
-/** Manage the effect if an assertion managed by assert_dbg fails
- *
- * By default whenever an exception is triggered with assert_dbg, then
- * the program is aborted (ExceptionEffect::ABORT). If you want to
- * change this behaviour try the set() function.
- * */
-class AssertDbgEffect {
- public:
-  static void set(ExceptionEffect effect) { m_eff = effect; }
-  static void set_abort() { set(ExceptionEffect::ABORT); }
-  static void set_throw() { set(ExceptionEffect::THROW); }
-  static ExceptionEffect get() { return m_eff; }
-
- private:
-  static ExceptionEffect m_eff;
-};
+}  // namespace detail
 
 //
 // Assert Macros
@@ -68,50 +45,37 @@ class AssertDbgEffect {
     if (!(cond)) {                                                             \
       auto __exc__cept = exception;                                            \
       __exc__cept.add_exc_data(__FILE__, __LINE__, __PRETTY_FUNCTION__, #cond, \
-                               #exception, false);                             \
-      ::krims::detail::throw_by_value(std::move(__exc__cept));                 \
+                               #exception);                                    \
+      ::krims::detail::throw_by_value(__exc__cept);                            \
     }                                                                          \
   }
-// add_exc_data's last argument specifies whether we are ok with using expensive
-// methods to determine extra data for the exception. False means no (in this
-// case we throw, so the exception could be internally caught by the program,
-// which
-// means that expensive methods add extra runtime cost)
 
 /** This macro is used for actual errors that should always abort the program.
  *
  * @note Active in DEBUG and RELEASE mode.
+ * \note This macro is deprecated
  */
-#define assert_abort(cond, exception)                                          \
-  {                                                                            \
-    if (!(cond)) {                                                             \
-      auto __exc__cept = exception;                                            \
-      __exc__cept.add_exc_data(__FILE__, __LINE__, __PRETTY_FUNCTION__, #cond, \
-                               #exception, true);                              \
-      std::cerr << __exc__cept.what() << std::endl;                            \
-      std::abort();                                                            \
-    }                                                                          \
+#define assert_abort(cond, exception)                                           \
+  _Pragma(                                                                      \
+        "GCC warning \"'assert_abort' macro is deprecated. Use 'assert_throw' " \
+        "instead.\"") {                                                         \
+    assert_throw(cond, exception);                                              \
   }
 
 /** Assert a condition and if it fails (evaluates to false), generate an
- * exception (the 2nd argument). Deal with this exception as the current
- * value of assert_dbg_effect indicates.
+ * exception (the 2nd argument).
  *
  * @note Active in DEBUG mode only.
  */
 #ifdef DEBUG
-#define assert_dbg(cond, exception)                                         \
-  {                                                                         \
-    if (!(cond)) {                                                          \
-      if (krims::AssertDbgEffect::get() == krims::ExceptionEffect::ABORT) { \
-        assert_abort(cond, exception);                                      \
-      } else {                                                              \
-        assert_throw(cond, exception);                                      \
-      }                                                                     \
-    }                                                                       \
+#define assert_dbg(cond, exception)  \
+  {                                  \
+    if (!(cond)) {                   \
+      assert_throw(cond, exception); \
+    }                                \
   }
 #else
-#define assert_dbg(cond, exc) \
+#define assert_dbg(cond, exception) \
   {}
 #endif
 

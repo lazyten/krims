@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 by the krims authors
+// Copyright (C) 2017 by the krims authors
 //
 // This file is part of krims.
 //
@@ -17,10 +17,24 @@
 // along with krims. If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "exception_defs.hh"
+#pragma once
 
 namespace krims {
-// Set default effect of the assert_dbg macro to ABORT
-ExceptionEffect AssertDbgEffect::m_eff = ExceptionEffect::ABORT;
+
+/** Enum class which defines the verbosity used for the exception handling */
+enum class ExceptionVerbosity : char {
+  /** Be entirely silent. Just abort the program.
+   *  This is *not* recommended
+   */
+  SILENT,
+
+  /** Just print a short summary of what and where
+   *  the error occurred
+   */
+  SUMMARY,
+
+  /** Print a full backtrace as well */
+  BACKTRACE,
+};
 
 }  // namespace krims

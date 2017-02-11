@@ -17,6 +17,10 @@
 // along with krims. If not, see <http://www.gnu.org/licenses/>.
 //
 
+// Setup the krims exception system
+#define KRIMS_INIT_EXCEPTION_SYSTEM
+#include <krims/ExceptionSystem.hh>
+
 #include <iomanip>
 #include <iostream>
 #include <krims/GenMap.hh>
@@ -150,8 +154,7 @@ int main() {
   print_map(map);
 
   std::cout << "#" << std::endl;
-  std::cout << R"(# Modify submap with modify_map_other(map.submap("sub"))"
-            << std::endl;
+  std::cout << R"(# Modify submap with modify_map_other(map.submap("sub"))" << std::endl;
   std::cout << "#" << std::endl;
 
   GenMap submap = map.submap("sub");

@@ -19,7 +19,7 @@
 
 #pragma once
 #include "addr2line.hh"
-#include <atomic>
+#include <iostream>
 #include <string>
 #include <vector>
 
@@ -31,19 +31,6 @@ namespace krims {
 
 class Backtrace {
  public:
-  /** Is backtracing in exceptions overall enabled?
-   *
-   * In some rare cases this could lead to a segmentation fault
-   * (e.g. if the stack itself is corrupted) and disabling this
-   * might therefore be helpful in these cases.
-   *
-   * The behaviour of this class is then equivalent to cases where
-   * backtracing is not supported at all.
-   *
-   * By default this value is true.
-   */
-  static std::atomic<bool> enabled;
-
   // Struct to represent one frame in the Backtrace
   struct Frame {
     //! Static string to describe an unknown piece of information in the frame
@@ -86,10 +73,7 @@ class Backtrace {
   void obtain_backtrace(const bool use_expensive = false);
 
   /** \brief Return the parsed backtrace frames */
-  const std::vector<Frame>& frames() const {
-    if (!m_parsing_done) parse_backtrace();
-    return m_parsed_frames;
-  }
+  const std::vector<Frame>& frames() const { return m_parsed_frames; }
 
   /** Return whether the parsing process has determined/will determine
    * the file path and the line numbers for each backtrace entry.
@@ -111,7 +95,7 @@ class Backtrace {
 #endif
 
   /** Parse the m_raw_backtrace into m_parsed_entries */
-  void parse_backtrace() const;
+  void parse_backtrace();
 
 #ifdef KRIMS_HAVE_GLIBC_STACKTRACE
   /**
@@ -125,13 +109,12 @@ class Backtrace {
   int m_n_raw_frames = 0;
 
   /** std::vector of Entry objects which contains the parsed stack trace. */
-  mutable std::vector<Frame> m_parsed_frames;
-
-  /** Flag to hold whether the parsing has been done */
-  mutable bool m_parsing_done = false;
+  std::vector<Frame> m_parsed_frames;
 
   /** Did the parsing process determine the file path and line numbers. */
   bool m_determine_file_line = false;
 };
+
+std::ostream& operator<<(std::ostream& out, const Backtrace& bt);
 
 }  // namespace krims

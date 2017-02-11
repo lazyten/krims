@@ -20,7 +20,6 @@
 #pragma once
 #include "Backtrace.hh"
 #include <exception>
-#include <ostream>
 #include <string>
 
 namespace krims {
@@ -32,7 +31,13 @@ namespace krims {
 class ExceptionBase : public std::exception {
  public:
   /** Constructor */
-  ExceptionBase();
+  ExceptionBase()
+        : m_name("?"),
+          m_file("?"),
+          m_line(0),
+          m_function("?"),
+          m_failed_condition("?"),
+          m_what_str{"Failed to generate the exception message."} {}
 
   /** Default copy constructor */
   ExceptionBase(const ExceptionBase&) = default;
@@ -47,35 +52,23 @@ class ExceptionBase : public std::exception {
    * \param failed_condition The condition which failed and gave rise to the
    *                         exception
    * \param exception_name The name of the exception
-   * \param use_expensive Whether expensive methods to gather additional data
-   * should be used (Only enable this in non-performance critical cases, e.g.
-   * when the exception will actually be shown to the user in the end and the
-   * program is then aborted.)
-   * */
+   **/
   void add_exc_data(const char* file, int line, const char* function,
-                    const char* failed_condition, const char* exception_name,
-                    bool use_expensive = false);
+                    const char* failed_condition, const char* exception_name) noexcept;
 
   /** The c-string which describes briefly what happened */
-  const char* what() const noexcept;
+  const char* what() const noexcept { return m_what_str.c_str(); }
 
   /** The name of the exception */
-  const char* name() const;
+  const char* name() const { return m_name; }
 
   /** The result of print_extra's print call */
-  const std::string extra() const;
+  std::string extra() const;
 
   /** Print exception-specific extra information to the outstream */
-  virtual void print_extra(std::ostream& out) const noexcept;
-
-  /** Print a stacktrace to the outstream */
-  void print_stacktrace(std::ostream& out) const;
+  virtual void print_extra(std::ostream& out) const noexcept { out << "(none)"; }
 
  protected:
-  /**  build the what string of this exception
-   */
-  virtual std::string generate_message() const noexcept;
-
   /** Print the internal exception data */
   virtual void print_exc_data(std::ostream& out) const noexcept;
 
@@ -95,11 +88,8 @@ class ExceptionBase : public std::exception {
   const char* m_failed_condition;
 
  private:
-  //! The class which will determine the backtrace.
-  Backtrace m_backtrace;
-
   //! The what of the exception
-  mutable std::string m_what_str;
+  std::string m_what_str;
 };
 
 }  // namespace krims

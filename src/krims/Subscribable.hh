@@ -159,8 +159,7 @@ class Subscribable {
  protected:
 #ifdef DEBUG
   /** Assert that this has no subscriptions made to it.
-   * If this is not the case, than abort the program via
-   * assert_abort.
+   * If this is not the case, than we throw via assert_throw.
    *
    * @note In RELEASE mode this function does not exist.
    */
@@ -178,7 +177,7 @@ class Subscribable {
       //       after this has occurred. There is no way we can get out of
       //       this gracefully.
       const std::string classname = m_classname.size() == 0 ? "(unknown)" : m_classname;
-      assert_abort(false, ExcStillUsed(classname, m_subscribers.size(), s.str()));
+      assert_throw(false, ExcStillUsed(classname, m_subscribers.size(), s.str()));
     }
   }
 #endif
@@ -236,10 +235,10 @@ class Subscribable {
    * Marked as mutable in order to allow to subscribe / unsubscribe from
    * const references as well.
    */
-  mutable std::list<std::shared_ptr<const std::string>> m_subscribers;
+  mutable std::list<std::shared_ptr<const std::string>> m_subscribers{};
 
   /** Mutex to guard m_subscribers */
-  mutable std::mutex m_mut_subscr;
+  mutable std::mutex m_mut_subscr{};
 
   /**
    * Name of the actual child Subscribable class
