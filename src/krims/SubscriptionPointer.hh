@@ -39,13 +39,6 @@ class SubscriptionPointer {
   /** The template parameter T, i.e. the type of the managed object */
   typedef T element_type;
 
-  /** A swap function for Subscription pointers */
-  friend void swap(SubscriptionPointer& first, SubscriptionPointer& second) {
-    using std::swap;
-    swap(first.m_subscriber_id_ptr, second.m_subscriber_id_ptr);
-    swap(first.m_subscribed_obj_ptr, second.m_subscribed_obj_ptr);
-  }
-
   /** \brief Create an empty Subscription pointer pointing to no object at all
    *
    * Actual subscription to an object may be done using the reset function.
@@ -64,27 +57,18 @@ class SubscriptionPointer {
    * */
   SubscriptionPointer(const std::string& subscriber_id, T& s)
         : SubscriptionPointer(subscriber_id) {
-    // Register this subscription
     register_at(&s);
   }
 
   /** Destructor */
   ~SubscriptionPointer() {
-    // Unregister from everything
-    register_at(nullptr);
+    register_at(nullptr);  // i.e. unregister us
   }
 
   /** Copy constructor */
   SubscriptionPointer(const SubscriptionPointer& other)
         : m_subscribed_obj_ptr(nullptr),
-#ifdef DEBUG
           m_subscriber_id_ptr(new std::string(*(other.m_subscriber_id_ptr))) {
-#else
-          // Avoid allocation in RELEASE mode, just copy the shared pointer:
-          m_subscriber_id_ptr(other.m_subscriber_id_ptr) {
-#endif
-
-    // Register the subscription
     register_at(other.m_subscribed_obj_ptr);
   }
 
@@ -93,29 +77,27 @@ class SubscriptionPointer {
   SubscriptionPointer(const SubscriptionPointer<U>& other)
         : m_subscribed_obj_ptr(nullptr),
           m_subscriber_id_ptr(new std::string(other.subscriber_id())) {
-    // Register the subscription (here the ptr conversion happens)
-    register_at(other.get());
+    register_at(other.get());  // Register (here the ptr conversion happens)
   }
 
   /** Move constructor */
   SubscriptionPointer(SubscriptionPointer&& other)
-        : m_subscribed_obj_ptr(nullptr),
-#ifdef DEBUG
-          m_subscriber_id_ptr(new std::string(*other.m_subscriber_id_ptr)) {
-#else
-          // Avoid the allocation in RELEASE mode, just move the shared pointer:
+        : m_subscribed_obj_ptr(other.m_subscribed_obj_ptr),
           m_subscriber_id_ptr(std::move(other.m_subscriber_id_ptr)) {
-#endif
-    // Register us:
-    register_at(other.m_subscribed_obj_ptr);
-
-    // Unregister the other object:
-    other.register_at(nullptr);
+    other.m_subscribed_obj_ptr = nullptr;
   }
 
   /** Assignment operator */
   SubscriptionPointer& operator=(SubscriptionPointer other) {
-    swap(*this, other);
+#ifdef DEBUG
+    register_at(nullptr);  // Unregister us first
+#endif
+
+    // Move the subscription of other over:
+    m_subscribed_obj_ptr = other.m_subscribed_obj_ptr;
+    m_subscriber_id_ptr = std::move(other.m_subscriber_id_ptr);
+    other.m_subscribed_obj_ptr = nullptr;
+
     return *this;
   }
 
@@ -164,15 +146,24 @@ class SubscriptionPointer {
 #else
     // Since we have no subscribing/unsubscribing business to do:
     m_subscribed_obj_ptr = object_ptr;
-#endif
+#endif  // DEBUG
   }
 
+  /// Pointer to the actual object.
   T* m_subscribed_obj_ptr;
+
+/** The pointer which is the unique identifier of this very pointer object
+ *  Note that in DEBUG the actual pointer address is used as the identifier
+ *  such that just barely using the string value is not enough
+ */
+#ifdef DEBUG
   std::shared_ptr<const std::string> m_subscriber_id_ptr;
+#else
+  // use unique_ptr in RELEASE mode since this guy is way faster.
+  std::unique_ptr<const std::string> m_subscriber_id_ptr;
+#endif
 };
 
-// TODO improve subscribable - subscription system and remove
-//      some of the problems mentioned below.
 /**
  * \brief Convenience wrapper for making subscription pointers
  * and subscribing to objects

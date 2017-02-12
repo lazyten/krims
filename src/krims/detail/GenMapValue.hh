@@ -18,6 +18,7 @@
 //
 
 #pragma once
+#include "krims/ExceptionSystem/Exceptions.hh"
 #include "krims/RCPWrapper.hh"
 #include "krims/SubscriptionPointer.hh"
 #include "krims/TypeUtils.hh"
