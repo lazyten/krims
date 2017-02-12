@@ -705,6 +705,7 @@ struct ResetPointer : rc::state::Command<SubscriptionModel<SubscribableType>,
 
     sut.pointers[ptr_index].reset();
 
+#ifdef DEBUG
     // Check that the object we pointed to does not
     // contain our id any more.
     // Only do this if we point to something
@@ -714,6 +715,7 @@ struct ResetPointer : rc::state::Command<SubscriptionModel<SubscribableType>,
       auto res = std::find(std::begin(subscribers), std::end(subscribers), pm.id);
       RC_ASSERT(res == std::end(subscribers));
     }
+#endif
 
     // check that we point nowhere
     RC_ASSERT(sut.pointers[ptr_index].get() == nullptr);
@@ -772,6 +774,7 @@ struct RemovePointer : rc::state::Command<SubscriptionModel<SubscribableType>,
 
     sut.pointers.erase(ptr_index + std::begin(sut.pointers));
 
+#ifdef DEBUG
     // Check that the object we pointed to does not
     // contain our id any more.
     // Only do this if we point to something
@@ -781,6 +784,7 @@ struct RemovePointer : rc::state::Command<SubscriptionModel<SubscribableType>,
       auto res = std::find(std::begin(subscribers), std::end(subscribers), pm.id);
       RC_ASSERT(res == std::end(subscribers));
     }
+#endif
 
     // Check that the number of pointers has decreased:
     RC_ASSERT(model.pointers.size() - 1 == sut.pointers.size());
@@ -986,12 +990,13 @@ TEST_CASE("Subscription and SubscriptionPointer system", "[subscription]") {
     // create empty subscription
     SubscriptionPointer<SimpleSubscribable> sptr("Test");
     REQUIRE(!sptr);
+#ifdef DEBUG
     CHECK(s.n_subscriptions() == 0);
+#endif
 
     // subscribe somewhere
     sptr.reset(s);
 #ifdef DEBUG
-    // n_subscriptions is always zero in RELEASE
     CHECK(s.n_subscriptions() == 1);
 #endif
 
@@ -1000,7 +1005,9 @@ TEST_CASE("Subscription and SubscriptionPointer system", "[subscription]") {
     // reset subscription
     sptr.reset();
     REQUIRE(!sptr);
+#ifdef DEBUG
     CHECK(s.n_subscriptions() == 0);
+#endif
   }
 
   //
@@ -1022,8 +1029,8 @@ TEST_CASE("Subscription and SubscriptionPointer system", "[subscription]") {
     SECTION("Test subscription was successful") {
       // Quick check for n_subscriptions
       REQUIRE(s.n_subscriptions() == 2);
-      REQUIRE(s.subscribers()[0] == "sub2");
-      REQUIRE(s.subscribers()[1] == "sub1");
+      REQUIRE(s.subscribers()[0] == "sub1");
+      REQUIRE(s.subscribers()[1] == "sub2");
     }
 #endif
 
@@ -1049,8 +1056,8 @@ TEST_CASE("Subscription and SubscriptionPointer system", "[subscription]") {
 #ifdef DEBUG
       // Check number of subscriptions:
       CHECK(s.n_subscriptions() == 2);
-      CHECK(s.subscribers()[0] == "sub2");
-      CHECK(s.subscribers()[1] == "sub1");
+      CHECK(s.subscribers()[0] == "sub1");
+      CHECK(s.subscribers()[1] == "sub2");
 
       // Require the copy to be subscribed by
       // no one
@@ -1086,8 +1093,8 @@ TEST_CASE("Subscription and SubscriptionPointer system", "[subscription]") {
 #ifdef DEBUG
       // Check number of subscriptions:
       CHECK(s.n_subscriptions() == 2);
-      CHECK(s.subscribers()[0] == "sub2");
-      CHECK(s.subscribers()[1] == "sub1");
+      CHECK(s.subscribers()[0] == "sub1");
+      CHECK(s.subscribers()[1] == "sub2");
 
       // Require the copy to be subscribed by
       // no one

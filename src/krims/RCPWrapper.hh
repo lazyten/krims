@@ -18,6 +18,7 @@
 //
 
 #pragma once
+#include "ExceptionSystem/Exceptions.hh"
 #include "Subscribable.hh"
 #include "SubscriptionPointer.hh"
 #include <type_traits>

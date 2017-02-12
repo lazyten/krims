@@ -18,36 +18,34 @@
 //
 
 #pragma once
-#include "ExceptionSystem.hh"
-#include "SubscriptionPointer.hh"
-#include "demangle.hh"
+#ifdef DEBUG
+#include "krims/ExceptionSystem.hh"
+#include "krims/demangle.hh"
 #include <algorithm>
-#include <atomic>
-#include <list>
 #include <memory>
 #include <mutex>
-#include <sstream>
-#include <string>
-#include <typeinfo>
 #include <utility>
 #include <vector>
+#endif  // DEBUG
 
 namespace krims {
+#ifdef DEBUG
 
-// forwand declare SubscriptionPointer
+// forward declare SubscriptionPointer
 template <typename Subscribable>
 class SubscriptionPointer;
 
 /** Class which handles subscribtions from a subscription pointer
  * If upon deletion still subscriptions exist, it throws an exception in debug
  * mode
+ *
+ * \note In RELEASE mode this class is just a dummy marker class,
+ *       which contains no functionality whatsoever.
  */
 class Subscribable {
-#ifdef DEBUG
   // Declare SubscriptionPointer as friend.
   template <typename T>
   friend class ::krims::SubscriptionPointer;
-#endif
 
  public:
   /** A swap function for Subscribables */
@@ -64,7 +62,7 @@ class Subscribable {
   /** Exception to indicate that Subscribable is still used */
   DefException3(ExcStillUsed, std::string, size_t, std::string,
                 << "Object of type \"" << arg1 << "\" is still used by " << arg2
-                << " other objects, which are (from new to old): " << arg3);
+                << " other objects, which are (from old to new): " << arg3);
 
   /** Exception to indicate that Subscriber is not known. */
   DefException2(ExcUnknownSubscriberId, std::string, std::string,
@@ -79,23 +77,17 @@ class Subscribable {
    *
    * @note This function is empty unless we are in DEBUG mode
    */
-  virtual ~Subscribable() {
-#ifdef DEBUG
-    assert_no_subscriptions();
-#endif
-  }
+  virtual ~Subscribable() { assert_no_subscriptions(); }
 
   /** Default constructor */
   Subscribable() = default;
 
   /** Default move constructor */
   explicit Subscribable(Subscribable&& other) {
-#ifdef DEBUG
     // check that other has no subscriptions
     // if it does have subscriptions, raise an
     // Exception there:
     other.assert_no_subscriptions();
-#endif
   }
 
   /** Copy constructor */
@@ -124,16 +116,11 @@ class Subscribable {
   //
   /** Return the current number of subscriptions to this object.
    *
-   * @note If we are not in DEBUG mode this count is always zero.
+   * @note Only defined in DEBUG mode.
    * */
   size_t n_subscriptions() const {
-#ifdef DEBUG
     // Note: Getting the size of a list in C++11 is constant time!
     return m_subscribers.size();
-#else
-    // return constant 0
-    return 0;
-#endif
   }
 
   /** Return the current subscriptions to this object.
@@ -143,21 +130,16 @@ class Subscribable {
    * and conversely the last object is the oldest object which has still
    * not cancelled its subscription to this Subscribable.
    *
-   * @note If we are in RELEASE mode, this list will always be empty
+   * @note Only defined in DEBUG  mode.
    */
   std::vector<std::string> subscribers() const {
-#ifdef DEBUG
     std::vector<std::string> v(m_subscribers.size());
     std::transform(std::begin(m_subscribers), std::end(m_subscribers), std::begin(v),
                    [](const std::shared_ptr<const std::string>& p) { return *p; });
     return v;
-#else
-    return std::vector<std::string>{};
-#endif
   }
 
  protected:
-#ifdef DEBUG
   /** Assert that this has no subscriptions made to it.
    * If this is not the case, than we throw via assert_throw.
    *
@@ -166,9 +148,9 @@ class Subscribable {
   void assert_no_subscriptions() const {
     if (m_subscribers.size() > 0) {
       // build the string of subscribing objects
-      std::stringstream s;
+      std::string subscribers;
       for (auto& p : m_subscribers) {
-        s << " " << *p;
+        subscribers.append(" ").append(*p);
       }
 
       // Raise the exception
@@ -177,13 +159,12 @@ class Subscribable {
       //       after this has occurred. There is no way we can get out of
       //       this gracefully.
       const std::string classname = m_classname.size() == 0 ? "(unknown)" : m_classname;
-      assert_throw(false, ExcStillUsed(classname, m_subscribers.size(), s.str()));
+      assert_throw(false,
+                   ExcStillUsed(classname, m_subscribers.size(), std::move(subscribers)));
     }
   }
-#endif
 
  private:
-#ifdef DEBUG
   //
   // Deal with subscriptions:
   //
@@ -226,7 +207,7 @@ class Subscribable {
       m_classname = demangled_string(typeid(*this).name());
     }
 
-    m_subscribers.push_front(id_ptr);
+    m_subscribers.push_back(id_ptr);
   }
 
   /** List to contain the pointer of string object, which are passed
@@ -235,7 +216,7 @@ class Subscribable {
    * Marked as mutable in order to allow to subscribe / unsubscribe from
    * const references as well.
    */
-  mutable std::list<std::shared_ptr<const std::string>> m_subscribers{};
+  mutable std::vector<std::shared_ptr<const std::string>> m_subscribers{};
 
   /** Mutex to guard m_subscribers */
   mutable std::mutex m_mut_subscr{};
@@ -248,7 +229,14 @@ class Subscribable {
    * const references as well.
    * */
   mutable std::string m_classname{};
-#endif
 };
 
+#else
+
+/** In RELEASE mode the Subscribable class is just a dummy marker class,
+ * which contains no functionality whatsoever.
+ */
+class Subscribable {};
+
+#endif  // DEBUG
 }  // namespace krims
