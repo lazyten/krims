@@ -29,22 +29,46 @@
 # The warning policy we use here is based on a very valuable
 # post by a clang developer on stack exchange
 # https://programmers.stackexchange.com/questions/122608#124574
+# and a list of recommended flags on
+# https://github.com/lefticus/cppbestpractices/blob/master/02-Use_the_Tools_Available.md
 
+#
+# Warnings
+#
 # Show high confidence warning
 enable_if_compiles(CMAKE_CXX_FLAGS "-Wall")
 
 # Show valuable extra warnings
 enable_if_compiles(CMAKE_CXX_FLAGS "-Wextra")
 
-# Turn on warnings about language extensions
-enable_if_compiles(CMAKE_CXX_FLAGS "-pedantic")
+# Warn if virtual classes do not have a virtual destructor
+enable_if_compiles(CMAKE_CXX_FLAGS "-Wnon-virtual-dtor")
+
+# Warn if a virtual function is overloaded
+enable_if_compiles(CMAKE_CXX_FLAGS "-Woverloaded-virtual")
+
+# Warn about old c-style casts
+enable_if_compiles(CMAKE_CXX_FLAGS "-Wold-style-cast")
+
+# Warn about performance-critcal casts
+enable_if_compiles(CMAKE_CXX_FLAGS "-Wcast-align")
 
 # But silence some rather annoying warnings
 enable_if_compiles(CMAKE_CXX_FLAGS "-Wno-unused-macros")
 enable_if_compiles(CMAKE_CXX_FLAGS "-Wno-unused-parameter")
 
+# Turn on warnings about language extensions
+enable_if_compiles(CMAKE_CXX_FLAGS "-pedantic")
+
+#
+# Warnings as errors
+#
 # Make warnings errors, such that we cannot ignore them
 enable_if_compiles(CMAKE_CXX_FLAGS "-Werror")
+
+# Do not make overloaded virtuals errors:
+# TODO maybe do?
+enable_if_compiles(CMAKE_CXX_FLAGS "-Wno-error=overloaded-virtual")
 
 #######################
 #-- Bug workarounds --#
