@@ -38,7 +38,7 @@ struct SortedArrays {
 
   SortedArrays(const std::vector<T>& unsorted)
         : sorted{}, argsort_res{}, argsort_sorted{} {
-    const Comparator comp;
+    Comparator comp{};
 
     // Sort the array the normal way.
     sorted = unsorted;

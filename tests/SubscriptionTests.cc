@@ -959,10 +959,6 @@ struct AssignRemovePointer
  * list of pointers and remove the old one */
 // TODO implictly tested, but do explicit
 
-/** Swap two random SubscriptionPointers and check that the reference counting
- * is the same, but their id and target have swapped */
-// TODO implicitly checked via the assignment operator, but do explicit
-
 }  // namespace subscription_tests
 
 //
@@ -1108,6 +1104,45 @@ TEST_CASE("Subscription and SubscriptionPointer system", "[subscription]") {
       REQUIRE(sub1->data == 42);
       REQUIRE(sub3->data == 5);
       REQUIRE(s_assigned.data == 5);
+    }
+
+    //
+    // ---------------------------------------------------------------
+    //
+
+    SECTION("Moving subscriptions") {
+      // Move subscription 2:
+      SubscriptionPointer<SimpleSubscribable> sub4(std::move(sub2));
+
+      // Check moving worked:
+      REQUIRE(sub4->data == 42);
+      REQUIRE(sub2 == nullptr);
+
+#ifdef DEBUG
+      // Check number of subscriptions:
+      CHECK(s.n_subscriptions() == 2);
+      CHECK(s.subscribers()[0] == "sub1");
+      CHECK(s.subscribers()[1] == "sub2");
+#endif
+
+      // Move-assign:
+      SubscriptionPointer<SimpleSubscribable> sub3("sub3");
+      sub3 = std::move(sub1);
+
+      // Check moving worked:
+      REQUIRE(sub3->data == 42);
+      REQUIRE(sub1 == nullptr);
+#ifdef DEBUG
+      // Check number of subscriptions:
+      CHECK(s.n_subscriptions() == 2);
+      CHECK(s.subscribers()[0] == "sub1");
+      CHECK(s.subscribers()[1] == "sub2");
+#endif
+
+      // check altering data
+      sub3->data = 4;
+      REQUIRE(s.data == 4);
+      REQUIRE(sub4->data == 4);
     }
 
     //
