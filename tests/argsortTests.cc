@@ -18,7 +18,7 @@
 //
 
 #include <catch.hpp>
-#include <krims/argsort.hh>
+#include <krims/Algorithm/argsort.hh>
 #include <rapidcheck.h>
 
 namespace krims {
