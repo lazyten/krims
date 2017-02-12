@@ -34,6 +34,7 @@ set(KRIMS_TESTS_SOURCES
 	CircularBufferTests.cc
 	TupleUtilsTests.cc
 	argsortTests.cc
+	joinTests.cc
 	NumCompTests.cc
 	main.cc
 )
