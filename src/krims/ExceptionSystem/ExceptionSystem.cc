@@ -45,7 +45,8 @@ size_t ExceptionSystem::mem_offset = 0;
 
 bool ExceptionSystem::initialise(ExceptionVerbosity verbosity) {
   try {
-    std::call_once(once_init, do_once_initialise, verbosity);
+    // clang-tidy flags an error in libstdc++ here, that's why we need the NOLINT
+    std::call_once(once_init, &do_once_initialise, verbosity);  // NOLINT
   } catch (const std::system_error& e) {
     std::cerr
           << "Could not setup ExceptionSystem due to std::system_error. \nUsually this "
