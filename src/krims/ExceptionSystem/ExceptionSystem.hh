@@ -19,36 +19,30 @@
 
 #pragma once
 #include "ExceptionVerbosity.hh"
-#include "terminate_handler.hh"
 #include <exception>
 #include <memory>
 #include <mutex>
 
 namespace krims {
 
+namespace detail {
+/** The terminate handler used by the krims exception system */
+[[noreturn]] inline void terminate_handler();
+}
+
 struct ExceptionSystem {
-  template <ExceptionVerbosity verbosity>
-  friend void terminate_handler();
+  // Make the terminate handler a friend
+  friend void detail::terminate_handler();
 
  public:
-  template <ExceptionVerbosity Verbosity = ExceptionVerbosity::BACKTRACE>
-  static bool initialise() {
-    std::lock_guard<std::mutex> lock(mutex_);
+  /** Initialise the krims exception system.
+   *
+   * This function is safe to be called from all threads, but the precise behaviour
+   * is undefined if the argument, which is passed, differs between the threads.
+   */
+  static bool initialise(ExceptionVerbosity verbosity = ExceptionVerbosity::BACKTRACE);
 
-    /* TODO later
-    if (memory_ == nullptr) {
-      memory_.reset(new char[max_mem]);
-    }
-    */
-
-    std::set_terminate(terminate_handler<Verbosity>);
-    verbosity_ = Verbosity;
-
-    return true;
-  }
-
-  static ExceptionVerbosity verbosity() { return verbosity_; }
-
+ private:
   /* TODO include this later: We don't want to allocate new memory
    *      in exception handling (might fail)
   static void* malloc(size_t size) {
@@ -63,24 +57,37 @@ struct ExceptionSystem {
   }
   */
 
- private:
-  /** Currently selected verbosity level */
-  static ExceptionVerbosity verbosity_;
+  /** Do the initialisation
+   *
+   * \note This should only be called once for all threads.
+   **/
+  static void do_once_initialise(ExceptionVerbosity verbosity_);
 
-  /** Mutex to make operations on the data or exception handling strictly thread-exclusive
+  /** Do handle an exception
+   *
+   * \note This should only be called once for all threads.
+   *       The execution of the program should be ended thereafter
+   *       in all threads (usually by calling ``std::_Exit()``)
    */
-  static std::mutex mutex_;
+  static void do_once_handle_exception() noexcept;
 
-  /* TODO for later
+  /** Once flag to guard initialisation */
+  static std::once_flag once_init;
+
+  /** Once flag to guard exception handling */
+  static std::once_flag once_handle_exception;
+
+  /** Selected verbosity level */
+  static ExceptionVerbosity verbosity;
+
   //! Maximal pre-allocated memory for exception handling.
-  static constexpr size_t max_mem = 0;
+  static constexpr size_t max_mem = 0;  // TODO just dummy for now.
 
   //! Buffer holding the pre-allocated memory
-  static std::unique_ptr<char[]> memory_;
+  static std::unique_ptr<char[]> memory;
 
   //! Offset to the next free memory
-  static size_t mem_offset_;
-  */
+  static size_t mem_offset;
 };
 
 #ifdef KRIMS_INIT_EXCEPTION_SYSTEM
@@ -96,7 +103,7 @@ struct ExceptionSystem {
 // to get going.
 
 __attribute__((unused)) const bool exception_system_initialised{
-      ExceptionSystem::initialise<KRIMS_INIT_EXCEPTION_SYSTEM>()};
+      ExceptionSystem::initialise(KRIMS_INIT_EXCEPTION_SYSTEM)};
 #endif  // defined KRIMS_INIT_EXCEPTION_SYSTEM
 
 }  // namespace krims
