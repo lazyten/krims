@@ -42,6 +42,13 @@ set(KRIMS_DEFINITIONS "")
 set(KRIMS_DEFINITIONS_DEBUG "")
 set(KRIMS_DEFINITIONS_RELEASE "")
 
+########################################
+#-- Link with some threading library --#
+########################################
+set(CMAKE_THREAD_PREFER_PTHREAD ON)
+find_package(Threads)
+set(KRIMS_DEPENDENCIES ${CMAKE_THREAD_LIBS_INIT})
+
 ############################
 #-- rapidcheck and catch --#
 ############################

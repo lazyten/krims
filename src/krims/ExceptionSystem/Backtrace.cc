@@ -175,12 +175,20 @@ void Backtrace::parse_backtrace() {
       initframe = frame + 1;
       break;
     }
+    if ((std::strstr(stacktrace[frame], "krims") != nullptr) &&
+        (std::strstr(stacktrace[frame], "detail") != nullptr) &&
+        (std::strstr(stacktrace[frame], "terminate_handler") != nullptr)) {
+      // The current frame is responsible for terminating the program.
+      initframe = frame + 1;
+      break;
+    }
+
     if (std::strstr(stacktrace[frame], "__cxa_call_unexpected") != nullptr) {
       // The current frame indicates that an unexpected exception was
       // caught. This is certainly already inside the exception handling
-      // part of the c++ library. So we set the init frame to the next
-      // frame, but we do not break in case we find something better.
+      // part of the c++ library.
       initframe = frame + 1;
+      break;
     }
   }
 
