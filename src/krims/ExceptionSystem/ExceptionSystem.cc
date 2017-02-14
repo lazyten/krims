@@ -28,7 +28,7 @@ namespace detail {
 [[noreturn]] void terminate_handler() {
   // This makes sure that only the first exception gets handled and
   // further calls to terminate (from other threads) lead to immediate
-  // termination.
+  // exit in the thread.
   std::call_once(ExceptionSystem::once_handle_exception,
                  ExceptionSystem::do_once_handle_exception);
 
@@ -61,17 +61,17 @@ bool ExceptionSystem::initialise(ExceptionVerbosity verbosity) {
 }
 
 void ExceptionSystem::do_once_initialise(ExceptionVerbosity verbosity_) {
-  std::set_terminate(detail::terminate_handler);
-  verbosity = verbosity_;
-
   // Allocate pre-allocated heap memory for exception handling
   try {
     memory.reset(new char[max_mem]);
   } catch (...) {
-    // Signal an error by not allocating any memory.
-    memory.reset();
+    memory.reset();  // Undo memory allocation if any
     throw std::bad_alloc();
   }
+
+  // Set the other static flags (which will not cause an error)
+  std::set_terminate(detail::terminate_handler);
+  verbosity = verbosity_;
 }
 
 void ExceptionSystem::do_once_handle_exception() noexcept {

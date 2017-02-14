@@ -37,11 +37,12 @@ struct ExceptionSystem {
  public:
   /** Initialise the krims exception system.
    *
-   * This function is safe to be called from all threads, but only has an effect the first
-   * time it is called.
+   * This function is safe to be called from all threads, but the precise behaviour
+   * is undefined if the argument, which is passed, differs between the threads.
    */
   static bool initialise(ExceptionVerbosity verbosity = ExceptionVerbosity::BACKTRACE);
 
+ private:
   /* TODO include this later: We don't want to allocate new memory
    *      in exception handling (might fail)
   static void* malloc(size_t size) {
@@ -56,7 +57,6 @@ struct ExceptionSystem {
   }
   */
 
- private:
   /** Do the initialisation
    *
    * \note This should only be called once for all threads.
