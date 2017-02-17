@@ -69,6 +69,7 @@ enable_if_compiles(CMAKE_CXX_FLAGS "-Werror")
 # Do not make overloaded virtuals errors:
 # TODO maybe do?
 enable_if_compiles(CMAKE_CXX_FLAGS "-Wno-error=overloaded-virtual")
+enable_if_compiles(CMAKE_CXX_FLAGS "-Wno-error=deprecated-declarations")
 
 #######################
 #-- Bug workarounds --#
