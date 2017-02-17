@@ -69,8 +69,8 @@ class ExceptionBase : public std::exception {
   virtual void print_extra(std::ostream& out) const noexcept { out << "(none)"; }
 
  protected:
-  /** Print the internal exception data */
-  virtual void print_exc_data(std::ostream& out) const noexcept;
+  /** Invoke all functions to rebuild the string returned by what() */
+  void rebuild_what_str() noexcept;
 
   //! The name of the exception
   const char* m_name;

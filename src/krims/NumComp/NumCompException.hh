@@ -97,7 +97,7 @@ void NumCompException<T>::print_extra(std::ostream& out) const noexcept {
   out << std::scientific << std::setprecision(15) << "Error in comparison (" << error
       << ") larger than tolerance (" << tolerance << ").";
   if (NumCompExceptionBase::description != "") {
-    out << std::endl << NumCompExceptionBase::description;
+    out << '\n' << '\n' << NumCompExceptionBase::description;
   }
 }
 

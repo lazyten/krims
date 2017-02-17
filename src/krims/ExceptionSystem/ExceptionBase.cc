@@ -32,18 +32,8 @@ void ExceptionBase::add_exc_data(const char* file, int line, const char* functio
   m_function = function;
   m_failed_condition = failed_condition;
 
-  try {
-    std::ostringstream converter;
-
-    print_exc_data(converter);
-    converter << '\n' << "Extra information:" << '\n';
-    print_extra(converter);
-
-    m_what_str = converter.str();
-  } catch (...) {
-    // By default m_what_str contains the message
-    //"Failed to generate the exception message."
-  }
+  // Rebuild the string stored in m_what_str.
+  rebuild_what_str();
 }
 
 std::string ExceptionBase::extra() const {
@@ -52,14 +42,32 @@ std::string ExceptionBase::extra() const {
   return ss.str();
 }
 
-void ExceptionBase::print_exc_data(std::ostream& out) const noexcept {
-  out << "The assertion" << '\n'
-      << "   " << m_failed_condition << '\n'
-      << "failed in line " << m_line << R"( of file ")" << m_file
-      << R"(" while executing the function)" << '\n'
-      << "   " << m_function << '\n'
-      << "This raised the exception" << '\n'
-      << "   " << m_name << '\n';
+/** Invoke all functions to rebuild the string returned by what() */
+void ExceptionBase::rebuild_what_str() noexcept {
+  try {
+    std::ostringstream converter;
+
+    // Print basic exception data:
+    converter << "The assertion" << '\n'
+              << "   " << m_failed_condition << '\n'
+              << "failed in line " << m_line << R"( of file ")" << m_file
+              << R"(" while executing the function)" << '\n'
+              << "   " << m_function << '\n'
+              << "This raised the exception" << '\n'
+              << "   " << m_name << '\n'
+              << '\n'
+              << "Extra information:" << '\n';
+
+    // Print the exception-specific extra part:
+    print_extra(converter);
+
+    // Set the what string:
+    m_what_str = converter.str();
+  } catch (...) {
+    // Default string with some extra nulls at the end in case of
+    // accidentially overwritten memory at the end of the string
+    m_what_str = "Failed to generate the exception message.\n\0\0\0";  // NOLINT
+  }
 }
 
 }  // namespace krims

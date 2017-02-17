@@ -23,13 +23,7 @@
 
 namespace krims {
 
-#if defined KRIMS_ENABLE_EXPERIMENTAL
-// Provide backwards compatibility, but complain that it is deprecated
+// Provide backwards compatibility to ParameterMap
 KRIMS_DEPRECATED("Use GenMap from GenMap.hh instead") typedef GenMap ParameterMap;
-
-#else
-// Provide silent backwards compatibility
-typedef GenMap ParameterMap;
-#endif  // experimental and debug
 
 }  // krims

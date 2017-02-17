@@ -26,6 +26,9 @@ void NumCompExceptionBase::append(const std::string& extra) {
     description += " ";
   }
   description += extra;
+
+  // Trigger rebuild the exception message.
+  ExceptionBase::rebuild_what_str();
 }
 
 }  // namespace krims
