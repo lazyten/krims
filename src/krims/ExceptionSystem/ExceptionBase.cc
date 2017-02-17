@@ -64,7 +64,9 @@ void ExceptionBase::rebuild_what_str() noexcept {
     // Set the what string:
     m_what_str = converter.str();
   } catch (...) {
-    m_what_str = "Failed to generate the exception message.\n\0\0\0";
+    // Default string with some extra nulls at the end in case of
+    // accidentially overwritten memory at the end of the string
+    m_what_str = "Failed to generate the exception message.\n\0\0\0";  // NOLINT
   }
 }
 
