@@ -101,6 +101,10 @@ struct DereferenceIterator {
     return copy;
   }
 
+  difference_type operator-(const DereferenceIterator& rhs) const {
+    return m_inner - rhs.m_inner;
+  }
+
   DereferenceIterator operator+(difference_type n) const {
     DereferenceIterator copy(*this);
     copy.m_inner += n;
