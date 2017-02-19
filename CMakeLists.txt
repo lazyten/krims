@@ -43,7 +43,6 @@ option(KRIMS_ENABLE_EXAMPLES "Build krims examples" ON)
 ##########################################################################
 # Project setup
 
-# enable the new version feature introduced in cmake 3.0.0
 project(krims VERSION 0.0.0)
 message("\n# Configuring ${PROJECT_NAME}\n#")
 
