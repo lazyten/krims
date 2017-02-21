@@ -71,7 +71,7 @@ install(DIRECTORY .
 	COMPONENT devel
 	FILES_MATCHING PATTERN "*.hh"
 )
-install(FILES "${CMAKE_CURRENT_BINARY_DIR}/version_defs.hh"
+install(FILES "${krims_BINARY_DIR}/src/krims/version_defs.hh"
 	DESTINATION "include/krims"
 	COMPONENT devel
 )

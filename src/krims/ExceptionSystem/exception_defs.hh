@@ -50,30 +50,14 @@ void throw_by_value(Exception e) {
     }                                                                          \
   }
 
-/** This macro is used for actual errors that should always abort the program.
- *
- * @note Active in DEBUG and RELEASE mode.
- * \note This macro is deprecated
- */
-#define assert_abort(cond, exception)                                           \
-  _Pragma(                                                                      \
-        "GCC warning \"'assert_abort' macro is deprecated. Use 'assert_throw' " \
-        "instead.\"") {                                                         \
-    assert_throw(cond, exception);                                              \
-  }
-
-/** Assert a condition and if it fails (evaluates to false), generate an
+/** Assert a condition and if it fails (evaluates to false), throw the
  * exception (the 2nd argument).
  *
  * @note Active in DEBUG mode only.
  */
 #ifdef DEBUG
-#define assert_dbg(cond, exception)  \
-  {                                  \
-    if (!(cond)) {                   \
-      assert_throw(cond, exception); \
-    }                                \
-  }
+#define assert_dbg(cond, exception) \
+  { assert_throw(cond, exception); }
 #else
 #define assert_dbg(cond, exception) \
   {}

@@ -93,7 +93,8 @@ find_program(CLANG_APPLY_REPLACEMENTS
 	DOC "Full path to clang-apply-replacements"
 )
 find_program(RUN_CLANG_TIDY
-	NAMES run-clang-tidy run-clang-tidy${ALTERNATE_SUFFIX}
+	NAMES run-clang-tidy run-clang-tidy.py run-clang-tidy${ALTERNATE_SUFFIX}
+	      run-clang-tidy${ALTERNATE_SUFFIX}.py
 	PATHS ${EXTRA_PATHS}
 	DOC "Full path to run-clang-tidy"
 )
