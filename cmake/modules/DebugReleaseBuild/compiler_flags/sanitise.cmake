@@ -46,12 +46,11 @@ foreach (_opt ${DRB_SANITIZE_OPTIONS})
 		set (DRB_HAVE_ANY_SANITIZE ON)
 	endif()
 endforeach()
-unset(DRB_HAVE_ANY_SANITIZE)
 
 #
 # Sanitize flags -- Release
 #
-if (CMAKE_BUILD_TYPE MATCHES "Release")
+if (CMAKE_BUILD_TYPE MATCHES "Release" AND DRB_HAVE_ANY_SANITIZE)
 	# Reduce optimisation level to 1
 	string(REGEX REPLACE "-O[02-9]" "-O1" RELEASE_FLAGS_REPLACED "${CMAKE_CXX_FLAGS_RELEASE}")
 	set(CMAKE_CXX_FLAGS_RELEASE "${RELEASE_FLAGS_REPLACED}")
@@ -80,3 +79,8 @@ if (CMAKE_BUILD_TYPE MATCHES "Release")
 	set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} ${_FLAGSS}")
 	unset(_FLAGSS)
 endif()
+
+#
+# Cleanup:
+#
+unset(DRB_HAVE_ANY_SANITIZE)
