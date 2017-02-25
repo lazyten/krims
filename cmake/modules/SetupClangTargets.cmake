@@ -103,6 +103,7 @@ find_program(CLANG_FORMAT
 	PATHS ${EXTRA_PATHS}
 	DOC "Full path to clang-format"
 )
+mark_as_advanced(CLANG_TIDY CLANG_APPLY_REPLACEMENTS RUN_CLANG_TIDY CLANG_FORMAT)
 unset(ALTERNATE_SUFFIX)
 unset(EXTRA_PATHS)
 
