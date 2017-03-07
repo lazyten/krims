@@ -190,15 +190,6 @@ Set to \"highest\" to let DRB use the highest available C++ standard (default)."
 		use_cxx_standard(${CXX_STANDARD})
 	endif()
 
-	# TODO set these for downstream compatibility:
-	if (NOT CMAKE_CXX_STANDARD VERSION_LESS 11)
-		set(DRB_HAS_CXX11_SUPPORT ON CACHE INTERNAL "Detected c++11 support.")
-	endif()
-	if (NOT CMAKE_CXX_STANDARD VERSION_LESS 14)
-		set(DRB_HAS_CXX14_SUPPORT ON CACHE INTERNAL "Detected c++14 support.")
-	endif()
-	# TODO end compatibility.
-
 	if (CMAKE_CXX_COMPILER_ID MATCHES "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 		# We have a known "standard" compiler
 		include("${DRB_DIR}/compiler_flags/standard.cmake")
