@@ -18,10 +18,8 @@
 //
 
 #pragma once
-#include "NumCompConstants.hh"
 #include "NumEqual.hh"
-#include <limits>
-#include <type_traits>
+#include "numcomp_tolerance_value.hh"
 
 namespace krims {
 
@@ -42,16 +40,19 @@ class NumComp {
     tolerance(NumCompAccuracyLevel::Default);
   }
 
-  /** Modify the tolerance by providing a different accuracy level */
-  NumComp& tolerance(const NumCompAccuracyLevel accuracy);
+  /** Modify the tolerance by providing a different accuracy level. */
+  NumComp& tolerance(const NumCompAccuracyLevel accuracy) {
+    m_tolerance = numcomp_tolerance_value<T>(accuracy);
+    return *this;
+  }
 
-  /** Modify the comparison tolerance */
+  /** Modify the comparison tolerance by providing an actual tolerance value. */
   NumComp& tolerance(const error_type tolerance) {
     m_tolerance = tolerance;
     return *this;
   }
 
-  /** Return the actual current tolerance level */
+  /** Return the actual current tolerance value */
   error_type tolerance() const { return m_tolerance; }
 
   NumComp& failure_action(const NumCompActionType failure_action) {
@@ -107,47 +108,6 @@ NumComp<T> numcomp_throw(const T& value) {
   } else {
     return NumComp<T>(value).failure_action(NumCompActionType::ThrowNormal);
   }
-}
-
-//
-// ----------------------------------------------------------------------------
-//
-
-template <typename T>
-NumComp<T>& NumComp<T>::tolerance(const NumCompAccuracyLevel accuracy) {
-  error_type factor = NumCompConstants::default_tolerance_factor;
-
-  switch (accuracy) {
-    case NumCompAccuracyLevel::MachinePrecision:
-      factor = 1.;
-      break;
-    case NumCompAccuracyLevel::TenMachinePrecision:
-      factor = 10.;
-      break;
-    case NumCompAccuracyLevel::Extreme:
-      factor /= 100.;
-      break;
-    case NumCompAccuracyLevel::Higher:
-      factor /= 10.;
-      break;
-    case NumCompAccuracyLevel::Default:
-      break;
-    case NumCompAccuracyLevel::Lower:
-      factor *= 10.;
-      break;
-    case NumCompAccuracyLevel::Sloppy:
-      factor *= 100.;
-      break;
-    case NumCompAccuracyLevel::SuperSloppy:
-      factor *= 1000.;
-      break;
-  }
-
-  // Make sure factor is at least one:
-  if (factor < 1.) factor = 1.;
-
-  m_tolerance = factor * std::numeric_limits<error_type>::epsilon();
-  return *this;
 }
 
 }  // namespace krims
