@@ -119,11 +119,11 @@ class Range {
   /** Return an iterator to the first element of the range */
   RangeIterator<T> begin() const {
     if (empty()) return end();
-    return RangeIterator<T>{m_first, m_last};
+    return RangeIterator<T>{m_first};
   }
 
   /** Return an iterator to the last element of the range */
-  RangeIterator<T> end() const { return RangeIterator<T>{}; }
+  RangeIterator<T> end() const { return RangeIterator<T>{m_last}; }
 
   /** \name Shifting operations */
   ///@{
@@ -150,7 +150,7 @@ Range<T> operator+(Range<T> r, T i) {
 
 template <typename T>
 Range<T> operator+(T i, Range<T> r) {
-  return r + i;
+  return std::move(r) + i;
 }
 
 template <typename T>
@@ -159,11 +159,14 @@ Range<T> operator-(Range<T> r, T i) {
 }
 
 template <typename T>
-Range<T>& operator-(T i, Range<T> r) {
-  assert_dbg(false, krims::ExcNotImplemented());
-  (void)i;
-  (void)r;
+Range<T> operator-(const Range<T>& r) {
+  static_assert(std::is_signed<T>::value,
+                "T needs to be a signed type for this to work.");
+  return {-r.upper_bound() + 1, -r.lower_bound() + 1};
 }
+
+template <typename T>
+Range<T> operator-(T i, Range<T> r);
 
 /** Iterator for ranges */
 template <typename T>
@@ -175,14 +178,16 @@ class RangeIterator : public std::iterator<std::input_iterator_tag, T> {
   typedef typename base_type::pointer pointer;
 
   /** Constructs an iterator-past-the-end */
-  RangeIterator() : m_current{0}, m_last{0} {}
+  RangeIterator() : m_current{invalid} {}
 
   /** Construct an iterator which currently points at
    * current and runs until last-1 (i.e. last is *not*
    * included any more.
    * */
-  RangeIterator(value_type current, value_type last) : m_current{current}, m_last{last} {
-    assert_dbg(!is_past_the_end(), krims::ExcIteratorPastEnd());
+  RangeIterator(value_type current) : m_current{current} {
+    assert_dbg(m_current != invalid,
+               krims::ExcInvalidState(
+                     "Cannot construct an iterator from the special value for invalid."));
   }
 
   /** Prefix increment to the next value */
@@ -192,24 +197,32 @@ class RangeIterator : public std::iterator<std::input_iterator_tag, T> {
   RangeIterator operator++(int);
 
   /** Return the value of the element we point to. */
-  value_type operator*() const;
+  value_type operator*() const {
+    assert_dbg(m_current != invalid,
+               krims::ExcInvalidState(
+                     "Cannot use a default-constructed iterator in that way."));
+    return m_current;
+  }
 
   /** Access the members of the element we point to. */
-  const pointer operator->() const;
+  const pointer operator->() const {
+    assert_dbg(m_current != invalid,
+               krims::ExcInvalidState(
+                     "Cannot use a default-constructed iterator in that way."));
+    return &m_current;
+  }
 
   /** Check if two iterators are equal */
-  bool operator==(const RangeIterator& other) const;
+  bool operator==(const RangeIterator& other) const {
+    return m_current == other.m_current;
+  }
 
   /** Check whether two iterators are unequal */
-  bool operator!=(const RangeIterator& other) const;
+  bool operator!=(const RangeIterator& other) const { return !(*this == other); }
 
  private:
-  /** Does this data structure represent an
-   *  iterator-past-the-end */
-  bool is_past_the_end() const { return m_current >= m_last; }
-
+  static constexpr T invalid = std::numeric_limits<T>::max();
   value_type m_current;
-  value_type m_last;
 };
 
 //
@@ -263,50 +276,49 @@ std::ostream& operator<<(std::ostream& o, const Range<T>& r) {
   return o;
 }
 
+template <typename T>
+Range<T> operator-(T i, const Range<T>& r) {
+  if (r.empty()) return r;
+
+  const T lower = i + 1 - r.upper_bound();
+  const T upper = i + 1 - r.lower_bound();
+
+  if (r.upper_bound() >= 0) {
+    assert_dbg(lower <= i + 1, krims::ExcUnderflow());
+  } else {
+    assert_dbg(lower >= i + 1, krims::ExcOverflow());
+  }
+
+  if (r.lower_bound() >= 0) {
+    assert_dbg(upper <= i + 1, krims::ExcUnderflow());
+  } else {
+    assert_dbg(upper >= i + 1, krims::ExcOverflow());
+  }
+
+  return {lower, upper};
+}
+
 //
 // ------------------------------------------------
 //
 
 template <typename T>
 RangeIterator<T>& RangeIterator<T>::operator++() {
-  assert_dbg(!is_past_the_end(), krims::ExcIteratorPastEnd());
+  assert_dbg(
+        m_current != invalid,
+        krims::ExcInvalidState("Cannot use a default-constructed iterator in that way."));
   m_current++;
   return (*this);
 }
 
 template <typename T>
 RangeIterator<T> RangeIterator<T>::operator++(int) {
-  assert_dbg(!is_past_the_end(), krims::ExcIteratorPastEnd());
+  assert_dbg(
+        m_current != invalid,
+        krims::ExcInvalidState("Cannot use a default-constructed iterator in that way."));
   RangeIterator<T> copy{*this};
   ++(*this);
   return copy;
-}
-
-template <typename T>
-typename RangeIterator<T>::value_type RangeIterator<T>::operator*() const {
-  assert_dbg(!is_past_the_end(), krims::ExcIteratorPastEnd());
-  return m_current;
-}
-
-template <typename T>
-const typename RangeIterator<T>::pointer RangeIterator<T>::operator->() const {
-  assert_dbg(!is_past_the_end(), krims::ExcIteratorPastEnd());
-  return &m_current;
-}
-
-template <typename T>
-bool RangeIterator<T>::operator==(const RangeIterator& other) const {
-  // The iterators are equal if they are either both past the end
-  // or their m_current and their m_last agrees
-
-  const bool both_past_the_end = is_past_the_end() && other.is_past_the_end();
-  const bool identical_values = (m_current == other.m_current && m_last == other.m_last);
-  return both_past_the_end || identical_values;
-}
-
-template <typename T>
-bool RangeIterator<T>::operator!=(const RangeIterator& other) const {
-  return !(*this == other);
 }
 
 }  // namespace krims
