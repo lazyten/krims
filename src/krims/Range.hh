@@ -21,7 +21,7 @@
 #include "macros/deprecated.hh"
 #include <cstddef>
 #include <iostream>
-#include <type_traits>
+#include <krims/TypeUtils/UsingLibrary.hh>
 #include <utility>
 
 namespace krims {
@@ -133,6 +133,18 @@ class Range {
   /** Shift the range by a certain value */
   Range& operator-=(value_type i) { return (*this) += -i; }
   ///@}
+
+  template <typename U>
+  bool operator==(const Range<U>& other) const {
+    typedef krims::common_type_t<U, T> type;
+    return static_cast<type>(lower_bound()) == static_cast<type>(other.lower_bound()) &&
+           static_cast<type>(upper_bound()) == static_cast<type>(other.upper_bound());
+  }
+
+  template <typename U>
+  bool operator!=(const Range<U>& other) const {
+    return !((*this) == other);
+  }
 
  private:
   value_type m_first;  // inclusive

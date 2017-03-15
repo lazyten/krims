@@ -161,6 +161,44 @@ TEST_CASE("Range tests", "[range]") {
                       RangeTests<int>::access_to_empty_range));
   }
 
+  SECTION("Range equality") {
+    auto r1 = krims::range(3, 5);
+    krims::Range<size_t> r2(3, 5);
+    auto r3 = krims::range(3, 4);
+    auto r4 = range(4, 5);
+    krims::Range<int> r5(4, 5);
+
+    CHECK(r1 == r1);
+    CHECK(r1 == r2);
+    CHECK(r1 != r3);
+    CHECK(r1 != r4);
+    CHECK(r1 != r5);
+
+    CHECK(r2 == r1);
+    CHECK(r2 == r2);
+    CHECK(r2 != r3);
+    CHECK(r2 != r4);
+    CHECK(r2 != r5);
+
+    CHECK(r3 != r1);
+    CHECK(r3 != r2);
+    CHECK(r3 == r3);
+    CHECK(r3 != r4);
+    CHECK(r3 != r5);
+
+    CHECK(r4 != r1);
+    CHECK(r4 != r2);
+    CHECK(r4 != r3);
+    CHECK(r4 == r4);
+    CHECK(r4 == r5);
+
+    CHECK(r5 != r1);
+    CHECK(r5 != r2);
+    CHECK(r5 != r3);
+    CHECK(r5 == r4);
+    CHECK(r5 == r5);
+  }
+
   SECTION("Iteraton") {
     REQUIRE(rc::check("Iteration (size_t)", RangeTests<size_t>::iteration));
     REQUIRE(rc::check("Iteration (int)", RangeTests<int>::iteration));
