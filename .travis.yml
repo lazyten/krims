@@ -106,5 +106,5 @@ script:
            -DKRIMS_ENABLE_EXPERIMENTAL=ON
            -GNinja ..
   - if [ "${PERFORM_COMPILE}" != "no" ]; then cmake --build  . -- -j ${CORES}; else true; fi
-  - if [ "${TEST_REGEX}" ]; then ctest --output-on-failure -R ${TEST_REGEX}; else true; fi
+  - if [ "${TEST_REGEX}" ]; then ctest -j ${CORES} --output-on-failure -R ${TEST_REGEX}; else true; fi
   - if [ "${TIDY_TARGET}" -a "$TRAVIS_PULL_REQUEST" != "false" ]; then cmake --build . --target ${TIDY_TARGET}; else true; fi
