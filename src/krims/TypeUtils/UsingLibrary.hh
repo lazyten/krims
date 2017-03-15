@@ -23,18 +23,51 @@
 namespace krims {
 #ifdef KRIMS_HAVE_CXX14
 
-using std::decay_t;
 using std::conditional_t;
+using std::common_type_t;
+using std::decay_t;
+
+using std::remove_reference_t;
+using std::add_rvalue_reference_t;
+using std::add_lvalue_reference_t;
+
+using std::remove_cv_t;
+using std::remove_const_t;
+using std::remove_volatile_t;
+using std::add_cv_t;
+using std::add_const_t;
+using std::add_volatile_t;
+
+using std::make_signed_t;
+using std::make_unsigned_t;
 
 #else
+#define USING_ALIAS(CLASS) \
+  template <typename T>    \
+  using CLASS##_t = typename std::CLASS<T>::type;
 
-/** Convenience using statement for std::decay */
-template <typename T>
-using decay_t = typename std::decay<T>::type;
-
-/** Convenience using statement for std::conditional */
 template <bool B, class T, class F>
 using conditional_t = typename std::conditional<B, T, F>::type;
 
+template <typename... Ts>
+using common_type_t = typename std::common_type_t<Ts...>::type;
+
+USING_ALIAS(decay);
+
+USING_ALIAS(remove_reference);
+USING_ALIAS(add_rvalue_reference);
+USING_ALIAS(add_lvalue_reference);
+
+USING_ALIAS(remove_cv);
+USING_ALIAS(remove_const);
+USING_ALIAS(remove_volatile);
+USING_ALIAS(add_cv);
+USING_ALIAS(add_const);
+USING_ALIAS(add_volatile);
+
+USING_ALIAS(make_signed);
+USING_ALIAS(make_unsigned);
+
+#undef USING_ALIAS
 #endif  // KRIMS_HAVE_CXX14
 }  // namespace krims
