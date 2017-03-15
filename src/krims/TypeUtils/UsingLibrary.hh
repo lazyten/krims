@@ -44,13 +44,13 @@ using std::make_unsigned_t;
 #else
 #define USING_ALIAS(CLASS) \
   template <typename T>    \
-  using CLASS##_t = typename std::CLASS<T>::type;
+  using CLASS##_t = typename std::CLASS<T>::type
 
 template <bool B, class T, class F>
 using conditional_t = typename std::conditional<B, T, F>::type;
 
 template <typename... Ts>
-using common_type_t = typename std::common_type_t<Ts...>::type;
+using common_type_t = typename std::common_type<Ts...>::type;
 
 USING_ALIAS(decay);
 
