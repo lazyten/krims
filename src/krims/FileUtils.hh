@@ -18,5 +18,6 @@
 //
 
 #pragma once
+#include "FileUtils/FindDataFile.hh"
 #include "FileUtils/read_binary.hh"
 #include "FileUtils/write_binary.hh"
