@@ -36,6 +36,7 @@ set(KRIMS_TESTS_SOURCES
 	argsortTests.cc
 	joinTests.cc
 	NumCompTests.cc
+	BinaryReadWriteTests.cc
 	main.cc
 )
 
