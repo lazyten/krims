@@ -28,6 +28,7 @@ set(KRIMS_SOURCES
 	ExceptionSystem/Backtrace.cc
 	ExceptionSystem/ExceptionBase.cc
 	ExceptionSystem/ExceptionSystem.cc
+	FileUtils/FindDataFile.cc
 	GenMap.cc
 	NumComp/NumCompConstants.cc
 	NumComp/NumCompException.cc

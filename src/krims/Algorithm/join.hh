@@ -55,4 +55,9 @@ String join(Iterator begin, const Iterator end, const String& sep) {
   return res.str();
 }
 
+template <typename charT, typename Iterator>
+std::basic_string<charT> join(Iterator begin, const Iterator end, const charT* sep) {
+  return join(begin, end, std::basic_string<charT>(sep));
+}
+
 }  // namespace krims
