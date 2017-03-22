@@ -26,13 +26,13 @@
 namespace krims {
 using namespace rc;
 
-static constexpr const char* FILENAME = "temporary_data_please_remove_me";
+static constexpr const char* temp_file = "temporary_data_please_remove_me";
 
 template <typename T>
 void test() {
   const auto size = *gen::inRange<size_t>(0, 50).as("Vector size");
   const auto vec = *gen::container<std::vector<T>>(size, rc::gen::arbitrary<T>());
-  const std::string filename(FILENAME);
+  const std::string filename(temp_file);
 
   write_binary(vec, filename);
 
@@ -68,7 +68,7 @@ TEST_CASE("binary_read, binary_write tests", "[binary_read_write]") {
   */
 
   // Remove the file again:
-  std::remove(FILENAME);
+  std::remove(temp_file);
 }  // binary_read, binary_write
 
 }  // namespace krims

@@ -47,13 +47,13 @@ std::string FindDataFile::operator()(const std::string& file) const {
 
   // File not found => tell user where we looked:
   const std::string pathstring =
-        std::string("\"")
-              .append(join(searchdirs.begin(), searchdirs.end(), "\", \""))
-              .append("\"");
+        std::string(R"(")")
+              .append(join(searchdirs.begin(), searchdirs.end(), R"(", ")"))
+              .append(R"(")");
   const std::string envstring =
-        std::string("\"")
-              .append(join(env_vars.begin(), env_vars.end(), "\", \""))
-              .append("\"");
+        std::string(R"(")")
+              .append(join(env_vars.begin(), env_vars.end(), R"(", ")"))
+              .append(R"(")");
 
   assert_throw(false, ExcDatafileNotFound(file, pathstring, envstring));
   return "<file not found>";
@@ -64,7 +64,7 @@ std::vector<std::string> FindDataFile::search_directories() const {
 
   for (FindStep s : find_steps) {
     // Find dirs for this step:
-    std::vector<std::string> s_dirs = [&s, this]() {
+    const auto s_dirs = [&s, this]() -> const std::vector<std::string> {
       switch (s) {
         case FindStep::Environment:
           return searchdirs_environ();
@@ -73,6 +73,7 @@ std::vector<std::string> FindDataFile::search_directories() const {
         case FindStep::WorkingDirectory:
           return searchdirs_cwd();
       }
+      return {};
     }();
 
     // Insert into ret:
