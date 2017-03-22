@@ -21,27 +21,31 @@
 #include <cstdio>
 #include <krims/FileUtils/read_binary.hh>
 #include <krims/FileUtils/write_binary.hh>
+#include <random>
 #include <rapidcheck.h>
 
 namespace krims {
 using namespace rc;
 
-static constexpr const char* temp_file = "temporary_data_please_remove_me";
+// The random number generator to generate random (hence non-existent) filenames.
+std::default_random_engine engine;
+std::uniform_int_distribution<size_t> dist(0, 100000);
 
 template <typename T>
 void test() {
   const auto size = *gen::inRange<size_t>(0, 50).as("Vector size");
-  const auto vec = *gen::container<std::vector<T>>(size, rc::gen::arbitrary<T>());
-  const std::string filename(temp_file);
+  const auto vec = *gen::container<std::vector<T>>(size, rc::gen::arbitrary<T>())
+                          .as("Data to read/write");
+  const std::string filename = std::string("temp.").append(std::to_string(dist(engine)));
 
   write_binary(vec, filename);
 
   // Read and check:
   std::vector<T> other;
   read_binary(filename, other);
-  REQUIRE(other.size() == size);
+  RC_ASSERT(other.size() == size);
   for (size_t i = 0; i < size; ++i) {
-    REQUIRE(other[i] == vec[i]);
+    RC_ASSERT(other[i] == vec[i]);
   }
 
   // Read and see it fail:
@@ -49,10 +53,13 @@ void test() {
 
   // Read and succeed:
   read_binary(filename, other, size);
-  REQUIRE(other.size() == size);
+  RC_ASSERT(other.size() == size);
   for (size_t i = 0; i < size; ++i) {
-    REQUIRE(other[i] == vec[i]);
+    RC_ASSERT(other[i] == vec[i]);
   }
+
+  // Remove the file again:
+  std::remove(filename.c_str());
 }
 
 TEST_CASE("binary_read, binary_write tests", "[binary_read_write]") {
@@ -66,9 +73,6 @@ TEST_CASE("binary_read, binary_write tests", "[binary_read_write]") {
     CHECK(rc::check("Test binary read/write strings", test<std::string>));
   }
   */
-
-  // Remove the file again:
-  std::remove(temp_file);
 }  // binary_read, binary_write
 
 }  // namespace krims
