@@ -65,11 +65,11 @@ function(WRITE_VERSION_HEADER _filename)
 	set(CONTENT_TO_WRITE
 "#pragma once
 namespace ${WVH_NAME} {
-	namespace detail {
-	static int constexpr __version_var_major{${WVH_MAJOR}};
-	static int constexpr __version_var_minor{${WVH_MINOR}};
-	static int constexpr __version_var_patch{${WVH_PATCH}};
-	} // namespace detail
+    namespace detail {
+    static int constexpr __version_var_major{${WVH_MAJOR}};
+    static int constexpr __version_var_minor{${WVH_MINOR}};
+    static int constexpr __version_var_patch{${WVH_PATCH}};
+    } // namespace detail
 } // namespace ${WVH_NAME}
 ")
 
