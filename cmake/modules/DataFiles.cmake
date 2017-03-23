@@ -23,24 +23,30 @@
 # static data required to run a program.
 #
 # including this module will set the following variables:
-#   PROJECT_DATA_DOWNLOAD_DIR     The directory to which static data should
-#                                 be downloaded
-#   DATA_INSTALL_DIR              The directory to which static data should
-#                                 be installed
+#   ${PROJECT_NAME}_DATA_DOWNLOAD_DIR
+#       The directory to which static data will be downloaded
+#   ${PROJECT_NAME}_DATA_INSTALL_DIR
+#       The directory to which static data will be installed
 
 
 #
 # Options
 #
 # The directory to which data is downloaded during the build process.
-set(DATA_DOWNLOAD_DIR "${CMAKE_BINARY_DIR}/data" CACHE INTERNAL
+set(DATA_DOWNLOAD_DIR "${CMAKE_BINARY_DIR}/data" CACHE PATH
 	"Directory to which static data files are downloaded during the build process.")
 
 #
 # ---------------------------------------------------------------------
 #
 
-set(DATA_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/share/${PROJECT_NAME}")
-set(PROJECT_DATA_DOWNLOAD_DIR "${DATA_DOWNLOAD_DIR}/${PROJECT_NAME}")
+set(${PROJECT_NAME}_DATA_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/share/${PROJECT_NAME}"
+	CACHE INTERNAL "The directory where files for the project ${PROJECT_NAME} are installed")
+set(${PROJECT_NAME}_DATA_DOWNLOAD_DIR 
+	CACHE INTERNAL "The directory where files for the project ${PROJECT_NAME}\
+are downloaded to during the build process")
 
 # TODO Helpful functions for downloading and installing data files.
+# TODO Use the ExternalData module to download the static data
+#      Maybe its a little over the top ...
+
