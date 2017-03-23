@@ -46,10 +46,9 @@ std::string FindDataFile::operator()(const std::string& file) const {
   }
 
   // File not found => tell user where we looked:
+  const std::string ind = "    ";
   const std::string pathstring =
-        std::string(R"(")")
-              .append(join(searchdirs.begin(), searchdirs.end(), R"(", ")"))
-              .append(R"(")");
+        ind + join(searchdirs.begin(), searchdirs.end(), "\n" + ind) + std::string("\n");
   const std::string envstring =
         std::string(R"(")")
               .append(join(env_vars.begin(), env_vars.end(), R"(", ")"))
@@ -92,8 +91,8 @@ FindDataFile::FindDataFile(const std::string& identifier) : FindDataFile() {
   }(identifier);
 
   env_vars.insert(std::begin(env_vars), id_upper + "_DATA_DIR");
-  env_suffixes.insert(std::begin(env_vars), identifier);
-  cwd_suffixes.insert(std::begin(env_vars), "data/" + identifier);
+  env_suffixes.insert(std::begin(env_suffixes), identifier);
+  cwd_suffixes.insert(std::begin(cwd_suffixes), "data/" + identifier);
 }
 
 std::vector<std::string> FindDataFile::searchdirs_environ() const {

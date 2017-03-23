@@ -33,6 +33,15 @@ DefException2(ExcInvalidBinaryFile, std::string, std::string,
  * converted to the requested type using a reinterpret_cast.
  *
  * The out buffer is resized automatically.
+ *
+ * \note Since the data is written into the std::vector<T> using
+ * a reinterpret_cast from the raw bytes, you cannot perform casting of
+ * any kind. A call like
+ * ```
+ * std::vector<double> data;
+ * read_binary<long double>("bla", data)
+ * ```
+ * will result in undefined behaviour!
  */
 template <typename T>
 void read_binary(const std::string& file, std::vector<T>& out) {
@@ -65,8 +74,8 @@ void read_binary(const std::string& file, std::vector<T>& out) {
 /** Read a binary file into a vector of specified type and check that
  *  a given number of elements has been read.
  *
- *  The vector does not need to have the correct size. It will be resized
- *  automatically.
+ *  Effectively calls the function with two arguments defined above.
+ *  See this documentation for more details.
  */
 template <typename T>
 void read_binary(const std::string& file, std::vector<T>& out, size_t expected_size) {
