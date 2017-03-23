@@ -25,9 +25,11 @@ namespace krims {
 DefException3(
       ExcDatafileNotFound, std::string, std::string, std::string,
       << "Could not find the static data file \"" << arg1
-      << "\" in the static data directories. Tried directories " << arg2 << ". "
+      << "\" in the static data directories. Tried directories:\n"
+      << arg2 << "\n"
       << "You can add further directories to this list using the environment variables "
-      << arg3 << ". See the documentation for more details.");
+      << arg3 << ".\n"
+      << "See the documentation for more details.");
 
 /** Class to change the order in which the individual find steps are executed */
 enum class FindStep {

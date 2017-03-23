@@ -26,7 +26,6 @@ In order to build without tests run
 mkdir build && cd build
 cmake -DKRIMS_ENABLE_TESTS=OFF ..
 cmake --build .
-ctest
 ```
 
 ## Short description
