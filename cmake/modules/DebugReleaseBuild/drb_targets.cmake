@@ -391,3 +391,45 @@ macro(drb_target_compile_options WHICH TARGET)
 		unset(VALUES)
 	endif()
 endmacro(drb_target_compile_options)
+
+#
+# ------------------------------
+#
+
+macro(drb_add_dependencies WHICH TARGET)
+	# Call drb_add_dependencies for the proper target names
+	# depinding on WHICH.
+	#
+	# if WHICH == ALL      calls it for all configured configurations
+	# if WHICH == DEBUG    calls it for the DEBUG configurations
+	#                      (if this configuration is enabled)
+	# if WHICH == RELEASE  calls it for the RELEASE configurations
+	#                      (if this configuration is enabled)
+	#
+	# TARGET should be exactly the target base name given to
+	# drb_add_library and drb_add_executable
+	#
+
+	# check that drb has been initialised
+	if("${${TARGET}_TARGETS}" STREQUAL "")
+		message(FATAL_ERROR "TARGET(${TARGET}) has not been setup with DebugReleaseBuild.")
+	endif()
+
+	if (NOT "${ARGN}" STREQUAL "")
+		# Extract the build types we want to change:
+		# This effectively filters DRB_BUILD_TYPES according
+		# to WHICH
+		drb_get_matching_build_types(${WHICH} MATCHLIST)
+
+		# Make ARGN string a list, which we then can properly pass to
+		# add_dependencies
+		string(REPLACE " " ";" VALUES "${ARGN}")
+
+		foreach(build ${MATCHLIST})
+			add_dependencies(${${TARGET}_${build}_TARGET} ${VALUES})
+		endforeach()
+
+		unset(MATCHLIST)
+		unset(VALUES)
+	endif()
+endmacro(drb_add_dependencies)
