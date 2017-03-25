@@ -93,11 +93,8 @@ endif()
 ##########################################################################
 # Setup extra targets for clang tools
 include(SetupClangTargets)
-add_available_clang_targets_for(krims
-	# Directories to work on
-	# (i.e. where sources and headers of this project are located)
-	DIRECTORIES ${KRIMS_SUBDIRS}
-)
+add_available_clang_targets_for(${PROJECT_NAME}
+	DIRECTORIES ${KRIMS_SUBDIRS})
 
 # Install package:
 include(cmake/install_modules_and_packages.cmake)
