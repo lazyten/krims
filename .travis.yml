@@ -1,6 +1,6 @@
 ## ---------------------------------------------------------------------
 ##
-## Copyright (C) 2016 by the krims authors
+## Copyright (C) 2016-17 by the krims authors
 ##
 ## This file is part of krims.
 ##
@@ -39,6 +39,11 @@ env:
     #
     # Dependencies we need to install
     - DEPEND_PKG=""
+
+# Required for installing extra python packages
+# like we neeed for clang-tidy
+virtualenv:
+  system_site_packages: true
 
 matrix:
   include:
@@ -94,7 +99,7 @@ matrix:
       - sudo apt-get install -y ninja-build clang-3.9 libstdc++-4.9-dev clang-tidy-3.9
       # Install yaml for the SetupClangTargets.cmake module
       # (which needs it for a generated python scripts)
-      - pip3 install --user yaml
+      - pip3 install --user --upgrade yaml
       compiler: clang
       env: CC_COMPILER="clang-3.9" CXX_COMPILER="clang++-3.9" PERFORM_COMPILE=no TIDY_TARGET="clang-tidy-krims"
 
