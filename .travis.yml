@@ -40,11 +40,6 @@ env:
     # Dependencies we need to install
     - DEPEND_PKG=""
 
-# Required for installing extra python packages
-# like we neeed for clang-tidy
-virtualenv:
-  system_site_packages: true
-
 matrix:
   include:
     # Clang 3.5 with disabled c++14 support
@@ -98,10 +93,10 @@ matrix:
       - sudo apt-get update -qq
       - sudo apt-get install -y ninja-build clang-3.9 libstdc++-4.9-dev clang-tidy-3.9
       # Install yaml for the SetupClangTargets.cmake module
-      # (which needs it for a generated python scripts)
-      - pip3 install --user --upgrade yaml
+      #     (which needs it for a generated python scripts)
+      - pip3 install --user pyyaml
       compiler: clang
-      env: CC_COMPILER="clang-3.9" CXX_COMPILER="clang++-3.9" PERFORM_COMPILE=no TIDY_TARGET="clang-tidy-krims"
+      env: CC_COMPILER="clang-3.9" CXX_COMPILER="clang++-3.9" BUILD_TARGET="clang-tidy-krims"
 
 script:
   - cmake --version
@@ -113,12 +108,7 @@ script:
            -DRC_ENABLE_TESTS=OFF
            -DKRIMS_ENABLE_EXPERIMENTAL=ON
            -GNinja ..
-  - if [ "${PERFORM_COMPILE}" != "no" ]; then
-           cmake --build  . -- -j ${CORES};
-    else true; fi
+  - cmake --build  . --target ${BUILD_TARGET:-all} -- -j ${CORES}
   - if [ "${TEST_REGEX}" ]; then
            ctest -j ${CORES} --output-on-failure -R ${TEST_REGEX};
-    else true; fi
-  - if [ "${TIDY_TARGET}" -a "$TRAVIS_PULL_REQUEST" != "false" ]; then
-           cmake --build . --target ${TIDY_TARGET} -- -j ${CORES};
     else true; fi
