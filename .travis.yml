@@ -36,65 +36,48 @@ env:
     #
     # Use a known-to-work rapidcheck seed
     - RC_PARAMS="seed=16920708173099178154 verbose_progress=1 noshrink=1"
-    #
-    # Dependencies we need to install
-    - DEPEND_PKG=""
+
+addons:
+  apt:
+    sources:
+      # Repo for libstdc++-4.9-dev (libstdc++ of gcc 4.8 is buggy)
+      - ubuntu-toolchain-r-test
+      # Repo for clang-3.9
+      - llvm-toolchain-trusty-3.9
+    packages:
+      - ninja-build
 
 matrix:
   include:
     # Clang 3.5 with disabled c++14 support
     - install:
-      # Repo for libstdc++-4.9-dev (libstdc++ of gcc 4.8 is buggy)
-      - sudo add-apt-repository -y "ppa:ubuntu-toolchain-r/test"
-      # Update and install
-      - sudo apt-get update -qq
-      - sudo apt-get install -y ninja-build libstdc++-4.9-dev $DEPEND_PKG
+      - travis_retry sudo apt-get install -y libstdc++-4.9-dev
       compiler: clang
       env: CC_COMPILER="clang" CXX_COMPILER="clang++" TEST_REGEX="krims_tests_"
         EXTRA_OPTS="-DDRB_MAXIMUM_CXX_STANDARD=11"
     #
     # Clang 3.9 (has c++14)
     - install:
-      # Repo for libstdc++-4.9-dev (libstdc++ of gcc 4.8 is buggy)
-      - sudo add-apt-repository -y "ppa:ubuntu-toolchain-r/test"
-      # Repo for clang-3.9
-      - sudo wget -O - http://llvm.org/apt/llvm-snapshot.gpg.key | sudo apt-key add -
-      - sudo add-apt-repository -y "deb http://llvm.org/apt/trusty/ llvm-toolchain-trusty-3.9 main"
-      # Update and install
-      - sudo apt-get update -qq
-      - sudo apt-get install -y ninja-build clang-3.9 libstdc++-4.9-dev $DEPEND_PKG
+      - travis_retry sudo apt-get install -y clang-3.9 libstdc++-4.9-dev
       compiler: clang
       env: CC_COMPILER="clang-3.9" CXX_COMPILER="clang++-3.9" TEST_REGEX="krims_tests_"
     #
     # gcc-4.8 (c++11 and without tests, since rapidcheck does not compile like this)
-    - install:
-      - sudo apt-get install -y ninja-build $DEPEND_PKG
-      compiler: gcc
+    - compiler: gcc
       env: CC_COMPILER="gcc" CXX_COMPILER="g++" EXTRA_OPTS="-DKRIMS_ENABLE_TESTS=OFF"
     #
     # gcc-5 (with tests and c++14)
     - install:
-      # Repo for g++-5
-      - sudo add-apt-repository -y "ppa:ubuntu-toolchain-r/test"
-      # Update and install
-      - sudo apt-get update -qq
-      - sudo apt-get install -y ninja-build g++-5 $DEPEND_PKG
+      - travis_retry sudo apt-get install -y g++-5
       compiler: gcc
       env: CC_COMPILER="gcc-5" CXX_COMPILER="g++-5" TEST_REGEX="krims_tests_"
     #
     # Clang-tidy 3.9
     - install:
-      # Repo for libstdc++-4.9-dev (libstdc++ of gcc 4.8 is buggy)
-      - sudo add-apt-repository -y "ppa:ubuntu-toolchain-r/test"
-      # Repo for clang-3.9 and clang-tidy-3.9
-      - sudo wget -O - http://llvm.org/apt/llvm-snapshot.gpg.key | sudo apt-key add -
-      - sudo add-apt-repository -y "deb http://llvm.org/apt/trusty/ llvm-toolchain-trusty-3.9 main"
-      # Update and install
-      - sudo apt-get update -qq
-      - sudo apt-get install -y ninja-build clang-3.9 libstdc++-4.9-dev clang-tidy-3.9
+      - travis_retry sudo apt-get install -y clang-3.9 libstdc++-4.9-dev clang-tidy-3.9
       # Install yaml for the SetupClangTargets.cmake module
       #     (which needs it for a generated python scripts)
-      - pip3 install --user pyyaml
+      - travis_retry pip3 install --user pyyaml
       compiler: clang
       env: CC_COMPILER="clang-3.9" CXX_COMPILER="clang++-3.9" BUILD_TARGET="clang-tidy-krims"
 
