@@ -50,7 +50,7 @@ addons:
     packages:
       - ninja-build
 
-matrie:
+matrix:
   include:
     # Clang 3.5 with disabled c++14 support
     - install:
