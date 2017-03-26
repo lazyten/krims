@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 by the krims authors
+// Copyright (C) 2016-17 by the krims authors
 //
 // This file is part of krims.
 //
@@ -234,7 +234,7 @@ void CircularBuffer<T, Container>::push_back(value_type val) {
     // Maximal size reached:
     // Change value and increment first pointer (circularly)
     // Here we use the fact that the past-the-end iterator in this circular
-    // buffer is equvalant to m_first.
+    // buffer is equivalent to m_first.
     *m_first = std::move(val);
     ++m_first;
     return;
