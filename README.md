@@ -1,5 +1,7 @@
 # Krims
-[![Build Status](https://travis-ci.org/linalgwrap/krims.svg?branch=master)](https://travis-ci.org/linalgwrap/krims) [![Licence](https://img.shields.io/badge/license-LGPL_v3.0-blue.svg)](LICENSE)
+[![Build Status](https://travis-ci.org/linalgwrap/krims.svg?branch=master)](https://travis-ci.org/linalgwrap/krims)
+[![Coverage Status](https://coveralls.io/repos/github/linalgwrap/krims/badge.svg?branch=master)](https://coveralls.io/github/linalgwrap/krims)  
+[![Licence](https://img.shields.io/badge/license-LGPL_v3.0-blue.svg)](LICENSE)
 
 Library of common *Krimskrams* (German for "odds and ends").
 It contains some very basic stuff which provides a useful foundation for many other projects.

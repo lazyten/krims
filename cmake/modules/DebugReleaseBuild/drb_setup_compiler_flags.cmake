@@ -202,5 +202,6 @@ Set to \"highest\" to let DRB use the highest available C++ standard (default)."
 	endif()
 
 	# Setup compiler flags for special compile options (if desired and available)
+	include("${DRB_DIR}/compiler_flags/coverage.cmake")
 	include("${DRB_DIR}/compiler_flags/sanitise.cmake")
 endmacro(DRB_SETUP_COMPILER_FLAGS)
