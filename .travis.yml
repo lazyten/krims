@@ -84,6 +84,7 @@ matrix:
       env: CC_COMP="clang-3.9" CXX_COMP="clang++-3.9" BUILD_TARGET="clang-tidy-krims"
 
 script:
+  - echo ${TRAVIS_BUILD_DIR}
   - cmake --version
   - ninja --version
   - mkdir ${TRAVIS_BUILD_DIR}/build && cd ${TRAVIS_BUILD_DIR}/build
@@ -101,7 +102,9 @@ script:
 
 after_success:
   - cd ${TRAVIS_BUILD_DIR}
+  - find -iname "*.gc*"
   - if [ "${GCOV}" ]; then coveralls --gcov "$GCOV"  --gcov-options '\-lp'
-           --exclude examples --exclude tests
+           --verbose
+           --include src
            --root ${PWD} --build-root ${PWD}/build;
     fi
