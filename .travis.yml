@@ -36,6 +36,9 @@ env:
     #
     # Use a known-to-work rapidcheck seed
     - RC_PARAMS="seed=16920708173099178154 verbose_progress=1 noshrink=1"
+    #
+    # The regex for tests to run (disable running tests by TESTS=0)
+    - TESTS_REGEX="krims_tests_"
 
 before_install:
     - pip install --user cpp-coveralls
@@ -81,7 +84,7 @@ matrix:
       #     (which needs it for a generated python scripts)
       - travis_retry pip3 install --user pyyaml
       compiler: clang
-      env: CC_COMP="clang-3.9" CXX_COMP="clang++-3.9" BUILD_TARGET="clang-tidy-krims" TESTS=0
+      env: CC_COMP="clang-3.9" CXX_COMP="clang++-3.9" TESTS=0 BUILD_TARGET="clang-tidy-krims"
 
 script:
   - cmake --version
@@ -96,14 +99,13 @@ script:
            -GNinja ..
   - cmake --build  . --target ${BUILD_TARGET:-all} -- -j ${CORES}
   - if [ "${TESTS}" != "0" ]; then
-        ctest -j ${CORES} --output-on-failure -R "$TESTS";
+        ctest -j ${CORES} --output-on-failure -R "${TESTS_REGEX}";
     else true; fi
 
 after_success:
   - cd ${TRAVIS_BUILD_DIR}
   - find -iname "*.gc*"
   - if [ "${GCOV}" ]; then coveralls --gcov "$GCOV"  --gcov-options '\-lp'
-           --verbose
-           --include src
            --root ${PWD} --build-root ${PWD}/build;
+           --include src
     fi
