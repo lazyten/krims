@@ -84,7 +84,6 @@ matrix:
       env: CC_COMP="clang-3.9" CXX_COMP="clang++-3.9" BUILD_TARGET="clang-tidy-krims"
 
 script:
-  - echo ${TRAVIS_BUILD_DIR}
   - cmake --version
   - ninja --version
   - mkdir ${TRAVIS_BUILD_DIR}/build && cd ${TRAVIS_BUILD_DIR}/build
@@ -97,7 +96,7 @@ script:
            -GNinja ..
   - cmake --build  . --target ${BUILD_TARGET:-all} -- -j ${CORES}
   - if [ "${TESTS}" ]; then
-        ctest -j ${CORES} --output-on-failure -R "${TESTS:.*}";
+        ctest -j ${CORES} --output-on-failure -R "${TESTS:-.*}";
     else true; fi
 
 after_success:
