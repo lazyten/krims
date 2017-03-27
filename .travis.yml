@@ -99,13 +99,13 @@ script:
            -GNinja ..
   - cmake --build  . --target ${BUILD_TARGET:-all} -- -j ${CORES}
   - if [ "${TESTS}" != "0" ]; then
-        ctest -j ${CORES} --output-on-failure -R "${TESTS_REGEX}";
-    else true; fi
+        ctest -j ${CORES} --output-on-failure -R "${TESTS_REGEX}"
+    ;else true; fi
 
 after_success:
   - cd ${TRAVIS_BUILD_DIR}
   - find -iname "*.gc*"
-  - if [ "${GCOV}" ]; then coveralls --gcov "$GCOV"  --gcov-options '\-lp'
-           --root ${PWD} --build-root ${PWD}/build;
+  - if [ "${GCOV}" ]; then coveralls --gcov "$GCOV" --gcov-options '\-lp'
+           --root ${PWD} --build-root ${PWD}/build
            --include src
-    fi
+    ;fi
