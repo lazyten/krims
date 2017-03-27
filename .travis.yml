@@ -38,10 +38,10 @@ env:
     - RC_PARAMS="seed=16920708173099178154 verbose_progress=1 noshrink=1"
     #
     # The regex for tests to run (disable running tests by TESTS=0)
-    - TESTS=1 TESTS_REGEX="krims_tests_"
+    - TESTS=1  TESTS_REGEX="krims_tests_"
 
 before_install:
-    - pip install --user cpp-coveralls
+    - travis_retry pip install --user cpp-coveralls
 
 addons:
   apt:
