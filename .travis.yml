@@ -72,7 +72,7 @@ matrix:
     - install:
       - travis_retry sudo apt-get install -y g++-5
       compiler: gcc
-      env: CC_COMP="gcc-5" CXX_COMP="g++-5" GCOV="llvm-cov-3.9 gcov"
+      env: CC_COMP="gcc-5" CXX_COMP="g++-5" GCOV="gcov-5"
     #
     # Clang-tidy 3.9
     - install:
