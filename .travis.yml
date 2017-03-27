@@ -60,7 +60,7 @@ matrix:
       env:
         - CC_COMP="clang" CXX_COMP="clang++"
         - EXTRA_OPTS="-DDRB_MAXIMUM_CXX_STANDARD=11"
-        - GCOV="llvm-cov-3.5 gcov"
+        - GCOV="llvm-cov gcov"
     #
     # Clang 3.9 (has c++14)
     - install:
@@ -92,7 +92,8 @@ matrix:
       compiler: clang
       env:
         - CC_COMP="clang-3.9" CXX_COMP="clang++-3.9"
-        - TESTS=0 BUILD_TARGET="clang-tidy-krims"
+        - BUILD_TARGET="clang-tidy-krims"
+        - TESTS=0
 
 script:
   - cmake --version
