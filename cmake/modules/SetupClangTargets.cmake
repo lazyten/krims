@@ -401,7 +401,7 @@ so cannot setup clang tidy targets.")
 
 	set(FIXDIR ${CMAKE_BINARY_DIR}/fixes)
 	set(FIXFILE ${FIXDIR}/clang-tidy-${TARGET_NAME}.yaml)
-	set(APPLYFILE ${FIXDIR}/last-fixes-apply)
+	set(APPLYFILE ${FIXDIR}/${TARGET_NAME}-last-fix)
 
 	# Generate the custom commands, which parse the source tree
 	# and give rise to the list of fixes for each file.
