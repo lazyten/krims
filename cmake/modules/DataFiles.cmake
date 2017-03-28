@@ -22,7 +22,7 @@
 # Module to manage the downloading and finding of files contaning
 # static data required to run a program.
 #
-# including this module will set the following variables:
+# including this module will set the following variables inside internal cache
 #   ${PROJECT_NAME}_DATA_DOWNLOAD_DIR
 #       The directory to which static data will be downloaded
 #   ${PROJECT_NAME}_DATA_INSTALL_DIR
