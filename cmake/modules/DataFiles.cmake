@@ -44,7 +44,7 @@ set(${PROJECT_NAME}_DATA_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/share/${PROJECT_NA
 	CACHE INTERNAL "The directory where files for the project ${PROJECT_NAME} are installed")
 set(${PROJECT_NAME}_DATA_DOWNLOAD_DIR "${DATA_DOWNLOAD_DIR}/${PROJECT_NAME}"
 	CACHE INTERNAL "The directory where files for the project ${PROJECT_NAME}\
-	are downloaded to during the build process")
+are downloaded to during the build process")
 
 function(data_download_target TARGET URL HASHFULL)
 	# Add a target which downloads a static data tar.gz file
