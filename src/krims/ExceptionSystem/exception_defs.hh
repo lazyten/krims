@@ -19,7 +19,7 @@
 
 #pragma once
 #include "ExceptionBase.hh"
-#include <iostream>
+#include <sstream>
 #include <string>
 
 namespace krims {
@@ -71,12 +71,10 @@ void throw_by_value(Exception e) {
  * on exception construction, the default string is printed when the exception
  * is raised.
  */
-#define DefExceptionMsg(Exception, defaulttext)                  \
-  class Exception : public ::krims::ExceptionBase {              \
-   public:                                                       \
-    virtual void print_extra(std::ostream& out) const noexcept { \
-      out << defaulttext << std::endl;                           \
-    }                                                            \
+#define DefExceptionMsg(Exception, text)                    \
+  class Exception : public ::krims::ExceptionBase {         \
+   public:                                                  \
+    Exception() { ::krims::ExceptionBase::m_extra = text; } \
   }
 
 /**
@@ -84,35 +82,31 @@ void throw_by_value(Exception e) {
  *
  * @ingroup Exceptions
  */
-#define DefException1(Exception1, type1, outsequence)            \
-  class Exception1 : public ::krims::ExceptionBase {             \
-   public:                                                       \
-    Exception1(const type1 a1) : arg1(a1) {}                     \
-    virtual ~Exception1() noexcept {}                            \
-    virtual void print_extra(std::ostream& out) const noexcept { \
-      out outsequence << std::endl;                              \
-    }                                                            \
-                                                                 \
-   private:                                                      \
-    const type1 arg1;                                            \
+#define DefException1(Exception1, type1, outsequence) \
+  class Exception1 : public ::krims::ExceptionBase {  \
+   public:                                            \
+    Exception1(const type1 a1) : arg1(a1) {           \
+      std::ostringstream ss;                          \
+      ss outsequence;                                 \
+      ::krims::ExceptionBase::m_extra = ss.str();     \
+    }                                                 \
+    const type1 arg1;                                 \
   }
 
 /**
  * Define an exception class derived from ExceptionBase with two additional
  * parameters.
  */
-#define DefException2(Exception2, type1, type2, outsequence)           \
-  class Exception2 : public ::krims::ExceptionBase {                   \
-   public:                                                             \
-    Exception2(const type1 a1, const type2 a2) : arg1(a1), arg2(a2) {} \
-    virtual ~Exception2() noexcept {}                                  \
-    virtual void print_extra(std::ostream& out) const noexcept {       \
-      out outsequence << std::endl;                                    \
-    }                                                                  \
-                                                                       \
-   private:                                                            \
-    const type1 arg1;                                                  \
-    const type2 arg2;                                                  \
+#define DefException2(Exception2, type1, type2, outsequence)          \
+  class Exception2 : public ::krims::ExceptionBase {                  \
+   public:                                                            \
+    Exception2(const type1 a1, const type2 a2) : arg1(a1), arg2(a2) { \
+      std::ostringstream ss;                                          \
+      ss outsequence;                                                 \
+      ::krims::ExceptionBase::m_extra = ss.str();                     \
+    }                                                                 \
+    const type1 arg1;                                                 \
+    const type2 arg2;                                                 \
   }
 
 /**
@@ -125,13 +119,11 @@ void throw_by_value(Exception e) {
   class Exception3 : public ::krims::ExceptionBase {                \
    public:                                                          \
     Exception3(const type1 a1, const type2 a2, const type3 a3)      \
-          : arg1(a1), arg2(a2), arg3(a3) {}                         \
-    virtual ~Exception3() noexcept {}                               \
-    virtual void print_extra(std::ostream& out) const noexcept {    \
-      out outsequence << std::endl;                                 \
+          : arg1(a1), arg2(a2), arg3(a3) {                          \
+      std::ostringstream ss;                                        \
+      ss outsequence;                                               \
+      ::krims::ExceptionBase::m_extra = ss.str();                   \
     }                                                               \
-                                                                    \
-   private:                                                         \
     const type1 arg1;                                               \
     const type2 arg2;                                               \
     const type3 arg3;                                               \
@@ -147,13 +139,11 @@ void throw_by_value(Exception e) {
   class Exception4 : public ::krims::ExceptionBase {                           \
    public:                                                                     \
     Exception4(const type1 a1, const type2 a2, const type3 a3, const type4 a4) \
-          : arg1(a1), arg2(a2), arg3(a3), arg4(a4) {}                          \
-    virtual ~Exception4() noexcept {}                                          \
-    virtual void print_extra(std::ostream& out) const noexcept {               \
-      out outsequence << std::endl;                                            \
+          : arg1(a1), arg2(a2), arg3(a3), arg4(a4) {                           \
+      std::ostringstream ss;                                                   \
+      ss outsequence;                                                          \
+      ::krims::ExceptionBase::m_extra = ss.str();                              \
     }                                                                          \
-                                                                               \
-   private:                                                                    \
     const type1 arg1;                                                          \
     const type2 arg2;                                                          \
     const type3 arg3;                                                          \
@@ -171,13 +161,11 @@ void throw_by_value(Exception e) {
    public:                                                                        \
     Exception5(const type1 a1, const type2 a2, const type3 a3, const type4 a4,    \
                const type5 a5)                                                    \
-          : arg1(a1), arg2(a2), arg3(a3), arg4(a4), arg5(a5) {}                   \
-    virtual ~Exception5() noexcept {}                                             \
-    virtual void print_extra(std::ostream& out) const noexcept {                  \
-      out outsequence << std::endl;                                               \
+          : arg1(a1), arg2(a2), arg3(a3), arg4(a4), arg5(a5) {                    \
+      std::ostringstream ss;                                                      \
+      ss outsequence;                                                             \
+      ::krims::ExceptionBase::m_extra = ss.str();                                 \
     }                                                                             \
-                                                                                  \
-   private:                                                                       \
     const type1 arg1;                                                             \
     const type2 arg2;                                                             \
     const type3 arg3;                                                             \

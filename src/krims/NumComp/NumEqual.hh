@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 by the krims authors
+// Copyright (C) 2016-17 by the krims authors
 //
 // This file is part of krims.
 //
@@ -141,17 +141,17 @@ operator()(const std::complex<T>& lhs, const std::complex<U>& rhs) const {
     // If we get through both we return the combined result.
     part = "Imaginary part";
     return real_equal && is_equal(lhs.imag(), rhs.imag());
-  } catch (NumCompExceptionBase& e) {
+  } catch (ExceptionBase& e) {
     // If we get here failure_action is some kind of Throw
     // So we rethrow what we caught.
     std::stringstream ss;
 
-    ss << part;
+    ss << ' ' << part;
     if (m_failure_action == NumCompActionType::ThrowVerbose) {
       ss << " of complex numbers " << lhs << " and " << rhs;
     }
     ss << " is not equal.";
-    e.append(ss.str());
+    e.append_extra(ss.str());
     throw;
   }
 }

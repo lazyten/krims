@@ -31,7 +31,6 @@ set(KRIMS_SOURCES
 	FileUtils/FindDataFile.cc
 	GenMap.cc
 	NumComp/NumCompConstants.cc
-	NumComp/NumCompException.cc
 	version.cc
 )
 

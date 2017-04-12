@@ -36,12 +36,6 @@ void ExceptionBase::add_exc_data(const char* file, int line, const char* functio
   rebuild_what_str();
 }
 
-std::string ExceptionBase::extra() const {
-  std::stringstream ss;
-  print_extra(ss);
-  return ss.str();
-}
-
 /** Invoke all functions to rebuild the string returned by what() */
 void ExceptionBase::rebuild_what_str() noexcept {
   try {
@@ -56,10 +50,8 @@ void ExceptionBase::rebuild_what_str() noexcept {
               << "This raised the exception" << '\n'
               << "   " << m_name << '\n'
               << '\n'
-              << "Extra information:" << '\n';
-
-    // Print the exception-specific extra part:
-    print_extra(converter);
+              << "Extra information:" << '\n'
+              << extra() << '\n';
 
     // Set the what string:
     m_what_str = converter.str();

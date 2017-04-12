@@ -106,7 +106,7 @@ TEST_CASE("NumComp tests", "[NumComp]") {
 
     // Note: The cast to void is to "fake-use" the comparsion result, which is
     // not of interest in this case
-    REQUIRE_THROWS_AS((void)(10.000 == numcomp(10.001)), NumCompExceptionBase);
+    REQUIRE_THROWS_AS((void)(10.000 == numcomp(10.001)), NumCompException<double>);
 
     try {
       (void)(10.000 == numcomp(10.001).tolerance(NumCompAccuracyLevel::SuperSloppy));
@@ -145,10 +145,10 @@ TEST_CASE("NumComp tests", "[NumComp]") {
 
     REQUIRE_THROWS_AS(
           (void)(0. == numcomp(0.0000001).tolerance(NumCompAccuracyLevel::Extreme)),
-          NumCompExceptionBase);
+          NumCompException<double>);
 
     REQUIRE_THROWS_AS((void)(0. == numcomp(0.0000001).tolerance(1e-10)),
-                      NumCompExceptionBase);
+                      NumCompException<double>);
     REQUIRE(0. == numcomp(0.0000001).tolerance(1e-4));
 
     REQUIRE(100.000000 == numcomp(100.000001).tolerance(1e-8));

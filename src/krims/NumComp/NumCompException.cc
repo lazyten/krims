@@ -19,16 +19,4 @@
 
 #include "NumCompException.hh"
 
-namespace krims {
-
-void NumCompExceptionBase::append(const std::string& extra) {
-  if (description != "") {
-    description += " ";
-  }
-  description += extra;
-
-  // Trigger rebuild the exception message.
-  ExceptionBase::rebuild_what_str();
-}
-
-}  // namespace krims
+namespace krims {}  // namespace krims
