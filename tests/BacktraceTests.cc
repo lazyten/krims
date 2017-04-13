@@ -52,17 +52,16 @@ TEST_CASE("Backtrace", "[backtrace]") {
   const std::string executable_end = "krims_tests_RELEASE";
 #endif
 
+  /** The number of addresses == number of frames */
+  constexpr size_t n = 3;
+
   /** The addresses which refer to the individual functions */
-  const auto addresses = []() {
+  const auto addresses = []() -> std::array<std::string, n> {
     Backtrace b;
     outer(b, false);
     const auto& frms = b.frames();
-    return std::array<std::string, 3>{
-          {frms[0].address, frms[1].address, frms[2].address}};
+    return {{frms[0].address, frms[1].address, frms[2].address}};
   }();
-
-  /** The number of addresses == number of frames */
-  constexpr size_t n = addresses.size();
 
 /** The function names */
 #ifdef KRIMS_HAVE_LIBSTDCXX_DEMANGLER
