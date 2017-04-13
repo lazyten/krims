@@ -218,7 +218,8 @@ for replacefile in args.files:
   if not content: continue # Skip empty files
 
   try:
-    merged['Replacements'].extend(content['Replacements'])
+    if content['Replacements']:
+      merged['Replacements'].extend(content['Replacements'])
   except KeyError:
     pass # Ignore files with missing keys
 
