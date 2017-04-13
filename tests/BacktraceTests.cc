@@ -52,17 +52,17 @@ TEST_CASE("Backtrace", "[backtrace]") {
   const std::string executable_end = "krims_tests_RELEASE";
 #endif
 
-  /** The number of frames */
-  constexpr size_t n = 3;
-
   /** The addresses which refer to the individual functions */
-  const auto addresses = [&n]() {
+  const auto addresses = []() {
     Backtrace b;
     outer(b, false);
     const auto& frms = b.frames();
-    return std::array<std::string, n>{
+    return std::array<std::string, 3>{
           {frms[0].address, frms[1].address, frms[2].address}};
   }();
+
+  /** The number of addresses == number of frames */
+  constexpr size_t n = addresses.size();
 
 /** The function names */
 #ifdef KRIMS_HAVE_LIBSTDCXX_DEMANGLER
@@ -81,12 +81,9 @@ TEST_CASE("Backtrace", "[backtrace]") {
 
   // The frame information we expect to get.
   const std::array<Backtrace::Frame, n> expected{{
-        {executable_end, addresses[0], funnames[0],  //
-         "krims/tests/BacktraceTests.cc", "29"},
-        {executable_end, addresses[1], funnames[1],  //
-         "krims/tests/BacktraceTests.cc", "33"},
-        {executable_end, addresses[2], funnames[2],  //
-         "krims/tests/BacktraceTests.cc", "37"},
+        {executable_end, addresses[0], funnames[0], "tests/BacktraceTests.cc", "29"},
+        {executable_end, addresses[1], funnames[1], "tests/BacktraceTests.cc", "33"},
+        {executable_end, addresses[2], funnames[2], "tests/BacktraceTests.cc", "37"},
   }};
 
   SECTION("Expensive test") {
