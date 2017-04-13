@@ -24,6 +24,7 @@
 #
 set(KRIMS_TESTS_SOURCES
 	TypeUtilsTests.cc
+	BacktraceTests.cc
 	ExceptionTests.cc
 	RangeTests.cc
 	SubscriptionTests.cc

@@ -36,23 +36,19 @@ class Backtrace {
     //! Static string to describe an unknown piece of information in the frame
     static const std::string unknown;
 
-    /** The name of the executable of the current backtrace entry (or '?' if not
-    known) **/
+    /** The name of the executable of the current backtrace entry */
     std::string executable_name = unknown;
 
-    /** The address of the backtrace symbol inside the exectuable (or '?' if not
-    known) **/
+    /** The address of the backtrace symbol inside the executable */
     std::string address = unknown;
 
-    /** The name of the function of the current backtrace entry (or '?' if not
-    known) **/
+    /** The name of the function of the current backtrace entry */
     std::string function_name = unknown;
 
-    //! The path to the file of the current backtrace entry (or '?' if not
-    //! known)
+    /** The path to the file of the current backtrace entry */
     std::string codefile = unknown;
 
-    //! The line number of the current backtrace entry (or '?' if not known)
+    /** The line number of the current backtrace entry */
     std::string line_number = unknown;
   };
 

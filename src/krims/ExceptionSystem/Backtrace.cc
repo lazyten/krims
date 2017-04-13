@@ -182,6 +182,13 @@ void Backtrace::parse_backtrace() {
       initframe = frame + 1;
       break;
     }
+    if ((std::strstr(stacktrace[frame], "krims") != nullptr) &&
+        (std::strstr(stacktrace[frame], "Backtrace") != nullptr) &&
+        (std::strstr(stacktrace[frame], "obtain_backtrace") != nullptr)) {
+      // The current frame is responsible for obtaining the backtrace right here.
+      initframe = frame + 1;
+      break;
+    }
 
     if (std::strstr(stacktrace[frame], "__cxa_call_unexpected") != nullptr) {
       // The current frame indicates that an unexpected exception was
