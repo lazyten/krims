@@ -50,6 +50,15 @@ class Backtrace {
 
     /** The line number of the current backtrace entry */
     std::string line_number = unknown;
+
+    Frame() = default;
+    Frame(std::string executable_name_, std::string address_, std::string function_name_,
+          std::string codefile_, std::string line_number_)
+          : executable_name(std::move(executable_name_)),
+            address(std::move(address_)),
+            function_name(std::move(function_name_)),
+            codefile(std::move(codefile_)),
+            line_number(std::move(line_number_)) {}
   };
 
   /** The maximal number of backtrace frames we can obtain and use */
