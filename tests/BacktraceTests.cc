@@ -30,11 +30,13 @@ KRIMS_NOINLINE int inner(Backtrace& b, bool expensive) {
   return 1;
 }
 
-KRIMS_NOINLINE int middle(Backtrace& b, bool expensive) { return inner(b, expensive); }
+KRIMS_NOINLINE int middle(Backtrace& b, bool expensive) {
+  return inner(b, expensive) + 1;
+}
 }  // namespace detail
 
 KRIMS_NOINLINE int outer(Backtrace& b, bool expensive) {
-  return detail::middle(b, expensive);
+  return detail::middle(b, expensive) + 1;
 }
 
 #define CHECK_END(s, t)                                        \
@@ -81,8 +83,8 @@ TEST_CASE("Backtrace", "[backtrace]") {
   // The frame information we expect to get.
   const std::array<Backtrace::Frame, n> expected{{
         {executable_end, addresses[0], funnames[0], "tests/BacktraceTests.cc", "29"},
-        {executable_end, addresses[1], funnames[1], "tests/BacktraceTests.cc", "33"},
-        {executable_end, addresses[2], funnames[2], "tests/BacktraceTests.cc", "37"},
+        {executable_end, addresses[1], funnames[1], "tests/BacktraceTests.cc", "34"},
+        {executable_end, addresses[2], funnames[2], "tests/BacktraceTests.cc", "39"},
   }};
 
   SECTION("Expensive test") {
