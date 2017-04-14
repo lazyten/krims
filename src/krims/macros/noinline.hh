@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016-17 by the krims authors
+// Copyright (C) 2017 by the krims authors
 //
 // This file is part of krims.
 //
@@ -17,6 +17,11 @@
 // along with krims. If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "NumCompException.hh"
+#pragma once
 
-namespace krims {}  // namespace krims
+namespace krims {
+
+/** Macro which prevents inlining of a function */
+#define KRIMS_NOINLINE __attribute__((noinline))
+
+}  // namespace krims

@@ -36,24 +36,29 @@ class Backtrace {
     //! Static string to describe an unknown piece of information in the frame
     static const std::string unknown;
 
-    /** The name of the executable of the current backtrace entry (or '?' if not
-    known) **/
+    /** The name of the executable of the current backtrace entry */
     std::string executable_name = unknown;
 
-    /** The address of the backtrace symbol inside the exectuable (or '?' if not
-    known) **/
+    /** The address of the backtrace symbol inside the executable */
     std::string address = unknown;
 
-    /** The name of the function of the current backtrace entry (or '?' if not
-    known) **/
+    /** The name of the function of the current backtrace entry */
     std::string function_name = unknown;
 
-    //! The path to the file of the current backtrace entry (or '?' if not
-    //! known)
+    /** The path to the file of the current backtrace entry */
     std::string codefile = unknown;
 
-    //! The line number of the current backtrace entry (or '?' if not known)
+    /** The line number of the current backtrace entry */
     std::string line_number = unknown;
+
+    Frame() = default;
+    Frame(std::string executable_name_, std::string address_, std::string function_name_,
+          std::string codefile_, std::string line_number_)
+          : executable_name(std::move(executable_name_)),
+            address(std::move(address_)),
+            function_name(std::move(function_name_)),
+            codefile(std::move(codefile_)),
+            line_number(std::move(line_number_)) {}
   };
 
   /** The maximal number of backtrace frames we can obtain and use */

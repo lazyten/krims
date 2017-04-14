@@ -99,6 +99,13 @@ int addr2line(const char* execname, const char* addr, const size_t maxlen, char*
     number[maxlen - 1] = 0;
 
     *colon = 0;
+
+    if (strncmp("??", codefile, 2) == 0 && strncmp("0", number, 1) == 0) {
+      // Error occurred finding the file and line,
+      // since file is ?? and line is 0
+      return -1;
+    }
+
     return 0;
   }
 }

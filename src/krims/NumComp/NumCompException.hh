@@ -18,40 +18,22 @@
 //
 
 #pragma once
-#include "krims/ExceptionSystem.hh"
+#include "krims/ExceptionSystem/ExceptionBase.hh"
 #include <iomanip>
+#include <sstream>
 
 namespace krims {
 
-/** Base exception of all NumCompExceptions. Catch these to get all NumComp
- *  Exceptions type-indepentantly */
-class NumCompExceptionBase : public ExceptionBase {
- public:
-  NumCompExceptionBase(std::string description_) noexcept : description(description_) {}
-
-  //! The description that was additionally supplied
-  std::string description;
-
-  //! Append some extra data to the description:
-  void append(const std::string& extra);
-};
-
 /** Exception raised by the NumComp operations if they fail on some objects. */
 template <typename T>
-class NumCompException : public NumCompExceptionBase {
+class NumCompException : public ExceptionBase {
  public:
   static_assert(std::is_arithmetic<T>::value, "T needs to be an arithmetic value");
   // otherwise the declaration of T as error and tolerance makes no sense.
 
   NumCompException(const T lhs_, const T rhs_, const T error_, const T tolerance_,
                    const std::string operation_string_,
-                   const std::string description_ = "") noexcept
-        : NumCompExceptionBase{description_},
-          lhs(lhs_),
-          rhs(rhs_),
-          error(error_),
-          tolerance(tolerance_),
-          operation_string(operation_string_) {}
+                   const std::string description = "");
 
   //! The value of the lhs
   const T lhs;
@@ -71,9 +53,6 @@ class NumCompException : public NumCompExceptionBase {
   /** Add enhancing exception data */
   void add_exc_data(const char* file, int line, const char* function);
 
-  /** Print exception-specific extra information to the outstream */
-  virtual void print_extra(std::ostream& out) const noexcept;
-
  private:
   std::string failed_condition{""};
 };
@@ -83,6 +62,25 @@ class NumCompException : public NumCompExceptionBase {
 //
 
 template <typename T>
+NumCompException<T>::NumCompException(const T lhs_, const T rhs_, const T error_,
+                                      const T tolerance_,
+                                      const std::string operation_string_,
+                                      const std::string description)
+      : lhs(lhs_),
+        rhs(rhs_),
+        error(error_),
+        tolerance(tolerance_),
+        operation_string(operation_string_) {
+  std::ostringstream ss;
+
+  ss << std::scientific << std::setprecision(15) << "Error in comparison (" << error
+     << ") larger than tolerance (" << tolerance << ").";
+  if (description != "") {
+    ss << '\n' << '\n' << description;
+  }
+}
+
+template <typename T>
 void NumCompException<T>::add_exc_data(const char* file, int line, const char* function) {
   std::stringstream ss;
   ss << std::scientific << std::setprecision(15) << lhs << operation_string << rhs
@@ -90,15 +88,6 @@ void NumCompException<T>::add_exc_data(const char* file, int line, const char* f
   failed_condition = ss.str();
   ExceptionBase::add_exc_data(file, line, function, failed_condition.c_str(),
                               "NumCompException");
-}
-
-template <typename T>
-void NumCompException<T>::print_extra(std::ostream& out) const noexcept {
-  out << std::scientific << std::setprecision(15) << "Error in comparison (" << error
-      << ") larger than tolerance (" << tolerance << ").";
-  if (NumCompExceptionBase::description != "") {
-    out << '\n' << '\n' << NumCompExceptionBase::description;
-  }
 }
 
 }  // namespace krims

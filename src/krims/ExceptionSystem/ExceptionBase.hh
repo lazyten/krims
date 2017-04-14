@@ -20,6 +20,7 @@
 #pragma once
 #include "Backtrace.hh"
 #include <exception>
+#include <krims/macros/deprecated.hh>
 #include <string>
 
 namespace krims {
@@ -37,6 +38,7 @@ class ExceptionBase : public std::exception {
           m_line(0),
           m_function("?"),
           m_failed_condition("?"),
+          m_extra("(none"),
           m_what_str{"Failed to generate the exception message."} {}
 
   /** Default copy constructor */
@@ -56,17 +58,47 @@ class ExceptionBase : public std::exception {
   void add_exc_data(const char* file, int line, const char* function,
                     const char* failed_condition, const char* exception_name) noexcept;
 
-  /** The c-string which describes briefly what happened */
+  /** The c-string which describes briefly what happened.
+   *
+   * This string includes information about what assertion has failed,
+   * the name of the exception, where the excetpion has failed and
+   * the exception-specific extra information */
   const char* what() const noexcept { return m_what_str.c_str(); }
 
   /** The name of the exception */
   const char* name() const { return m_name; }
 
-  /** The result of print_extra's print call */
-  std::string extra() const;
+  /** The name of the file where the exception occurred */
+  const char* file() const { return m_file; }
 
-  /** Print exception-specific extra information to the outstream */
-  virtual void print_extra(std::ostream& out) const noexcept { out << "(none)"; }
+  /** The line where the exception occurred */
+  int line() const { return m_line; }
+
+  /** The function which failed */
+  const char* function() const { return m_function; }
+
+  /** The condition which failed */
+  const char* failed_condition() const { return m_failed_condition; }
+
+  /** The exception-specific extra information */
+  std::string extra() const { return m_extra; }
+
+  /** Alter the exception-specific extra information */
+  void set_extra(std::string extra) {
+    m_extra = std::move(extra);
+    rebuild_what_str();
+  }
+
+  /** Append another string to the extra string stored inside. */
+  void append_extra(const std::string& s) {
+    m_extra.append(s);
+    rebuild_what_str();
+  }
+
+  void prepend_extra(std::string s) {
+    m_extra = s.append(m_extra);
+    rebuild_what_str();
+  }
 
  protected:
   /** Invoke all functions to rebuild the string returned by what() */
@@ -86,6 +118,9 @@ class ExceptionBase : public std::exception {
 
   //! The failed condition as a string.
   const char* m_failed_condition;
+
+  //! The extra information, specific to the exception.
+  std::string m_extra;
 
  private:
   //! The what of the exception
