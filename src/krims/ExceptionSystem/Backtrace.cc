@@ -221,7 +221,7 @@ void Backtrace::parse_backtrace() {
 std::ostream& operator<<(std::ostream& out, const Backtrace& bt) {
   // If we have no backtrace, print nothing.
   if (bt.frames().empty()) {
-    std::cerr << "Sorry, no backtrace available" << std::endl;
+    std::cerr << "Sorry, no backtrace available." << std::endl;
     return out;
   }
 
@@ -256,8 +256,8 @@ std::ostream& operator<<(std::ostream& out, const Backtrace& bt) {
 
     // Was the determine_file_line call to addr2line successful?
     const bool file_line_successful =
-          !frame.codefile.empty() && frame.codefile[0] != '?' &&
-          !frame.line_number.empty() && frame.line_number[0] != '?';
+          !frame.codefile.empty() && frame.codefile != Backtrace::Frame::unknown &&
+          !frame.line_number.empty() && frame.line_number != Backtrace::Frame::unknown;
 
     if (bt.determine_file_line() && file_line_successful) {
       out << frame.codefile << "  :  " << frame.line_number;
