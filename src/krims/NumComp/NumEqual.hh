@@ -141,7 +141,7 @@ operator()(const std::complex<T>& lhs, const std::complex<U>& rhs) const {
     // If we get through both we return the combined result.
     part = "Imaginary part";
     return real_equal && is_equal(lhs.imag(), rhs.imag());
-  } catch (ExceptionBase& e) {
+  } catch (NumCompExceptionBase& e) {
     // If we get here failure_action is some kind of Throw
     // So we rethrow what we caught.
     std::stringstream ss;
