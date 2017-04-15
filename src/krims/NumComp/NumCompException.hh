@@ -24,9 +24,11 @@
 
 namespace krims {
 
+class NumCompExceptionBase : public ExceptionBase {};
+
 /** Exception raised by the NumComp operations if they fail on some objects. */
 template <typename T>
-class NumCompException : public ExceptionBase {
+class NumCompException : public NumCompExceptionBase {
  public:
   static_assert(std::is_arithmetic<T>::value, "T needs to be an arithmetic value");
   // otherwise the declaration of T as error and tolerance makes no sense.
