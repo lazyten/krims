@@ -18,7 +18,10 @@
 //
 
 #include "realpath.hh"
-#include "krims/ExceptionSystem.hh"
+
+// Use the gnu version of strerror_r:
+#define _GNU_SOURCE 1
+#include <cstring>
 
 namespace krims {
 
@@ -29,8 +32,12 @@ std::string realpath(const std::string& path) {
   }
 
   char* rp = ::realpath(path.c_str(), nullptr);
-  assert_throw(rp, krims::ExcInvalidPointer());
-
+  if (rp == nullptr) {
+    const int errval = errno;
+    char buffer[1024] = {0};
+    char* msg = strerror_r(errval, buffer, 1024);
+    assert_throw(false, ExcRealpathError(errval, std::string(msg)));
+  }
   std::string ret = std::string(rp);
   free(rp);
   return ret;

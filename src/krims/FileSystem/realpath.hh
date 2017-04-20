@@ -18,9 +18,14 @@
 //
 
 #pragma once
+#include <krims/ExceptionSystem.hh>
 #include <string>
 
 namespace krims {
+
+DefException2(ExcRealpathError, int, std::string,
+              << "An error in realpath occurred: " << arg2 << " (Error code " << arg1
+              << ")");
 
 /** Return the realpath of an input path */
 std::string realpath(const std::string& path);
