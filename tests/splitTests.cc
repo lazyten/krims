@@ -37,11 +37,15 @@ void run_test(const Container& array, char sepc) {
   std::back_insert_iterator<decltype(splitted)> backit(splitted);
   split(joined, backit, sepc);
 
-  RC_ASSERT(splitted.size() == array.size());
-  auto itar = std::begin(array);
-  auto itsp = std::begin(splitted);
-  for (; itar != std::end(array); ++itar, ++itsp) {
-    RC_ASSERT(*itar == *itsp);
+  if (joined.empty()) {
+    RC_ASSERT(splitted.empty());
+  } else {
+    RC_ASSERT(splitted.size() == array.size());
+    auto itar = std::begin(array);
+    auto itsp = std::begin(splitted);
+    for (; itar != std::end(array); ++itar, ++itsp) {
+      RC_ASSERT(*itar == *itsp);
+    }
   }
 }
 

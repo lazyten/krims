@@ -26,10 +26,13 @@ namespace krims {
  *
  * Store the resulting substrings using the iterator out.
  *
- * \note Neither trailling, nor leading separator characters, nor multiple
+ * \note Neither trailing, nor leading separator characters, nor multiple
  * separators are ignored and give rise to empty strings. In other words
  * ".a..b." will split to ["","a","","b",""] if passed to this function
  * with delim=='.'.
+ *
+ * \note Empty strings are not split at all, i.e. no element will be
+ *       added via the iterator.
  *
  * \return The iterator after the last insertion has happened.
  */
