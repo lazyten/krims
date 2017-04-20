@@ -151,6 +151,7 @@ TEST_CASE("filesystem tests", "[FileSystem]") {
   SECTION("path_exists") {
     CHECK_FALSE(path_exists("/nonexistent"));
     CHECK_FALSE(path_exists("nonExIstent"));
+    CHECK(path_exists("/bin/sh"));
     CHECK(path_exists(std::string(__FILE__)));
     CHECK(path_exists("."));
   }
