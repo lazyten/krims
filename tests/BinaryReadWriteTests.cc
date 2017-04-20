@@ -25,6 +25,7 @@
 #include <rapidcheck.h>
 
 namespace krims {
+namespace tests {
 using namespace rc;
 
 // The random number generator to generate random (hence non-existent) filenames.
@@ -75,4 +76,5 @@ TEST_CASE("binary_read, binary_write tests", "[binary_read_write]") {
   */
 }  // binary_read, binary_write
 
+}  // namespace tests
 }  // namespace krims
