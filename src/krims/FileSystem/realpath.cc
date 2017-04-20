@@ -24,7 +24,9 @@ namespace krims {
 
 // TODO Multiplex for C++17 filesystem stuff
 std::string realpath(const std::string& path) {
-  if (path.size() == 0) return "";
+  if (path.empty()) {
+    return "";
+  }
 
   char* rp = ::realpath(path.c_str(), nullptr);
   assert_throw(rp, krims::ExcInvalidPointer());

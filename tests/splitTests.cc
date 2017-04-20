@@ -47,8 +47,8 @@ void run_test(const Container& array, char sepc) {
 
 rc::Gen<std::string> string_gen(char sep) {
   using namespace rc;
-  auto charGen = gen::distinctFrom(gen::arbitrary<char>(), sep);
-  return gen::container<std::string>(charGen);
+  auto char_gen = gen::distinctFrom(gen::arbitrary<char>(), sep);
+  return gen::container<std::string>(char_gen);
 }
 
 TEST_CASE("split function", "[split]") {

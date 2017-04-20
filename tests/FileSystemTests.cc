@@ -48,12 +48,12 @@ struct Path {
   }
 
   //! Build the file name only
-  std::string file() const { return ext.size() > 0 ? base + "." + ext : base; }
+  std::string file() const { return ext.empty() ? base : base + "." + ext; }
 
   //! Build the full path
   std::string build() const {
     std::string ret = dir();
-    if (ret.size() > 0) ret.append("/");
+    if (!ret.empty()) ret.append("/");
     ret.append(file());
     return ret;
   }
@@ -70,12 +70,12 @@ struct Path {
     const std::pair<std::string, std::string> base_ext = splitext(bn);
 
     r.base = base_ext.first;
-    if (base_ext.second.size() > 0) {
+    if (!base_ext.second.empty()) {
       r.ext = base_ext.second.substr(1);
     }
 
     std::back_insert_iterator<std::vector<std::string>> backit(r.dirs);
-    split(dirname(path), std::move(backit), '/');
+    split(dirname(path), backit, '/');
     return r;
   }
 };
@@ -91,7 +91,7 @@ rc::Gen<char> gen_ascii_print() {
     std::iota(std::begin(ret), std::end(ret), 32);
     return ret;
   }();
-  return rc::gen::elementOf(std::move(ascii_print));
+  return rc::gen::elementOf(ascii_print);
 }
 
 /* pathpart: Chars for dirs and base (filename without extension)
@@ -99,49 +99,50 @@ rc::Gen<char> gen_ascii_print() {
 *   up extension. */
 rc::Gen<std::string> gen_pathpart() {
   using namespace rc;
-  auto notSlash = gen::distinctFrom(gen_ascii_print(), '/');
-  auto pathpart_charGen = gen::weightedOneOf<char>({{8, notSlash}, {1, gen::just('.')}});
-  return gen::nonEmpty(gen::container<std::string>(std::move(pathpart_charGen)));
+  auto not_slash = gen::distinctFrom(gen_ascii_print(), '/');
+  auto pathpart_chargen = gen::weightedOneOf<char>({{8, not_slash}, {1, gen::just('.')}});
+  return gen::nonEmpty(gen::container<std::string>(std::move(pathpart_chargen)));
 }
 
 rc::Gen<Path> gen_path(size_t n_dirs, size_t ext_len) {
   using namespace rc;
 
-  auto notSlash = gen::distinctFrom(gen_ascii_print(), '/');
-  auto notSlashDot = gen::distinctFrom(notSlash, '.');
+  auto not_slash = gen::distinctFrom(gen_ascii_print(), '/');
+  auto not_slash_dot = gen::distinctFrom(not_slash, '.');
 
   // basepart: (Filename without extension)
   //   - If the extension length is 0: No dots in the string
   //   - The first char is a . with higher probability (unix hidden file,
   //     i.e. no extension)
-  auto basepart_1charGen =
-        gen::weightedOneOf<char>({{1, std::move(notSlash)}, {1, gen::just('.')}});
-  auto basepart_noSlashDotString =
-        gen::nonEmpty(gen::container<std::string>(notSlashDot));
-  auto pairGen = gen::pair(std::move(basepart_1charGen),
-                           ext_len > 0 ? gen_pathpart() : basepart_noSlashDotString);
-  auto basepartGen = gen::map(std::move(pairGen), [](std::pair<char, std::string> c_str) {
-    return std::string(1, c_str.first) + c_str.second;
-  });
+  auto basepart_1char_gen =
+        gen::weightedOneOf<char>({{1, std::move(not_slash)}, {1, gen::just('.')}});
+  auto no_slash_dot_string_gen =
+        gen::nonEmpty(gen::container<std::string>(not_slash_dot));
+  auto pair_gen = gen::pair(std::move(basepart_1char_gen),
+                            ext_len > 0 ? gen_pathpart() : no_slash_dot_string_gen);
+  auto basepart_gen =
+        gen::map(std::move(pair_gen), [](std::pair<char, std::string> c_str) {
+          return std::string(1, c_str.first) + c_str.second;
+        });
 
   // Extension: If larger than zero, than generate a string without slashes and dots.
-  auto extGen = gen::container<std::string>(ext_len, std::move(notSlashDot));
+  auto ext_gen = gen::container<std::string>(ext_len, std::move(not_slash_dot));
 
   return gen::construct<Path>(
         gen::container<std::vector<std::string>>(n_dirs, gen_pathpart()),
-        std::move(basepartGen), std::move(extGen));
+        std::move(basepart_gen), std::move(ext_gen));
 }
 
 rc::Gen<Path> gen_path() {
   using namespace rc;
 
-  auto nDirsGen = gen::weightedOneOf<size_t>(
+  auto n_dirs_gen = gen::weightedOneOf<size_t>(
         {{10, gen::inRange<size_t>(0, 11)}, {1, gen::just<size_t>(0)}});
-  auto extLenGen = gen::weightedOneOf<size_t>(
+  auto ext_len_gen = gen::weightedOneOf<size_t>(
         {{10, gen::inRange<size_t>(0, 6)}, {1, gen::just<size_t>(0)}});
+  auto pair_gen = gen::pair(std::move(n_dirs_gen), std::move(ext_len_gen));
 
-  auto pairGen = gen::pair(std::move(nDirsGen), std::move(extLenGen));
-  return gen::mapcat(std::move(pairGen), [](std::pair<size_t, size_t> i) {
+  return gen::mapcat(std::move(pair_gen), [](std::pair<size_t, size_t> i) {
     return gen_path(i.first, i.second);
   });
 }
@@ -160,7 +161,7 @@ TEST_CASE("filesystem tests", "[FileSystem]") {
       const std::string dir = dirname(p.build());
       const std::string base = basename(p.build());
 
-      if (p.dir().size() == 0) {
+      if (p.dir().empty()) {
         RC_ASSERT(dir == ".");
       } else {
         RC_ASSERT(dir == p.dir());
@@ -176,8 +177,8 @@ TEST_CASE("filesystem tests", "[FileSystem]") {
       Path p = *gen_path().as("Path");
       const std::pair<std::string, std::string> res = splitext(p.build());
 
-      const std::string ext = p.ext.size() > 0 ? "." + p.ext : "";
-      const std::string rest = p.dir().size() == 0 ? p.base : p.dir() + "/" + p.base;
+      const std::string ext = p.ext.empty() ? "" : "." + p.ext;
+      const std::string rest = p.dir().empty() ? p.base : p.dir() + "/" + p.base;
       RC_ASSERT(res.first == rest);
       RC_ASSERT(res.second == ext);
       RC_ASSERT(res.first + res.second == p.build());
@@ -206,7 +207,7 @@ TEST_CASE("filesystem tests", "[FileSystem]") {
         // const std::string dummy_path =
         //      *gen_pathpart().as("Path " + std::to_string(i) + " to insert");
         const std::string dummy_path = cp.dirs.back();
-        cp.dirs.push_back("..");
+        cp.dirs.emplace_back("..");
         cp.dirs.push_back(dummy_path);
       }
 
