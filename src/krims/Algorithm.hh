@@ -21,3 +21,4 @@
 
 #include "Algorithm/argsort.hh"
 #include "Algorithm/join.hh"
+#include "Algorithm/split.hh"

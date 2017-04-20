@@ -36,6 +36,7 @@ set(KRIMS_TESTS_SOURCES
 	TupleUtilsTests.cc
 	argsortTests.cc
 	joinTests.cc
+	splitTests.cc
 	NumCompTests.cc
 	BinaryReadWriteTests.cc
 	main.cc
