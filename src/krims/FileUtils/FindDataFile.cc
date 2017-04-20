@@ -19,6 +19,7 @@
 
 #include "FindDataFile.hh"
 #include "krims/Algorithm.hh"
+#include "krims/FileSystem.hh"
 #include <algorithm>
 #include <cctype>
 #include <cstdio>
@@ -29,20 +30,13 @@
 namespace krims {
 
 std::string FindDataFile::operator()(const std::string& file) const {
-  // TODO Multiplex for C++17 filesystem stuff
-  auto file_exists = [](const std::string& f) { return access(f.c_str(), R_OK) != -1; };
-  auto realpath = [](const std::string& p) {
-    char* rp = ::realpath(p.c_str(), nullptr);
-    return std::string(rp);
-  };
-
   // If we already have a full path, we are done:
-  if (file_exists(file)) return realpath(file);
+  if (path_exists(file)) return realpath(file);
 
   const std::vector<std::string> searchdirs = search_directories();
   for (const auto& dir : searchdirs) {
     std::string fullpath(dir + "/" + file);
-    if (file_exists(fullpath)) return realpath(fullpath);
+    if (path_exists(fullpath)) return realpath(fullpath);
   }
 
   // File not found => tell user where we looked:
@@ -117,7 +111,7 @@ std::vector<std::string> FindDataFile::searchdirs_environ() const {
 std::vector<std::string> FindDataFile::searchdirs_cwd() const {
   // Get current working directory:
   char cwd[FILENAME_MAX];
-  if (getcwd(cwd, sizeof(cwd)) == nullptr) return {};
+  if (::getcwd(cwd, sizeof(cwd)) == nullptr) return {};
 
   std::vector<std::string> search(cwd_suffixes.size());
   std::transform(std::begin(cwd_suffixes), std::end(cwd_suffixes), std::begin(search),

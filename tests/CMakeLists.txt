@@ -38,6 +38,7 @@ set(KRIMS_TESTS_SOURCES
 	joinTests.cc
 	splitTests.cc
 	NumCompTests.cc
+	FileSystemTests.cc
 	BinaryReadWriteTests.cc
 	main.cc
 )
