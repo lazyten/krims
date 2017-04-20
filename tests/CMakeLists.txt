@@ -67,6 +67,6 @@ drb_target_link_libraries(RELEASE krims_tests
 FOREACH(target ${krims_tests_TARGETS})
 	add_test(NAME ${target}
 		COMMAND ${target}
-		WORKING_DIRECTORY ${CMAKE_BUILD_DIR}
+		WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
 	)
 ENDFOREACH()
