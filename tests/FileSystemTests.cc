@@ -188,6 +188,8 @@ TEST_CASE("filesystem tests", "[FileSystem]") {
   }  // splitext
 
   SECTION("realpath") {
+    CHECK_THROWS_AS(realpath(std::string("/nonexistent")), ExcRealpathError);
+
     auto testable = [] {
       const Path p = Path::this_file();
       Path cp(p);
