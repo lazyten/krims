@@ -28,6 +28,11 @@ set(KRIMS_SOURCES
 	ExceptionSystem/Backtrace.cc
 	ExceptionSystem/ExceptionBase.cc
 	ExceptionSystem/ExceptionSystem.cc
+	FileSystem/basename.cc
+	FileSystem/dirname.cc
+	FileSystem/path_exists.cc
+	FileSystem/realpath.cc
+	FileSystem/splitext.cc
 	FileUtils/FindDataFile.cc
 	GenMap.cc
 	NumComp/NumCompConstants.cc

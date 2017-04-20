@@ -17,8 +17,12 @@
 // along with krims. If not, see <http://www.gnu.org/licenses/>.
 //
 
-#pragma once
+#include "path_exists.hh"
+#include <unistd.h>
 
-#include "Algorithm/argsort.hh"
-#include "Algorithm/join.hh"
-#include "Algorithm/split.hh"
+namespace krims {
+
+// TODO Multiplex for C++17 filesystem stuff
+bool path_exists(const std::string& path) { return access(path.c_str(), R_OK) != -1; }
+
+}  // namespace krims

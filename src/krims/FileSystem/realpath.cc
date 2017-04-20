@@ -17,8 +17,30 @@
 // along with krims. If not, see <http://www.gnu.org/licenses/>.
 //
 
-#pragma once
+#include "realpath.hh"
 
-#include "Algorithm/argsort.hh"
-#include "Algorithm/join.hh"
-#include "Algorithm/split.hh"
+// Use the gnu version of strerror_r:
+#define _GNU_SOURCE 1
+#include <cstring>
+
+namespace krims {
+
+// TODO Multiplex for C++17 filesystem stuff
+std::string realpath(const std::string& path) {
+  if (path.empty()) {
+    return "";
+  }
+
+  char* rp = ::realpath(path.c_str(), nullptr);
+  if (rp == nullptr) {
+    const int errval = errno;
+    char buffer[1024] = {0};
+    char* msg = strerror_r(errval, buffer, 1024);
+    assert_throw(false, ExcRealpathError(errval, std::string(msg)));
+  }
+  std::string ret = std::string(rp);
+  free(rp);
+  return ret;
+}
+
+}  // namespace krims

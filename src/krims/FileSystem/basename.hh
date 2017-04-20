@@ -18,7 +18,11 @@
 //
 
 #pragma once
+#include <string>
 
-#include "Algorithm/argsort.hh"
-#include "Algorithm/join.hh"
-#include "Algorithm/split.hh"
+namespace krims {
+
+/** Return the basename of an input path */
+std::string basename(const std::string& path);
+
+}  // namespace krims

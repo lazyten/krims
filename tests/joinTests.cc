@@ -79,7 +79,7 @@ TEST_CASE("join function", "[join]") {
   SECTION("Test join with double vector") {
     REQUIRE(check("Join with double vector", TestFunctor<std::vector<double>>{}));
   }
-  SECTION("Test join with strung vector") {
+  SECTION("Test join with string vector") {
     REQUIRE(check("Join with string vector", TestFunctor<std::vector<std::string>>{}));
   }
   SECTION("Test join with string array") {
@@ -88,6 +88,6 @@ TEST_CASE("join function", "[join]") {
   SECTION("Test join with int array") {
     REQUIRE(check("Join with int array", TestFunctor<std::array<int, 20>>{}));
   }
-}
+}  // join
 }  // namespace tests
 }  // namespace krims

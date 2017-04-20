@@ -18,7 +18,8 @@
 //
 
 #pragma once
-
-#include "Algorithm/argsort.hh"
-#include "Algorithm/join.hh"
-#include "Algorithm/split.hh"
+#include "FileSystem/basename.hh"
+#include "FileSystem/dirname.hh"
+#include "FileSystem/path_exists.hh"
+#include "FileSystem/realpath.hh"
+#include "FileSystem/splitext.hh"

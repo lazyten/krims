@@ -42,6 +42,8 @@ parts of the library.
 - [``Subscribable`` base class and ``SubscriptionPointer``](#subscribable-base-class-and-subscriptionpointer)
 - [Useful type properties and type transformations](#useful-type-properties-and-type-transformations)
 - [``GenMap``: A hierachical dictionary for managing data of arbitrary type.](#genmap-a-hierachical-dictionary-for-managing-data-of-arbitrary-type)
+- [File system functions](#file-system-functions)
+- [File utils](#file-utils)
 - [Iterator utils](#iterator-utils)
 - [Circular buffer with maximum size](#circular-buffer-with-maximum-size)
 - [Useful helper functions to deal with tuples](#useful-helper-functions-to-deal-with-tuples)
@@ -318,6 +320,32 @@ for (auto& kv : map.subtree("only_ints") {
 }
 ```
 - An example is located at [examples/GenMap_demo](examples/GenMap_demo).
+
+### File system functions
+- A basic set of filesystem functions is included by the file
+  [``krims/IteratorUtils.hh``](src/krims/IteratorUtils.hh).
+- C++ interfaces for the following is available:
+	- ``basename``: Obtain the file name in a path
+	- ``dirname``: Obtain the directory which contains the file referenced
+	               by a path
+	- ``realpath``: Obtain the canonical path with all symbolic links resolved.
+	- ``path_exists``: Check whether a path exists on the filesystem.
+	- ``splitext``: Split the file extension from a path
+- This part of krims is intended as a lightweight transition library
+  until the C++17 filesystem support of the standard library becomes
+  widely available.
+
+### File utils
+- [``krims/FileUtils.hh``](src/krims/FileUtils.hh) includes
+  a set of functions to deal with common tasks, which occurr
+  when reading or writing data files.
+- This includes ``read_binary`` and ``write_binary`` to easily read/write
+  a vector of integers or floating point types in binary form.
+- ``FindDataFile`` is a class to aid with locating static data files
+  on disk. It is very flexible and allows to consider various hard-coded
+  locations as well as paths provided by environment variables
+  when looking for files.
+  The precise order as well as path prefixes can be specified as needed.
 
 ### Iterator utils
 - [``krims/IteratorUtils.hh``](src/krims/IteratorUtils.hh) includes classes for

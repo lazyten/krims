@@ -17,8 +17,18 @@
 // along with krims. If not, see <http://www.gnu.org/licenses/>.
 //
 
-#pragma once
+#include "dirname.hh"
+#include <cstring>
+#include <libgen.h>
 
-#include "Algorithm/argsort.hh"
-#include "Algorithm/join.hh"
-#include "Algorithm/split.hh"
+namespace krims {
+
+// TODO Multiplex for C++17 filesystem stuff
+std::string dirname(const std::string& path) {
+  char* copy = ::strndup(path.c_str(), path.size());
+  std::string ret(::dirname(copy));
+  free(copy);
+  return ret;
+}
+
+}  // namespace krims

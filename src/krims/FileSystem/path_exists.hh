@@ -18,7 +18,11 @@
 //
 
 #pragma once
+#include <string>
 
-#include "Algorithm/argsort.hh"
-#include "Algorithm/join.hh"
-#include "Algorithm/split.hh"
+namespace krims {
+
+/** Return true if a path exits, i.e. read access to the given location is ok. */
+bool path_exists(const std::string& path);
+
+}  // namespace krims

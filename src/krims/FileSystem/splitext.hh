@@ -18,7 +18,15 @@
 //
 
 #pragma once
+#include <string>
 
-#include "Algorithm/argsort.hh"
-#include "Algorithm/join.hh"
-#include "Algorithm/split.hh"
+namespace krims {
+
+/** Split the last extension off the path.
+ *
+ * Returns the pair (base, extension), where extension still
+ * starts with a "."
+ */
+std::pair<std::string, std::string> splitext(const std::string& path);
+
+}  // namespace krims

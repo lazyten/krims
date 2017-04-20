@@ -36,7 +36,9 @@ set(KRIMS_TESTS_SOURCES
 	TupleUtilsTests.cc
 	argsortTests.cc
 	joinTests.cc
+	splitTests.cc
 	NumCompTests.cc
+	FileSystemTests.cc
 	BinaryReadWriteTests.cc
 	main.cc
 )
@@ -63,5 +65,8 @@ drb_target_link_libraries(RELEASE krims_tests
 
 # Add the test executables
 FOREACH(target ${krims_tests_TARGETS})
-	add_test(NAME ${target} COMMAND ${target})
+	add_test(NAME ${target}
+		COMMAND ${target}
+		WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
+	)
 ENDFOREACH()

@@ -18,7 +18,11 @@
 //
 
 #pragma once
+#include <string>
 
-#include "Algorithm/argsort.hh"
-#include "Algorithm/join.hh"
-#include "Algorithm/split.hh"
+namespace krims {
+
+/** Return the dirname of a path */
+std::string dirname(const std::string&);
+
+}  // namespace krims
