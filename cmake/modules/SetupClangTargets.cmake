@@ -225,6 +225,9 @@ for replacefile in args.files:
 
 if merged['Replacements']:
   yaml.safe_dump(merged, open(args.outfile,'w'))
+else:
+  # Empty the file:
+  open(args.outfile, 'w').close()
 "	)
 
 	# Change permissions and copy to destination:
