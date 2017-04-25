@@ -111,11 +111,12 @@ endfunction()
 
 function(SCT_parse_add_clang_target_args)
 	# Parse the arguments passed to a SetupClang function
-	# and check basic sanity. Then create a list of 
+	# and check basic sanity. Then create a list of
 	# header files and source files in the passed directories.
 	#
 	# After the macro execution these variables are set:
 	#
+	# DIRECTORIES:    List of all directories searched.
 	# HEADER_FILES:   List of all header files in the dirs
 	# SOURCE_FILES:   List of all source files in the dirs
 	#                 (takes the current language into account)
@@ -187,6 +188,7 @@ to process for source files and headers.")
 	set(SOURCE_FILES "${SOURCE_FILES}" PARENT_SCOPE)
 	set(HEADER_FILES "${HEADER_FILES}" PARENT_SCOPE)
 	set(DIR_TARGETS "${DIR_TARGETS}" PARENT_SCOPE)
+	set(DIRECTORIES "${SCT_DIRECTORIES}" PARENT_SCOPE)
 endfunction(SCT_parse_add_clang_target_args)
 
 function(SCT_dump_fixes_yaml_merger file)
@@ -396,6 +398,10 @@ function(add_clang_tidy_target TARGET_NAME)
 		message(FATAL_ERROR "clang-tidy and/or clang-apply-replacements executable not found, \
 so cannot setup clang tidy targets.")
 	endif()
+	if (NOT CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+		message(WARNING "The clang-tidy tagets might not work properly if clang  \
+is not used to compile the project.")
+	endif()
 
 	#
 	# Dump compilation database
@@ -406,6 +412,19 @@ so cannot setup clang tidy targets.")
 	set(FIXDIR ${CMAKE_BINARY_DIR}/fixes)
 	set(FIXFILE ${FIXDIR}/clang-tidy-${TARGET_NAME}.yaml)
 	set(APPLYFILE ${FIXDIR}/${TARGET_NAME}-last-fix)
+
+	#
+	# Setup header filter for including errors
+	# from headers with clang-tidy
+	#
+	set(HEADER_FILTER "")
+	foreach(hdr ${HEADER_FILES})
+		if ("${HEADER_FILTER}" STREQUAL "")
+			set(HEADER_FILTER "${hdr}")
+		else()
+			set(HEADER_FILTER "${HEADER_FILTER}|${hdr}")
+		endif()
+	endforeach()
 
 	# Generate the custom commands, which parse the source tree
 	# and give rise to the list of fixes for each file.
@@ -427,7 +446,9 @@ so cannot setup clang tidy targets.")
 			COMMAND
 			${CMAKE_COMMAND} -E make_directory "${FIXFILE_dir}"
 			COMMAND
-			${CLANG_TIDY} -p "${CMAKE_BINARY_DIR}" -export-fixes=${source_FIXFILE} "${sourceRel}"
+			${CMAKE_COMMAND} -E remove -f ${source_FIXFILE}
+			COMMAND
+			${CLANG_TIDY} -p "${CMAKE_BINARY_DIR}" -header-filter=${HEADER_FILTER} -export-fixes=${source_FIXFILE} "${sourceRel}"
 			COMMAND
 			${CMAKE_COMMAND} -E touch "${source_FIXFILE}"
 			##
@@ -447,7 +468,7 @@ so cannot setup clang tidy targets.")
 		COMMAND
 		${CMAKE_COMMAND} -E make_directory ${FIXDIR}
 		COMMAND
-		${CMAKE_COMMAND} -E remove -f ${APPLYFILE}
+		${CMAKE_COMMANaD} -E remove -f ${APPLYFILE}
 		COMMAND
 		${YAML_MERGER} -o "${FIXFILE}" ${SOURCE_FIX_FILES}
 		COMMAND
@@ -505,7 +526,8 @@ function(add_available_clang_targets_for)
 
 		add_generate_compdb_target()
 		if (NOT CLANG_TIDY MATCHES "NOTFOUND"
-			AND NOT CLANG_APPLY_REPLACEMENTS MATCHES "NOTFOUND")
+			AND NOT CLANG_APPLY_REPLACEMENTS MATCHES "NOTFOUND"
+			AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 
 			add_clang_tidy_target(${ARGV})
 		endif()
