@@ -90,6 +90,8 @@ matrix:
       - export TESTS=0
       compiler: clang
       env: CC_COMP="clang-3.9" CXX_COMP="clang++-3.9"
+  allow_failures:
+    - env: CC_COMP="clang-3.9" CXX_COMP="clang++-3.9" BUILD_TARGET="clang-tidy-krims"
 
 script:
   - cmake --version
