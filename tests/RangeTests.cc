@@ -41,9 +41,8 @@ struct RangeTests {
       RC_ASSERT(r.lower_bound() == t1);
       RC_ASSERT(r.upper_bound() == t2);
     } else {
-#ifdef DEBUG
-      RC_ASSERT_THROWS_AS((Range<T>{t1, t2}), krims::ExcTooLarge<T>);
-#endif
+      range_type r{t1, t2};
+      RC_ASSERT(r.empty());
     }
   }
 
@@ -94,7 +93,6 @@ struct RangeTests {
 
 #ifdef DEBUG
     // check that element access throws:
-
     typedef typename range_type::ExcEmptyRange exc_type;
     RC_ASSERT_THROWS_AS(r[0], exc_type);
 #endif
