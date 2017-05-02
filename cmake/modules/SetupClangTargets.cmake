@@ -468,7 +468,7 @@ is not used to compile the project.")
 		COMMAND
 		${CMAKE_COMMAND} -E make_directory ${FIXDIR}
 		COMMAND
-		${CMAKE_COMMANaD} -E remove -f ${APPLYFILE}
+		${CMAKE_COMMAND} -E remove -f ${APPLYFILE}
 		COMMAND
 		${YAML_MERGER} -o "${FIXFILE}" ${SOURCE_FIX_FILES}
 		COMMAND
