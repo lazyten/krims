@@ -38,7 +38,7 @@ class ExceptionBase : public std::exception {
           m_line(0),
           m_function("?"),
           m_failed_condition("?"),
-          m_extra("(none"),
+          m_extra("(none)"),
           m_what_str{"Failed to generate the exception message."} {}
 
   /** Default copy constructor */
