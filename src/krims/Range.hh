@@ -59,19 +59,27 @@ class Range {
 
   /** \brief Construct a range
    *
-   * Note that the interval is half-open, i.e. the range
+   * Construct the range [first, last). If last is smaller or equal
+   * to first, the range is empty.
+   *
+   * \note The interval is half-open, i.e. the range
    * is including the first element but not the last.
    * */
-  Range(value_type first, value_type last) : m_first(first), m_last(last) {
+  Range(value_type first, value_type last)
+        : m_first(first), m_last(std::max(first, last)) {
     assert_greater_equal(m_first, m_last);
   }
   /** \brief Construct from pair
    *
-   * The first element is inclusive, the last exclusive
-   * (half-open interval)
+   * Construct the range [first, second). If second is smaller or equal
+   * to first, the range is empty.
+   *
+   * \note The interval is half-open, i.e. first is inclusive, but second
+   * exclusive.
    */
   explicit Range(std::pair<value_type, value_type> first_last)
-        : m_first(first_last.first), m_last(first_last.second) {
+        : m_first(first_last.first),
+          m_last(std::max(first_last.first, first_last.second)) {
     assert_greater_equal(m_first, m_last);
   }
 
@@ -80,7 +88,8 @@ class Range {
    * i.e. if this class represents [3,5) it returns 2.
    * */
   size_type length() const {
-    return static_cast<diff_type>(m_last) - static_cast<diff_type>(m_first);
+    return static_cast<size_type>(static_cast<diff_type>(m_last) -
+                                  static_cast<diff_type>(m_first));
   }
 
   /** \brief Return the effective number of elements in the range
