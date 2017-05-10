@@ -89,7 +89,7 @@ matrix:
       - export BUILD_TARGET="clang-tidy-krims"
       - export TESTS=0
       compiler: clang
-      env: CC_COMP="clang-3.9" CXX_COMP="clang++-3.9"
+      env: CC_COMP="clang-3.9" CXX_COMP="clang++-3.9" BUILD_TARGET="clang-tidy-krims"
   allow_failures:
     - env: CC_COMP="clang-3.9" CXX_COMP="clang++-3.9" BUILD_TARGET="clang-tidy-krims"
 
