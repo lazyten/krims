@@ -34,6 +34,8 @@
  * <li> The number to check
  * <li> The upper bound plus one
  * </ol>
+ *
+ * \note Active in DEBUG mode only
  */
 #define assert_range(start, number, end)                                                 \
   {                                                                                      \
@@ -51,6 +53,8 @@
  * <li> lhs number
  * <li> rhs number
  * </ol>
+ *
+ * \note Active in DEBUG mode only
  */
 #define assert_greater_equal(lhs, rhs) \
   { assert_dbg(lhs <= rhs, ::krims::ExcTooLarge<decltype(lhs + rhs)>(lhs, rhs)); }
@@ -64,6 +68,8 @@
  * <li> lhs number
  * <li> rhs number
  * </ol>
+ *
+ * \note Active in DEBUG mode only
  */
 #define assert_greater(lhs, rhs) \
   { assert_dbg(lhs < rhs, ::krims::ExcTooLargeOrEqual<decltype(lhs + rhs)>(lhs, rhs)); }
@@ -77,12 +83,16 @@
  * <li> lhs number
  * <li> rhs number
  * </ol>
+ *
+ * \note Active in DEBUG mode only
  */
 #define assert_equal(lhs, rhs) \
   { assert_dbg(lhs == rhs, ::krims::ExcNotEqual<decltype(lhs + rhs)>(lhs, rhs)); }
 
 /**
  * Assert whether two sizes match
+ *
+ * \note Active in DEBUG mode only
  */
 #define assert_size(lhs, rhs) \
   { assert_dbg(lhs == rhs, ::krims::ExcSizeMismatch(lhs, rhs)); }
@@ -98,6 +108,18 @@
       assert_size(vsize, it->size());                              \
     }                                                              \
   }
+
+/*
+ * Macro for an internal check that a certain property is satisfied
+ * by the code at this point.
+ *
+ * If the condition is false an ExcInternalError is thrown, i.e.
+ * the user gets flagged that a bug in the code has occurred.
+ *
+ * \note Active in DEBUG mode only
+ */
+#define assert_internal(cond) \
+  { assert_dbg(cond, ::krims::ExcInternalError()) }
 
 namespace krims {
 template <typename T>
@@ -123,6 +145,8 @@ bool isfinite(std::complex<T> t) {
  * has been sufficiently tested. If false ExcNotSufficientlyTested
  * is raised (in Debug mode) unless the preprocessor macro IGNORE_UNTESTED
  * has been defined.
+ *
+ * \note Active in DEBUG mode only
  **/
 #ifdef IGNORE_UNTESTED
 #define assert_sufficiently_tested(condition) \
@@ -130,4 +154,4 @@ bool isfinite(std::complex<T> t) {
 #else
 #define assert_sufficiently_tested(condition) \
   { assert_dbg(condition, ::krims::ExcNotSufficientlyTested()); }
-#endif
+#endif  // IGNORE_UNTESTED

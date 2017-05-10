@@ -72,8 +72,8 @@ void GenMap::update(const std::string& key, GenMap&& other) {
 }
 
 std::string GenMap::make_full_key(const std::string& key) const {
-  assert_dbg(m_location[0] == '/' || m_location.length() == 0, krims::ExcInternalError());
-  assert_dbg(m_location.back() != '/', krims::ExcInternalError());
+  assert_internal(m_location[0] == '/' || m_location.length() == 0);
+  assert_internal(m_location.back() != '/');
 
   // Make a stack out of the key:
   std::vector<std::string> pathparts;
@@ -111,8 +111,8 @@ std::string GenMap::make_full_key(const std::string& key) const {
     res += "/" + part;
   }
 
-  assert_dbg(res.length() == 0 || res.back() != '/', krims::ExcInternalError());
-  assert_dbg(res.length() == 0 || res[0] == '/', krims::ExcInternalError());
+  assert_internal(res.length() == 0 || res.back() != '/');
+  assert_internal(res.length() == 0 || res[0] == '/');
 
   return res;
 }

@@ -223,7 +223,7 @@ void CircularBuffer<T, Container>::push_front(value_type val) {
   }
 
   // Check that we inserted something
-  assert_dbg(ssize + 1 == m_storage.size(), ExcInternalError());
+  assert_internal(ssize + 1 == m_storage.size());
 }
 
 template <typename T, typename Container>
@@ -253,7 +253,7 @@ void CircularBuffer<T, Container>::push_back(value_type val) {
   }
 
   // Check that we inserted something
-  assert_dbg(ssize + 1 == m_storage.size(), ExcInternalError());
+  assert_internal(ssize + 1 == m_storage.size());
 }
 
 template <typename T, typename Container>

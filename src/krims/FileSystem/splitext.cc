@@ -52,7 +52,7 @@ std::pair<std::string, std::string> splitext(const std::string& path) {
   if (no_dot_in_filename || hidden_file) {
     return {path, ""};
   } else {
-    assert_dbg(dot != std::string::npos, krims::ExcInternalError());
+    assert_internal(dot != std::string::npos);
     return {path.substr(0, dot), path.substr(dot)};
   }
 }
