@@ -18,6 +18,7 @@
 //
 
 #pragma once
+#include "ExceptionSystem.hh"
 #include "GenMapAccessor.hh"
 #include <iterator>
 #include <map>
@@ -116,15 +117,15 @@ GenMapAccessor<Const>* GenMapIterator<Const>::operator->() const {
 template <bool Const>
 std::string GenMapIterator<Const>::strip_location_prefix(const std::string& key) const {
   // The first part needs to be exactly the location:
-  assert_dbg(key.size() >= m_location.size(), ExcInternalError());
-  assert_dbg(0 == key.compare(0, m_location.size(), m_location), ExcInternalError());
+  assert_internal(key.size() >= m_location.size());
+  assert_internal(0 == key.compare(0, m_location.size(), m_location));
 
   if (key.size() <= m_location.size()) {
     return "/";
   } else {
     std::string res = key.substr(m_location.size());
-    assert_dbg(res[0] == '/' || res.length() == 0, ExcInternalError());
-    assert_dbg(res.back() != '/', ExcInternalError());
+    assert_internal(res[0] == '/' || res.length() == 0);
+    assert_internal(res.back() != '/');
     return res;
   }
 }

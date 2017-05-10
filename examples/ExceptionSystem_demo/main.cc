@@ -70,7 +70,7 @@ void part2() {
 
 void part3() {
   // Just abort after an internal error.
-  assert_dbg(false, ExcInternalError());
+  assert_internal(false);
 }
 
 void part4() {

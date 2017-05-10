@@ -41,7 +41,7 @@ void write_binary(const std::vector<T>& data, const std::string& file) {
   assert_throw(out, ExcIO());
 
   const size_t size = static_cast<size_t>(out.tellp());
-  assert_throw(size == data.size() * sizeof(T), krims::ExcInternalError());
+  assert_throw(size == data.size() * sizeof(T), ExcIO());
 }
 
 }  // namespace krims

@@ -145,6 +145,36 @@ TEST_CASE("Exception system", "[exception]") {
     // ---------------------------------------------------------
     //
 
+    auto test_assert_finite = [] {
+      double value =
+            *gen::map(gen::pair(gen::arbitrary<double>(),
+                                gen::elementOf(std::vector<double>{{0., 1., 2.}})),
+                      [](std::pair<double, double> dp) { return dp.first / dp.second; });
+
+      // Should this assertion fail?
+      const bool should_catch_something = !std::isfinite(value);
+
+      // Classify according to upper property
+      RC_CLASSIFY(should_catch_something, "Assertion failed");
+
+#ifdef DEBUG
+      if (should_catch_something) {
+        // sometimes we catch something in debug mode.
+        RC_ASSERT_THROWS_AS(assert_finite(value), ExcNumberNotFinite);
+      } else {
+        assert_finite(value);
+      }
+#else
+      // we should never catch anything in release mode.
+      assert_greater(value1, value2);
+#endif
+    };
+    CHECK(rc::check("Test assert_finite", test_assert_finite));
+
+    //
+    // ---------------------------------------------------------
+    //
+
     auto test_assert_size = [] {
       // The signed data type equivalent to size_t
       typedef typename std::make_signed<size_t>::type ssize;
