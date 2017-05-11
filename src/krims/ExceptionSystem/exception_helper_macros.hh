@@ -121,6 +121,16 @@
 #define assert_internal(cond) \
   { assert_dbg(cond, ::krims::ExcInternalError()) }
 
+/*
+ *  Macro to define a condition which tests whether the functionality
+ *  is implemented or not. Sometimes a specific case is hard to implement
+ *  and one leaves it out for someone else to implement ...
+ *
+ *  This is to make sure that such things do not go unnoticed.
+ */
+#define assert_implemented(condition) \
+  { assert_throw(condition, ::krims::ExcNotImplemented()) }
+
 namespace krims {
 template <typename T>
 bool isfinite(T t) {
