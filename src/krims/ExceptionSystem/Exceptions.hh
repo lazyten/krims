@@ -138,7 +138,7 @@ DefExceptionMsg(ExcNotInitialised,
 /**
  * The object is in a state not suitable for this operation.
  */
-DefException1(ExcInvalidState, char*,
+DefException1(ExcInvalidState, std::string,
               << "The object you attempt to use is not in a valid state: " << arg1);
 
 /**
@@ -159,8 +159,8 @@ DefExceptionMsg(ExcInternalError,
  * The calling of this function was deliberately disabled for some reason (which
  * is given here).
  */
-DefException1(ExcDisabled, char*, << "The method you attempt to call has been disabled: "
-                                  << arg1);
+DefException1(ExcDisabled, std::string,
+              << "The method you attempt to call has been disabled: " << arg1);
 
 /**
  * This is thrown if an iterator should be incremented, decremented
@@ -184,9 +184,9 @@ DefExceptionMsg(ExcIO, "An input/output error has occurred.");
 /**
  * An error occurred opening the named file.
  *
- * The constructor takes a single argument of type <tt>char*</tt> naming the
+ * The constructor takes a single argument of type <tt>std::string</tt> naming the
  * file.
  */
-DefException1(ExcFileNotOpen, char*, << "Could not open file " << arg1);
+DefException1(ExcFileNotOpen, std::string, << "Could not open file " << arg1);
 
 }  // namespace krims
