@@ -180,7 +180,7 @@ TEST_CASE("NumComp tests", "[NumComp]") {
 
     // Setup a vector of different length
     std::vector<double> v3{1.000000, 2.0000001, 10.001};
-    REQUIRE_THROWS_AS((void)(v3 == numcomp(v2)), NumCompException<double>);
+    REQUIRE_THROWS_AS((void)(v3 == numcomp(v2)), NumCompException<size_t>);
   }
 
 }  // TEST_CASE
