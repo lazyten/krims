@@ -25,6 +25,7 @@
 #include "TypeUtils/EnableIfLibrary.hh"
 #include "TypeUtils/IsCheaplyCopyable.hh"
 #include "TypeUtils/IsComplexNumber.hh"
+#include "TypeUtils/IsStreamInsertable.hh"
 #include "TypeUtils/RealTypeOf.hh"
 #include "TypeUtils/UsingLibrary.hh"
 #include "TypeUtils/VoidType.hh"
