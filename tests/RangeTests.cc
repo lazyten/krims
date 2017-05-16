@@ -210,8 +210,44 @@ TEST_CASE("Range tests", "[range]") {
     RangeTests<int>::access_to_past_the_end_iterator();
   }
 
-  // TODO test operators +=, -=, -, + on ranges and value types.
+  SECTION("Tests for +=, -=, - and + on Ranges") {
+    CHECK((3 - Range<int>(2, 4)) == Range<int>(0, 2));
+    CHECK((3 - Range<int>(1, 6)) == Range<int>(-2, 3));
+    CHECK((0 - Range<int>(1, 3)) == Range<int>(-2, 0));
+    CHECK((3 - Range<int>(1, 1)) == Range<int>(2, 2));
 
+    auto testable = [](long start) {
+      unsigned int off = *gen::arbitrary<unsigned int>().as("Range length");
+
+      Range<long> range{{start, start + off}};
+
+      long add = *gen::arbitrary<int>().as("Offset to add");
+      range += add;
+      RC_ASSERT(range.lower_bound() == start + add);
+      RC_ASSERT(range.upper_bound() == start + off + add);
+
+      range -= add;
+      RC_ASSERT(range.lower_bound() == start);
+      RC_ASSERT(range.upper_bound() == start + off);
+
+      RC_ASSERT((range + add) - add == range);
+      RC_ASSERT((add + range) - add == range);
+      RC_ASSERT((range - add) + add == range);
+      RC_ASSERT(add - (add - range) == range);
+
+      auto res = add - range;
+
+      if (off != 0) {
+        RC_ASSERT(res.lower_bound() == add - start - off + 1);
+        RC_ASSERT(res.upper_bound() == add - start + 1);
+      } else {
+        RC_ASSERT(res.lower_bound() == add - start);
+        RC_ASSERT(res.upper_bound() == add - start);
+      }
+    };
+
+    CHECK(rc::check("Tests for shifting ranges around", testable));
+  }  // Tests for +=, -=, - and + on Ranges
 }  // TEST_CASE
 }  // namespace tests
 }  // namespace krims
