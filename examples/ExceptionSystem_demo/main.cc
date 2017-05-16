@@ -23,6 +23,7 @@
 
 #include <future>
 #include <krims/GenMap.hh>
+#include <krims/NumComp.hh>
 #include <krims/version.hh>
 #include <sstream>
 #include <vector>
@@ -114,11 +115,27 @@ void part8() {
   ret.get();
 }
 
+void part9() {
+  using krims::numcomp;
+
+  // Numerical comparison should throw verbosely
+  krims::NumCompConstants::default_failure_action =
+        krims::NumCompActionType::ThrowVerbose;
+
+  // Perform a numerical comparison of two vectors:
+  std::vector<double> v1{1, 2, 3, 4};
+  std::vector<double> v2{1, 2, 3.00001, 4};
+
+  if (v1 == numcomp(v2)) {
+    std::cout << "Numerically equal ... that is suprising." << std::endl;
+  }
+}
+
 int main(int argc, char** argv) {
 
   std::cout << "Using krims version " << krims::version::version_string() << std::endl;
 
-  const int partmax = 8;
+  const int partmax = 9;
 
   if (argc != 2) {
     print_error(partmax);
@@ -141,6 +158,7 @@ int main(int argc, char** argv) {
   if (part-- == 0) part6();
   if (part-- == 0) part7();
   if (part-- == 0) part8();
+  if (part-- == 0) part9();
 
   return 0;
 }

@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 by the krims authors
+// Copyright (C) 2017 by the krims authors
 //
 // This file is part of krims.
 //
@@ -18,30 +18,21 @@
 //
 
 #pragma once
-#include <complex>
-#include <type_traits>
+#include "VoidType.hh"
+#include <iostream>
 
 namespace krims {
 
 //@{
-/** \brief helper struct to extract the underlying real type from a
- *         potentially complex scalar type.
- *
- * The real type is accessible via the member type "type".
- *  */
-template <typename Scalar>
-struct RealTypeOf {
-  static_assert(std::is_arithmetic<Scalar>::value,
-                "RealTypeOf can only operate oni arithmetic types.");
-  typedef Scalar type;
-};
-
-template <typename Scalar>
-struct RealTypeOf<std::complex<Scalar>> {
-  typedef Scalar type;
-};
-//@}
+/** \brief struct representing a type (std::true_type, std::false_type) which
+ *  indicates whether T can be inserted into an ostream or not.
+ */
+template <typename T, typename = void>
+struct IsStreamInsertable : public std::false_type {};
 
 template <typename T>
-using RealTypeOfType = typename RealTypeOf<T>::type;
-}
+struct IsStreamInsertable<T, VoidType<decltype(std::cout << std::declval<T>())>>
+      : public std::true_type {};
+//@}
+
+}  // namespace krims

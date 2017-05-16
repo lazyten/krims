@@ -27,9 +27,11 @@ namespace tests {
 using namespace rc;
 
 TEST_CASE("NumComp tests", "[NumComp]") {
+  // Throw on numerical error
+  NumCompConstants::default_failure_action = NumCompActionType::ThrowVerbose;
+
   SECTION("Test NumCompConstants::CacheChange") {
     // Set some failure action and some tolerance
-    NumCompConstants::default_failure_action = NumCompActionType::ThrowVerbose;
     NumCompConstants::default_tolerance_factor = 1e3;
 
     // change inside a region:
@@ -97,10 +99,7 @@ TEST_CASE("NumComp tests", "[NumComp]") {
   // -----------------------------------------------
   //
 
-  SECTION("Test is_equal with extremely sloppy tolerance") {
-    // If numerical comparison fails, throw an exception.
-    NumCompConstants::default_failure_action = NumCompActionType::ThrowVerbose;
-
+  SECTION("Test numcomp with extremely sloppy tolerance") {
     // Use a very sloppy tolerance:
     NumCompConstants::default_tolerance_factor = 1e6;
 
@@ -160,7 +159,29 @@ TEST_CASE("NumComp tests", "[NumComp]") {
             numcomp(std::complex<double>(1.000001, 1.99999999999)).tolerance(1e-6));
     REQUIRE(std::complex<float>(1., 2.) ==
             numcomp(std::complex<double>(1.000001, 1.99999999999)).tolerance(1e-6));
-  }  // SECTION Test is_equal with extremely sloppy tolerance
+  }  // SECTION Test numcomp with extremely sloppy tolerance
+
+  SECTION("Test numcomp with std::vectors") {
+    // Use a very sloppy tolerance:
+    NumCompConstants::default_tolerance_factor = 1e10;
+
+    // Setup two vectors where the 3rd element is problematic
+    std::vector<double> v1{1.000001, 2.0000001, 10.000, 14.00000};
+    std::vector<double> v2{1.000000, 2.0000001, 10.001, 14.00001};
+
+    REQUIRE_THROWS_AS((void)(v1 == numcomp(v2)), NumCompException<double>);
+
+    try {
+      (void)(v1 == numcomp(v2));
+    } catch (const NumCompException<double>& e) {
+      CHECK(Approx(e.tolerance) == 1e6 * std::numeric_limits<double>::epsilon());
+      CHECK(e.error == Approx(0.0001));
+    }
+
+    // Setup a vector of different length
+    std::vector<double> v3{1.000000, 2.0000001, 10.001};
+    REQUIRE_THROWS_AS((void)(v3 == numcomp(v2)), NumCompException<size_t>);
+  }
 
 }  // TEST_CASE
 }  // namespace tests

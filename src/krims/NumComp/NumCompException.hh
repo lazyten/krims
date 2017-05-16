@@ -80,6 +80,7 @@ NumCompException<T>::NumCompException(const T lhs_, const T rhs_, const T error_
   if (description != "") {
     ss << '\n' << '\n' << description;
   }
+  ExceptionBase::set_extra(ss.str());
 }
 
 template <typename T>

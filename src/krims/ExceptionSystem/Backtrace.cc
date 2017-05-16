@@ -197,6 +197,14 @@ void Backtrace::parse_backtrace() {
       initframe = frame + 1;
       break;
     }
+
+    if (std::strstr(stacktrace[frame], "__cxa_rethrow") != nullptr) {
+      // The current frame indicates that a rethrow occurred.
+      // This is certainly already inside the exception handling
+      // part of the c++ library.
+      initframe = frame + 1;
+      break;
+    }
   }
 
   for (int raw_i = initframe; raw_i < m_n_raw_frames; ++raw_i) {
