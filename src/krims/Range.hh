@@ -140,7 +140,7 @@ class Range {
   Range& operator+=(value_type i);
 
   /** Shift the range by a certain value */
-  Range& operator-=(value_type i) { return (*this) += -i; }
+  Range& operator-=(value_type i);
   ///@}
 
   template <typename U>
@@ -285,7 +285,21 @@ Range<T>& Range<T>::operator+=(value_type i) {
 
   m_first += i;
   m_last += i;
+  return *this;
+}
 
+template <typename T>
+Range<T>& Range<T>::operator-=(value_type i) {
+  if (i < 0) {
+    assert_dbg(m_first - i >= m_first, krims::ExcOverflow());
+    assert_dbg(m_last - i >= m_last, krims::ExcOverflow());
+  } else {
+    assert_dbg(m_first - i <= m_first, krims::ExcUnderflow());
+    assert_dbg(m_last - i <= m_last, krims::ExcUnderflow());
+  }
+
+  m_first -= i;
+  m_last -= i;
   return *this;
 }
 
