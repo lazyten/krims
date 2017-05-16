@@ -41,4 +41,7 @@ struct RealTypeOf<std::complex<Scalar>> {
   typedef Scalar type;
 };
 //@}
+
+template <typename T>
+using RealTypeOfType = typename RealTypeOf<T>::type;
 }
