@@ -140,7 +140,7 @@ class Range {
   Range& operator+=(value_type i);
 
   /** Shift the range by a certain value */
-  Range& operator-=(value_type i) { return (*this) += -i; }
+  Range& operator-=(value_type i);
   ///@}
 
   template <typename U>
@@ -187,7 +187,7 @@ Range<T> operator-(const Range<T>& r) {
 }
 
 template <typename T>
-Range<T> operator-(T i, Range<T> r);
+Range<T> operator-(T i, const Range<T>& r);
 
 /** Iterator for ranges */
 template <typename T>
@@ -285,21 +285,35 @@ Range<T>& Range<T>::operator+=(value_type i) {
 
   m_first += i;
   m_last += i;
+  return *this;
+}
+
+template <typename T>
+Range<T>& Range<T>::operator-=(value_type i) {
+  if (i < 0) {
+    assert_dbg(m_first - i >= m_first, krims::ExcOverflow());
+    assert_dbg(m_last - i >= m_last, krims::ExcOverflow());
+  } else {
+    assert_dbg(m_first - i <= m_first, krims::ExcUnderflow());
+    assert_dbg(m_last - i <= m_last, krims::ExcUnderflow());
+  }
+
+  m_first -= i;
+  m_last -= i;
+  return *this;
 }
 
 template <typename T>
 std::ostream& operator<<(std::ostream& o, const Range<T>& r) {
-  if (r.empty()) {
-    o << "[0,0)";
-  } else {
-    o << "[" << r.lower_bound() << "," << r.upper_bound() << ")";
-  }
+  o << "[" << r.lower_bound() << "," << r.upper_bound() << ")";
   return o;
 }
 
 template <typename T>
 Range<T> operator-(T i, const Range<T>& r) {
-  if (r.empty()) return r;
+  if (r.empty()) {
+    return {i - r.lower_bound(), i - r.upper_bound()};
+  }
 
   const T lower = i + 1 - r.upper_bound();
   const T upper = i + 1 - r.lower_bound();
