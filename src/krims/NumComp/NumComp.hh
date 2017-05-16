@@ -84,13 +84,21 @@ class NumComp {
   const T& m_value;
 };
 
-/** Helper function to make an NumComp<T> object */
+/** Helper function to make an NumComp<T> object
+ *
+ * \note do not use this for fast numeric comparsion,
+ *       use numerical_error (from the numerical_error.hh header) instead.
+ * */
 template <typename T>
 NumComp<T> numcomp(const T& value) {
   return NumComp<T>(value);
 }
 
-/** Helper function to make a NumComp<T> object which is guaranteed to return */
+/** Helper function to make a NumComp<T> object which is guaranteed to return
+ *
+ * \note do not use this for fast numeric comparsion,
+ *       use numerical_error (from the numerical_error.hh header) instead.
+ */
 template <typename T>
 NumComp<T> numcomp_return(const T& value) {
   return NumComp<T>(value).failure_action(NumCompActionType::Return);
@@ -100,7 +108,10 @@ NumComp<T> numcomp_return(const T& value) {
  *
  * If not ThrowVerbose is chosen as the default setting the comparison will
  * only throw normally (i.e. less verbose).
- * */
+ *
+ * \note do not use this for fast numeric comparsion,
+ *       use numerical_error (from the numerical_error.hh header) instead.
+ */
 template <typename T>
 NumComp<T> numcomp_throw(const T& value) {
   if (NumCompConstants::default_failure_action == NumCompActionType::ThrowVerbose) {

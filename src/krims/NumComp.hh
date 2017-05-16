@@ -22,3 +22,4 @@
 #include "NumComp/NumCompConstants.hh"
 #include "NumComp/NumCompException.hh"
 #include "NumComp/NumEqual.hh"
+#include "NumComp/numerical_error.hh"

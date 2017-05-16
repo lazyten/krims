@@ -20,6 +20,7 @@
 #pragma once
 #include "NumCompConstants.hh"
 #include "NumCompException.hh"
+#include "numerical_error.hh"
 #include <cmath>
 #include <complex>
 
@@ -85,39 +86,17 @@ template <typename T, typename U>
 bool NumEqual<T, U, typename std::enable_if<std::is_floating_point<T>::value &&
                                             std::is_floating_point<U>::value>::type>::
 operator()(const T& lhs, const U& rhs) const {
-  using std::abs;
+  const common_type error = numerical_error<common_type>(lhs, rhs);
 
-  // This comparison algorithm is based on these resources:
-  //    http://realtimecollisiondetection.net/blog/?p=89
-  //    https://stackoverflow.com/questions/17333/most-effective-way-for-float-and-double-comparison
-
-  if (lhs == rhs) {
-    // shortcut, which handles infinities
+  if (error <= m_tolerance) {
     return true;
+  } else if (m_failure_action == NumCompActionType::ThrowNormal ||
+             m_failure_action == NumCompActionType::ThrowVerbose) {
+    NumCompException<common_type> e(lhs, rhs, error, m_tolerance, "==");
+    e.add_exc_data(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    throw e;
   } else {
-    // This essentially does absolute comparision if lhs and rhs are small
-    // compared to the tolerance else it does relative comparsion
-
-    const common_type absdiff = abs(lhs - rhs);
-    const common_type maxside = std::max<common_type>(abs(lhs), abs(rhs));
-    const common_type maxone = std::max<common_type>(1, maxside);
-    const bool equal = absdiff <= m_tolerance * maxone;
-
-    // Alternative to control tolerance for absolute comparison (absErr)
-    // and relative comparison (relErr) separately:
-    // bool equal = absdiff <= max(absErr, relErr * max(abs(lhs),abs(rhs)))
-
-    if (equal) {
-      return true;
-    } else if (m_failure_action == NumCompActionType::ThrowNormal ||
-               m_failure_action == NumCompActionType::ThrowVerbose) {
-      const common_type error = absdiff / maxone;
-      NumCompException<common_type> e(lhs, rhs, error, m_tolerance, "==");
-      e.add_exc_data(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-      throw e;
-    } else {
-      return false;
-    }
+    return false;
   }
 }
 
