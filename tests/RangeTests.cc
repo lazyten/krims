@@ -248,6 +248,47 @@ TEST_CASE("Range tests", "[range]") {
 
     CHECK(rc::check("Tests for shifting ranges around", testable));
   }  // Tests for +=, -=, - and + on Ranges
+
+  SECTION("Tests for intersection, subset and superset") {
+    Range<size_t> empty{{4, 4}};
+    Range<size_t> empty2{{5, 5}};
+
+    CHECK(empty.subset_of(empty2));
+    CHECK(empty.superset_of(empty2));
+    CHECK(intersection(empty, empty2).empty());
+    CHECK(empty.contains(empty));
+    CHECK(empty2.contains(empty));
+
+    Range<size_t> r1{{2, 6}};
+    CHECK(empty.subset_of(r1));
+    CHECK(r1.contains(empty));
+    CHECK(r1.contains(r1));
+    CHECK(intersection(r1, empty).empty());
+
+    Range<size_t> r2{{1, 4}};
+    CHECK_FALSE(r1.contains(r2));
+    CHECK_FALSE(r2.contains(r1));
+
+    auto inter = intersection(r1, r2);
+    Range<size_t> inter_ref{{2, 4}};
+    CHECK(inter == inter_ref);
+    CHECK(inter.subset_of(r1));
+    CHECK(inter.subset_of(r2));
+    CHECK(r1.contains(inter));
+    CHECK(r2.contains(inter));
+
+    Range<size_t> r3{{5, 6}};
+    CHECK(intersection(r2, r3).empty());
+    CHECK(r1.contains(r3));
+    CHECK(intersection(r1, r3) == r3);
+    CHECK_FALSE(intersection(r1, r3).empty());
+    CHECK(r3.subset_of(r1));
+    CHECK(r3.subset_of(r3));
+    CHECK(r1.superset_of(r1));
+    CHECK(r1.superset_of(r3));
+    CHECK_FALSE(r3.superset_of(r1));
+  }
+
 }  // TEST_CASE
 }  // namespace tests
 }  // namespace krims
