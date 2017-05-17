@@ -122,6 +122,26 @@ class Range {
   /** Check whether the provided value is in range */
   bool contains(value_type i) const { return m_first <= i && i < m_last; }
 
+  /** Check whether the other range is fully contained in this one.
+   *
+   * \note This is always true if other is empty.
+   * */
+  bool contains(const Range<T>& other) const {
+    return other.empty() || (m_first <= other.m_first && other.m_last <= m_last);
+  }
+
+  /** Is this range a superset of the other range
+   *
+   *  \note This is an alias of contains
+   */
+  bool superset_of(const Range<T>& other) const { return contains(other); }
+
+  /** Is this range a subset of the other range, i.e.
+   *
+   * is other.superset_of(*this) true
+   */
+  bool subset_of(const Range<T>& other) const { return other.superset_of(*this); }
+
   /** Return the ith value of the range */
   value_type operator[](size_type i) const;
 
@@ -260,6 +280,13 @@ Range<T> range(const T& t) {
 template <typename T>
 Range<T> range(const T& t1, const T& t2) {
   return Range<T>{t1, t2};
+}
+
+template <typename T>
+Range<T> intersection(const Range<T>& lhs, const Range<T>& rhs) {
+  const T lower = std::max(lhs.lower_bound(), rhs.lower_bound());
+  const T upper = std::min(lhs.upper_bound(), rhs.upper_bound());
+  return {lower, std::max(lower, upper)};
 }
 
 //
