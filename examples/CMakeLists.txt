@@ -64,3 +64,4 @@ endfunction()
 #
 add_subdirectory(GenMap_demo)
 add_subdirectory(ExceptionSystem_demo)
+add_subdirectory(Binary128Read)
