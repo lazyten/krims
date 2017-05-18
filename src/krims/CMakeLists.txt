@@ -24,6 +24,7 @@
 #
 set(KRIMS_SOURCES
 	demangle.cc
+	DataFiles/FindDataFile.cc
 	ExceptionSystem/addr2line.cc
 	ExceptionSystem/Backtrace.cc
 	ExceptionSystem/ExceptionBase.cc
@@ -33,7 +34,6 @@ set(KRIMS_SOURCES
 	FileSystem/path_exists.cc
 	FileSystem/realpath.cc
 	FileSystem/splitext.cc
-	FileUtils/FindDataFile.cc
 	GenMap.cc
 	NumComp/NumCompConstants.cc
 	version.cc

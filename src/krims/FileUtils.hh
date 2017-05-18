@@ -18,6 +18,5 @@
 //
 
 #pragma once
-#include "FileUtils/FindDataFile.hh"
-#include "FileUtils/read_binary.hh"
-#include "FileUtils/write_binary.hh"
+#include "DataFiles.hh"
+#pragma message("This header file is deprecated. Use DataFiles.hh instead")

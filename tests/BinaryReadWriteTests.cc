@@ -19,8 +19,8 @@
 
 #include <catch.hpp>
 #include <cstdio>
-#include <krims/FileUtils/read_binary.hh>
-#include <krims/FileUtils/write_binary.hh>
+#include <krims/DataFiles/read_binary.hh>
+#include <krims/DataFiles/write_binary.hh>
 #include <random>
 #include <rapidcheck.h>
 
