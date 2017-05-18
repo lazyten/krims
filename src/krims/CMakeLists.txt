@@ -25,6 +25,8 @@
 set(KRIMS_SOURCES
 	demangle.cc
 	DataFiles/FindDataFile.cc
+	DataFiles/FloatingPointType.cc
+	DataFiles/ieee_convert.cc
 	ExceptionSystem/addr2line.cc
 	ExceptionSystem/Backtrace.cc
 	ExceptionSystem/ExceptionBase.cc
