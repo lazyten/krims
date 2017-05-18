@@ -94,4 +94,26 @@ void read_binary(const std::string& file, std::vector<T>& out, size_t expected_s
                                  std::to_string(expected_size) + ")."));
 }
 
+//@{
+/** Read a binary file of IEEE quadruple precision 128bit floating points
+ *  and return the result as a vector of long doubles.
+ *
+ *  Works very similar to the two other functions in this header.
+ *  The difference is that this time a conversion from the quad precision
+ *  128bit format to long double is attempted. The target bit size is
+ *  whatever the compiler/system uses for long double (usually 80bit
+ *  extended precision).
+ *
+ *  The version with the expected_size argument explicitly verifies the
+ *  number of floats read.
+ *
+ *  \note These functions are temporary and will probably be removed again
+ *        at some point.
+ */
+void read_binary128(const std::string& file, std::vector<long double>& out);
+
+void read_binary128(const std::string& file, std::vector<long double>& out,
+                    size_t expected_size);
+//@}
+
 }  // namespace krims

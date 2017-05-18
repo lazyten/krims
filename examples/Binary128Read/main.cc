@@ -18,7 +18,6 @@
 //
 
 #include <iomanip>
-#include <krims/DataFiles/ieee_convert.hh>
 #include <krims/DataFiles/read_binary.hh>
 
 int main(int argc, char** argv) {
@@ -31,26 +30,9 @@ int main(int argc, char** argv) {
     return 1;
   }
 
-  // Read the full content into a buffer:
-  std::vector<char> buf;
-  krims::read_binary(std::string(argv[1]), buf);
+  std::vector<long double> out;
+  krims::read_binary128(std::string(argv[1]), out);
 
-  if (buf.size() % 16 != 0) {
-    std::cerr << "File size not a multiple of 16." << std::endl;
-    return 1;
-  }
-
-  // Convert buffer to long double:
-  std::vector<long double> out(buf.size() / 16);
-  FloatingPointType intype = FloatingPointType::BINARY128;
-  const FloatingPointType outtype = krims::floating_point_type_of<long double>();
-
-  for (size_t i = 0; i < out.size(); ++i) {
-    krims::ieee_convert({intype, &buf[i * 16]},
-                        {outtype, reinterpret_cast<char*>(&out[i])});
-  }
-
-  // Print findings
   for (const auto& val : out) {
     std::cout << std::setprecision(25) << val << std::endl;
   }
