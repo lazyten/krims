@@ -19,8 +19,10 @@
 
 #include <catch.hpp>
 #include <cstdio>
-#include <krims/FileUtils/read_binary.hh>
-#include <krims/FileUtils/write_binary.hh>
+#include <krims/DataFiles/read_binary.hh>
+#include <krims/DataFiles/write_binary.hh>
+#include <krims/FileSystem/dirname.hh>
+#include <krims/FileSystem/path_exists.hh>
 #include <random>
 #include <rapidcheck.h>
 
@@ -74,6 +76,40 @@ TEST_CASE("binary_read, binary_write tests", "[binary_read_write]") {
     CHECK(rc::check("Test binary read/write strings", test<std::string>));
   }
   */
+
+  SECTION("Test read_binary128") {
+    const std::string f128sample = dirname(__FILE__) + "/float128sample.bin";
+    REQUIRE(path_exists(f128sample));
+
+    std::vector<long double> reference{0.0L,
+                                       0.0L / -1.0L,
+                                       -2.0L,
+                                       4.0L,
+                                       15.0L,
+                                       1.0L / 10.0L,
+                                       1.0L / 10101010.0L,
+                                       -std::numeric_limits<long double>::infinity(),
+                                       std::numeric_limits<long double>::infinity(),
+                                       1e123L,
+                                       -34873289471.0L};
+
+    // Load without size constraint
+    std::vector<long double> data;
+    read_binary128(f128sample, data);
+    CHECK(data.size() == reference.size());
+
+    // Load with size constraint:
+    read_binary128(f128sample, data, reference.size());
+
+    for (size_t i = 0; i < reference.size(); ++i) {
+      if (std::isfinite(reference[i]) && reference[i] != 0) {
+        CHECK(std::abs(reference[i] - data[i]) < 1e-19);
+      } else {
+        CHECK(reference[i] == data[i]);
+      }
+    }
+  }  // read_binary128
+
 }  // binary_read, binary_write
 
 }  // namespace tests

@@ -18,6 +18,26 @@
 //
 
 #pragma once
-#include "krims/DataFiles/write_binary.hh"
-#pragma message( \
-      "This header file is deprecated. Use krims/DataFiles/write_binary.hh instead.")
+
+namespace krims {
+
+enum FloatingPointType {
+  INVALID = 0,
+
+  /** Use IEEE 754 binary32 floats (single precision)*/
+  BINARY32 = 4,
+
+  /** Use IEEE 754 binary64 floats (double precision)*/
+  BINARY64 = 8,
+
+  /** Use IEEE 754 binary80 floats (extended precision)*/
+  BINARY80 = 10,
+
+  /** Use IEEE 754 binary128 floats (quad precision)*/
+  BINARY128 = 16,
+};
+
+template <typename T>
+FloatingPointType floating_point_type_of();
+
+}  // namespace krims

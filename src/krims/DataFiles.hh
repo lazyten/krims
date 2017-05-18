@@ -18,6 +18,6 @@
 //
 
 #pragma once
-#include "krims/DataFiles/write_binary.hh"
-#pragma message( \
-      "This header file is deprecated. Use krims/DataFiles/write_binary.hh instead.")
+#include "DataFiles/FindDataFile.hh"
+#include "DataFiles/read_binary.hh"
+#include "DataFiles/write_binary.hh"

@@ -17,7 +17,24 @@
 // along with krims. If not, see <http://www.gnu.org/licenses/>.
 //
 
-#pragma once
-#include "krims/DataFiles/write_binary.hh"
-#pragma message( \
-      "This header file is deprecated. Use krims/DataFiles/write_binary.hh instead.")
+#include <iomanip>
+#include <krims/DataFiles/read_binary.hh>
+
+int main(int argc, char** argv) {
+  using krims::FloatingPointType;
+
+  if (argc < 2) {
+    std::cerr << "Please supply one argument:" << '\n'
+              << "The path to a binary data file with numbers in IEEE BINARY128 format."
+              << std::endl;
+    return 1;
+  }
+
+  std::vector<long double> out;
+  krims::read_binary128(std::string(argv[1]), out);
+
+  for (const auto& val : out) {
+    std::cout << std::setprecision(25) << val << std::endl;
+  }
+  return 0;
+}

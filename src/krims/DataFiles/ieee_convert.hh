@@ -18,6 +18,24 @@
 //
 
 #pragma once
-#include "krims/DataFiles/write_binary.hh"
-#pragma message( \
-      "This header file is deprecated. Use krims/DataFiles/write_binary.hh instead.")
+#include "FloatingPointType.hh"
+#include <utility>
+
+namespace krims {
+
+/** Low level conversion function to convert between different
+ *  IEEE 754 floating point formats in memory.
+ *
+ *  No checks on memory bounds are done. Enough space to
+ *  store the input and output data types has to be present
+ *  at the pointed locations.
+ *
+ *  The function tries to use the functionality implemented in the
+ *  compiler as much as possible for doing the conversions.
+ *
+ *  \note Right now only BINARY128 to BINARY80 is implemented.
+ */
+void ieee_convert(std::pair<FloatingPointType, const char*> in,
+                  std::pair<FloatingPointType, char*> out);
+
+}  // namespace krims

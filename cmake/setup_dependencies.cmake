@@ -67,3 +67,15 @@ if (KRIMS_ENABLE_TESTS)
 	include(cmake/findCatch.cmake)
 	set(KRIMS_DEPENDENCIES_TEST ${KRIMS_DEPENDENCIES_TEST} ${catch_TARGET})
 endif()
+
+##################
+#-- Endianness --#
+##################
+include(TestBigEndian)
+TEST_BIG_ENDIAN(IS_BIG_ENDIAN)
+if (IS_BIG_ENDIAN)
+	message(WARNING "Little endian is assumed for writing binary files \
+at the moment and no conversion is attempted. You are on your own if you choose \
+to read/write binary files.")
+endif()
+unset(IS_BIG_ENDIAN)
