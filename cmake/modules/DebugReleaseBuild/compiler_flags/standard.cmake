@@ -134,7 +134,7 @@ int main() { std::vector<int> v{0,}; return v[0]; }" DRB_HAVE_LLVM_LIBCXX)
 	unset(CMAKE_REQUIRED_FLAGS_ORIG)
 
 	# Set the library to link with accordingly in the cache:
-	if (DRB_CXX_STANDARD_LIBRARY STREQUAL "")
+	if ("${DRB_CXX_STANDARD_LIBRARY}" STREQUAL "")
 		if(DRB_HAVE_LLVM_LIBCXX)
 			set(DRB_CXX_STANDARD_LIBRARY "libc++")
 		else()
@@ -151,7 +151,7 @@ int main() { std::vector<int> v{0,}; return v[0]; }" DRB_HAVE_LLVM_LIBCXX)
 			"${CMAKE_EXE_LINKER_FLAGS_DEBUG} -stdlib=${DRB_CXX_STANDARD_LIBRARY}")
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=${DRB_CXX_STANDARD_LIBRARY}")
 	else()
-		message(FATAL_ERROR "Unrecognised value for CPP_STANDARD_LIBRARY. \
-Only \"libc++\" or \"libstdc++\" are valid.")
+		message(FATAL_ERROR "Unrecognised value \"${DRB_CXX_STANDARD_LIBRARY}\" \
+for CPP_STANDARD_LIBRARY. Only \"libc++\" or \"libstdc++\" are valid.")
 	endif()
 endif()
