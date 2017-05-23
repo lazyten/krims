@@ -18,6 +18,7 @@
 //
 
 #include "basename.hh"
+#include <cstdlib>
 #include <cstring>
 #include <libgen.h>
 

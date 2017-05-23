@@ -7,9 +7,12 @@ Library of common *Krimskrams* (German for "odds and ends").
 It contains some very basic stuff which provides a useful foundation for many other projects.
 
 ## Building
-All compilers starting from ``clang-3.5`` and ``gcc-4.8`` should be able to build the code.
-``C++11`` support is required and enables at least the basic functionality for everything below.
-The full implementation is only available for ``C++14``-aware compilers.
+For configuring the build we need at least ``cmake`` ``3.0.0``.  
+All compilers starting from ``clang-3.5`` and ``gcc-4.8`` should be able to build the code
+``C++11`` support is required. If ``C++14`` is available some more general implementations
+of certain functionality becomes available.
+E.g. the [tuple utility functions](#useful-helper-functions-to-deal-with-tuples) are only
+available up to tuples with 4 elements at the moment if ``C++14`` cannot be used.
 
 The tests depend on some third-party libraries ([rapidcheck](https://github.com/emil-e/rapidcheck)
 and [Catch](https://github.com/philsquared/Catch/)), which are automatically

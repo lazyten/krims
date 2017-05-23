@@ -18,6 +18,7 @@
 //
 
 #include "dirname.hh"
+#include <cstdlib>
 #include <cstring>
 #include <libgen.h>
 

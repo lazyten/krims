@@ -19,6 +19,7 @@
 
 #pragma once
 #include "krims/ExceptionSystem.hh"
+#include <array>
 
 namespace krims {
 
