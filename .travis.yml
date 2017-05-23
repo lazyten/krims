@@ -55,7 +55,7 @@ matrix:
   include:
     # Clang 3.5 with disabled c++14 support
     - install:
-      - travis_retry sudo apt-get install -y lib++-dev
+      - travis_retry sudo apt-get install -y libc++-dev
       - export EXTRA_OPTS="-DDRB_MAXIMUM_CXX_STANDARD=11"
       - export GCOV="llvm-cov gcov"
       compiler: clang
