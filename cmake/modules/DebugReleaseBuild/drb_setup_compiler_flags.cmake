@@ -65,6 +65,35 @@ Going with C++98.")
 	endif()
 endmacro(determine_supported_cxx_standards)
 
+function(cxx_standard_flag STANDARD VARIABLE)
+	# Function which determines the compiler flag needed for the requested
+	# standard STANDARD on the current compiler.
+	#
+	# The flag is written to the output variable ${VARIABLE}
+	#
+	if (STANDARD VERSION_LESS "11" OR "${STANDARD}" STREQUAL "98")
+		message(FATAL_ERROR "C++ Standard below 11 not supported in cxx_standard_flag")
+	endif()
+
+	set (FLAG "c++${STANDARD}")
+	if (STANDARD EQUAL "14")
+		if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS "3.5")
+			# Clang <3.5 needs special treatment here,
+			# since c++14 flag is not yet know there
+			set(FLAG "c++1y")
+		endif()
+	endif()
+
+	# Check whether the flag works
+	CHECK_CXX_COMPILER_FLAG("-std=${FLAG}" DRB_HAVE_STANDARD_FLAG)
+	if (NOT DRB_HAVE_STANDARD_FLAG)
+		message(FATAL_ERROR "C++ Standard ${STANDARD} is requested but is not supported.")
+	endif()
+	unset(DRB_HAVE_STANDARD_FLAG)
+
+	set(${VARIABLE} "-std=${FLAG}" PARENT_SCOPE)
+endfunction(cxx_standard_flag)
+
 macro(use_cxx_standard STANDARD)
 	# macro to enforce a particular c++ standard (only needed for cmake < 3.1)
 	#
@@ -73,34 +102,15 @@ macro(use_cxx_standard STANDARD)
 	# to the plain value STANDARD (98,11,14 or 17)
 	#
 	if (CMAKE_VERSION VERSION_LESS "3.1")
-		if (STANDARD VERSION_LESS "11")
-			message(FATAL_ERROR "C++ Standard below 11 not supported in USE_CXX_STANDARD")
-		endif()
-
-		set (FLAG "c++${STANDARD}")
-		if (STANDARD EQUAL "14")
-			if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS "3.5")
-				# Clang <3.5 needs special treatment here, 
-				# since c++14 flag is not yet know there
-				set(FLAG "c++1y")
-			endif()
-		endif()
-
-		# Check whether the flag works
-		CHECK_CXX_COMPILER_FLAG("-std=${FLAG}" DRB_HAVE_STANDARD_FLAG)
-		if (NOT DRB_HAVE_STANDARD_FLAG)
-			message(FATAL_ERROR "C++ Standard ${STANDARD} is required but not supported.")
-		endif()
-		unset(DRB_HAVE_STANDARD_FLAG)
-
-		# Add it to the list of flags.
-		set (CMAKE_CXX_FLAGS "-std=${FLAG} ${CMAKE_CXX_FLAGS}")
+		# Determine the flag for the requested c++ standard.
+		cxx_standard_flag("${STANDARD}" FLAG)
+		set (CMAKE_CXX_FLAGS "${FLAG} ${CMAKE_CXX_FLAGS}")
 		unset(FLAG)
 
 		# set the CMAKE_CXX_STANDARD variable
 		# (even though unused in this CMake version)
 		set(CMAKE_CXX_STANDARD ${STANDARD}
-			CACHE "The C++ standard we use for this build.")
+			CACHE STRING "The C++ standard we use for this build.")
 	else()
 		# set the standard and enforce it:
 		set(CMAKE_CXX_STANDARD ${STANDARD})
