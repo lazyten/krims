@@ -19,8 +19,15 @@
 ##
 ## ---------------------------------------------------------------------
 
-if (NOT CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-	# Cannot produce sanitisation analysis for any compiler but clang
+if (NOT CMAKE_CXX_COMPILER_ID MATCHES "Clang"
+		AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER "3.5.0")
+	# Clang only supports this on 3.5 and up
+	return()
+endif()
+
+if (NOT CMAKE_CXX_COMPILER_ID MATCHES "GNU"
+		AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER "4.9.0")
+	# GCC only supports this on 4.9 and up
 	return()
 endif()
 
@@ -28,11 +35,18 @@ endif()
 # Options
 #
 
-option(DRB_SANITIZE_MEMORY_Release "Enable detection of unitialised memory reads in RELEASE build.")
 option(DRB_SANITIZE_ADDRESS_Release "Enable detection of memory errors (Out-of-bounds, use-after-free, ...) in RELEASE build.")
 option(DRB_SANITIZE_THREAD_Release "Enable detection of data races introduced by multi-threading in the RELEASE build.")
+option(DRB_SANITIZE_UNDEFINED_Release "Enable detection of undefined behaviour instructions in the RELEASE build.")
 
-set(DRB_SANITIZE_OPTIONS DRB_SANITIZE_MEMORY_Release DRB_SANITIZE_THREAD_Release DRB_SANITIZE_ADDRESS_Release)
+set(DRB_SANITIZE_OPTIONS DRB_SANITIZE_THREAD_Release DRB_SANITIZE_ADDRESS_Release
+	DRB_SANITIZE_UNDEFINED_Release)
+
+if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+	# AFAIK only clang has this feature
+	option(DRB_SANITIZE_MEMORY_Release "Enable detection of unitialised memory reads in RELEASE build.")
+	set(DRB_SANITIZE_OPTIONS ${DRB_SANITIZE_OPTIONS} DRB_SANITIZE_MEMORY_Release)
+endif()
 
 #
 # Consistency check
@@ -69,6 +83,9 @@ if (CMAKE_BUILD_TYPE MATCHES "Release" AND DRB_HAVE_ANY_SANITIZE)
 	elseif(DRB_SANITIZE_ADDRESS_Release)
 		set(_FLAGSS "${_FLAGSS} -fsanitize=address")
 		message(STATUS "Enabled address sanitiser in Release build.")
+	elseif(DRB_SANITIZE_UNDEFINED_Release)
+		set(_FLAGSS "${_FLAGSS} -fsanitize=undefined")
+		message(STATUS "Enabled undefined behaviour sanitiser in Release build.")
 	endif()
 
 	# Disable some further optimisations
