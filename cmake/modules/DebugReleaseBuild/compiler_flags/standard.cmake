@@ -119,39 +119,3 @@ if (CMAKE_BUILD_TYPE MATCHES "Release")
 		message(STATUS "Enabled machine-specific optimisations in Release build.")
 	endif()
 endif()
-
-###################################
-#--  Special section for clang  --#
-###################################
-if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-	# Try to see whether clang and the system support llvm's libc++ library
-	# as the standard c++ library
-	set(CMAKE_REQUIRED_FLAGS_ORIG "${CMAKE_REQUIRED_FLAGS}")
-	set(CMAKE_REQUIRED_FLAGS "-stdlib=libc++ -Werror -std=c++11")
-	CHECK_CXX_SOURCE_COMPILES("#include <vector>
-int main() { std::vector<int> v{0,}; return v[0]; }" DRB_HAVE_LLVM_LIBCXX)
-	set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS_ORIG}")
-	unset(CMAKE_REQUIRED_FLAGS_ORIG)
-
-	# Set the library to link with accordingly in the cache:
-	if ("${DRB_CXX_STANDARD_LIBRARY}" STREQUAL "")
-		if(DRB_HAVE_LLVM_LIBCXX)
-			set(DRB_CXX_STANDARD_LIBRARY "libc++")
-		else()
-			set(DRB_CXX_STANDARD_LIBRARY "libstdc++")
-		endif()
-		set(DRB_CXX_STANDARD_LIBRARY "${DRB_CXX_STANDARD_LIBRARY}" CACHE STRING
-			"Choose the standard library clang should link with")
-	endif()
-
-	# And alos in the compiler/linker flags:
-	if (DRB_CXX_STANDARD_LIBRARY STREQUAL "libc++" OR
-			DRB_CXX_STANDARD_LIBRARY STREQUAL "libstdc++")
-		set(CMAKE_EXE_LINKER_FLAGS
-			"${CMAKE_EXE_LINKER_FLAGS_DEBUG} -stdlib=${DRB_CXX_STANDARD_LIBRARY}")
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=${DRB_CXX_STANDARD_LIBRARY}")
-	else()
-		message(FATAL_ERROR "Unrecognised value \"${DRB_CXX_STANDARD_LIBRARY}\" \
-for CPP_STANDARD_LIBRARY. Only \"libc++\" or \"libstdc++\" are valid.")
-	endif()
-endif()

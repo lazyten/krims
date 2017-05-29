@@ -65,6 +65,45 @@ Going with C++98.")
 	endif()
 endmacro(determine_supported_cxx_standards)
 
+function(determine_supported_stdlib_cxx)
+	# macro to check for the ideal standard library to use.
+	#
+	# For clang this would be libc++ if it is available, for 
+	# gcc it would be libstdc++.
+	#
+	# The result is stored in cache under DRB_CXX_STANDARD_LIBRARY
+	#
+	if (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+		set(CXX_STANDARD_LIBRARY "libstdc++")
+	elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+		# Try to see whether clang and the system support llvm's libc++ library
+		# as the standard c++ library
+		set(CMAKE_REQUIRED_FLAGS_ORIG "${CMAKE_REQUIRED_FLAGS}")
+		set(CMAKE_REQUIRED_FLAGS "-stdlib=libc++ -Werror -std=c++11")
+		CHECK_CXX_SOURCE_COMPILES("#include <vector>
+			int main() { std::vector<int> v{0,}; return v[0]; }" DRB_HAVE_LLVM_LIBCXX)
+		set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS_ORIG}")
+		unset(CMAKE_REQUIRED_FLAGS_ORIG)
+
+		# Set the library to link with accordingly in the cache:
+		if ("${CXX_STANDARD_LIBRARY}" STREQUAL "")
+			if(DRB_HAVE_LLVM_LIBCXX)
+				set(CXX_STANDARD_LIBRARY "libc++")
+			else()
+				set(CXX_STANDARD_LIBRARY "libstdc++")
+			endif()
+		endif()
+	else()
+		message(WARNING "Compiler ${CMAKE_CXX_COMPILER_ID} not supported in determine_supported_stdlib_cxx")
+	endif()
+
+	set(DRB_CXX_STANDARD_LIBRARY "${CXX_STANDARD_LIBRARY}" CACHE STRING
+		"Choose the standard library to link with.")
+	message(STATUS "Using C++ standard library:  ${DRB_CXX_STANDARD_LIBRARY}")
+
+	unset(CXX_STANDARD_LIBRARY)
+endfunction()
+
 function(cxx_standard_flag STANDARD VARIABLE)
 	# Function which determines the compiler flag needed for the requested
 	# standard STANDARD on the current compiler.
@@ -93,6 +132,34 @@ function(cxx_standard_flag STANDARD VARIABLE)
 
 	set(${VARIABLE} "-std=${FLAG}" PARENT_SCOPE)
 endfunction(cxx_standard_flag)
+
+function(stdlib_cxx_flag STDLIB VARIABLE)
+	# Function which determines the compiler flag needed in order to use
+	# the requested standard library for the current compiler
+	#
+	# The flag is written to the output variable ${VARIABLE}
+	#
+	if (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+		if (NOT "${STDLIB}" STREQUAL "libstdc++")
+			message(FATAL_ERROR "For gcc only \"libstdc++\" \
+is supported as the standard library")
+		endif()
+
+		# Set no flags, since libstdc++ is the default on gcc
+		set(${VARIABLE} "" PARENT_SCOPE)
+		return()
+	elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+		# And also in the compiler/linker flags:
+		if (STDLIB STREQUAL "libc++" OR STDLIB STREQUAL "libstdc++")
+			set(${VARIABLE} "-stdlib=${STDLIB}" PARENT_SCOPE)
+		else()
+			message(FATAL_ERROR "Unrecognised value \"${STDLIB}\" \
+for CPP_STANDARD_LIBRARY. Only \"libc++\" or \"libstdc++\" are valid for clang")
+		endif()
+	else()
+		message(WARNING "Compiler ${CMAKE_CXX_COMPILER_ID} not supported in stdlib_cxx_flag")
+	endif()
+endfunction()
 
 macro(use_cxx_standard STANDARD)
 	# macro to enforce a particular c++ standard (only needed for cmake < 3.1)
@@ -199,6 +266,13 @@ Set to \"highest\" to let DRB use the highest available C++ standard (default)."
 	else()
 		use_cxx_standard(${CXX_STANDARD})
 	endif()
+
+	# Check what standard library should be used
+	determine_supported_stdlib_cxx()
+	stdlib_cxx_flag(${DRB_CXX_STANDARD_LIBRARY} STDLIB_FLAG)
+	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS_DEBUG} ${STDLIB_FLAG}")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${STDLIB_FLAG}")
+	unset(STDLIB_FLAG)
 
 	if (CMAKE_CXX_COMPILER_ID MATCHES "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 		# We have a known "standard" compiler
