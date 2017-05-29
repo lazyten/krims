@@ -270,7 +270,7 @@ Set to \"highest\" to let DRB use the highest available C++ standard (default)."
 	# Check what standard library should be used
 	determine_supported_stdlib_cxx()
 	stdlib_cxx_flag(${DRB_CXX_STANDARD_LIBRARY} STDLIB_FLAG)
-	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS_DEBUG} ${STDLIB_FLAG}")
+	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${STDLIB_FLAG}")
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${STDLIB_FLAG}")
 	unset(STDLIB_FLAG)
 
