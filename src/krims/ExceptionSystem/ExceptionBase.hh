@@ -18,7 +18,6 @@
 //
 
 #pragma once
-#include "Backtrace.hh"
 #include <exception>
 #include <krims/macros/deprecated.hh>
 #include <string>
