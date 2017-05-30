@@ -20,6 +20,7 @@
 #pragma once
 #include "krims/ExceptionSystem.hh"
 #include <array>
+#include <vector>
 
 namespace krims {
 

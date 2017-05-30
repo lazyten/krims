@@ -133,11 +133,13 @@ function(cxx_standard_flag STANDARD VARIABLE)
 	set(${VARIABLE} "-std=${FLAG}" PARENT_SCOPE)
 endfunction(cxx_standard_flag)
 
-function(stdlib_cxx_flag STDLIB VARIABLE)
-	# Function which determines the compiler flag needed in order to use
-	# the requested standard library for the current compiler
+function(stdlib_cxx_flags STDLIB COMP_FLAGS LINK_FLAGS)
+	# Function which determines the compiler flags and linker flags
+	# needed in order to use the requested standard library for the
+	# current compiler.
 	#
-	# The flag is written to the output variable ${VARIABLE}
+	# The flags are added to the output variables ${COMP_FLAGS}
+	# and ${LINK_FLAGS} respectively
 	#
 	if (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
 		if (NOT "${STDLIB}" STREQUAL "libstdc++")
@@ -151,13 +153,14 @@ is supported as the standard library")
 	elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 		# And also in the compiler/linker flags:
 		if (STDLIB STREQUAL "libc++" OR STDLIB STREQUAL "libstdc++")
-			set(${VARIABLE} "-stdlib=${STDLIB}" PARENT_SCOPE)
+			set(${COMP_FLAGS} "${${COMP_FLAGS}} -stdlib=${STDLIB}" PARENT_SCOPE)
+			set(${LINK_FLAGS} "${${LINK_FLAGS}} -stdlib=${STDLIB}" PARENT_SCOPE)
 		else()
 			message(FATAL_ERROR "Unrecognised value \"${STDLIB}\" \
 for CPP_STANDARD_LIBRARY. Only \"libc++\" or \"libstdc++\" are valid for clang")
 		endif()
 	else()
-		message(WARNING "Compiler ${CMAKE_CXX_COMPILER_ID} not supported in stdlib_cxx_flag")
+		message(WARNING "Compiler ${CMAKE_CXX_COMPILER_ID} not supported in stdlib_cxx_flags")
 	endif()
 endfunction()
 
@@ -269,10 +272,7 @@ Set to \"highest\" to let DRB use the highest available C++ standard (default)."
 
 	# Check what standard library should be used
 	determine_supported_stdlib_cxx()
-	stdlib_cxx_flag(${DRB_CXX_STANDARD_LIBRARY} STDLIB_FLAG)
-	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS_DEBUG} ${STDLIB_FLAG}")
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${STDLIB_FLAG}")
-	unset(STDLIB_FLAG)
+	stdlib_cxx_flags(${DRB_CXX_STANDARD_LIBRARY} CMAKE_CXX_FLAGS CMAKE_EXE_LINKER_FLAGS)
 
 	if (CMAKE_CXX_COMPILER_ID MATCHES "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 		# We have a known "standard" compiler

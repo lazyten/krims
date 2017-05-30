@@ -18,6 +18,7 @@
 //
 
 #include "GenMap.hh"
+#include <vector>
 
 namespace krims {
 

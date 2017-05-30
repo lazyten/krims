@@ -22,6 +22,7 @@
 #include "krims/ExceptionSystem.hh"
 #include <fstream>
 #include <iterator>
+#include <vector>
 
 namespace krims {
 
