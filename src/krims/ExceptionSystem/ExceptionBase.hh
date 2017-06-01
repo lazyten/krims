@@ -19,7 +19,6 @@
 
 #pragma once
 #include <exception>
-#include <krims/macros/deprecated.hh>
 #include <string>
 
 namespace krims {

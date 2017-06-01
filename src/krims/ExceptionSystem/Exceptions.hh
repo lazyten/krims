@@ -152,7 +152,7 @@ DefExceptionMsg(ExcInvalidPointer,
  * Internal error occurred inside a routine
  */
 DefExceptionMsg(ExcInternalError,
-                "An assertion inside an internal routine has failed. "
+                "An internal consistency assertion inside a routine has failed. "
                 "This is a bug and should not have happened.");
 
 /**
