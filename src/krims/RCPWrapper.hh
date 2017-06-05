@@ -94,7 +94,7 @@ class RCPWrapper {
   constexpr bool is_shared_ptr() const { return true; }
 
  private:
-  const std::shared_ptr<T> m_shared_ptr;
+  std::shared_ptr<T> m_shared_ptr;
 };
 
 /** \brief Wrapper class taking either a std::shared_ptr or a subscription
@@ -223,13 +223,13 @@ class RCPWrapper<T,
 
  private:
   //! Does this class contain a shared pointer?
-  const bool m_contains_shared_ptr;
+  bool m_contains_shared_ptr;
 
   //! The stored subscription pointer (or a nullptr)
-  const SubscriptionPointer<T> m_subscr_ptr;
+  SubscriptionPointer<T> m_subscr_ptr;
 
   //! The stored shared pointer (or a nullptr)
-  const std::shared_ptr<T> m_shared_ptr;
+  std::shared_ptr<T> m_shared_ptr;
 };
 
 //
