@@ -66,7 +66,7 @@ struct Path {
   static Path this_file() {
     Path r;
     const std::string path = realpath(std::string(__FILE__));
-    const std::string bn = basename(path);
+    const std::string bn   = basename(path);
     const std::pair<std::string, std::string> base_ext = splitext(bn);
 
     r.base = base_ext.first;
@@ -99,7 +99,7 @@ rc::Gen<char> gen_ascii_print() {
 *   up extension. */
 rc::Gen<std::string> gen_pathpart() {
   using namespace rc;
-  auto not_slash = gen::distinctFrom(gen_ascii_print(), '/');
+  auto not_slash        = gen::distinctFrom(gen_ascii_print(), '/');
   auto pathpart_chargen = gen::weightedOneOf<char>({{8, not_slash}, {1, gen::just('.')}});
   return gen::nonEmpty(gen::container<std::string>(std::move(pathpart_chargen)));
 }
@@ -107,7 +107,7 @@ rc::Gen<std::string> gen_pathpart() {
 rc::Gen<Path> gen_path(size_t n_dirs, size_t ext_len) {
   using namespace rc;
 
-  auto not_slash = gen::distinctFrom(gen_ascii_print(), '/');
+  auto not_slash     = gen::distinctFrom(gen_ascii_print(), '/');
   auto not_slash_dot = gen::distinctFrom(not_slash, '.');
 
   // basepart: (Filename without extension)
@@ -159,9 +159,9 @@ TEST_CASE("filesystem tests", "[FileSystem]") {
   SECTION("basename and dirname") {
     auto testable = []() {
       Path p = *gen_path().as("Path to use for testing");
-      const std::string dir = dirname(p.build());
-      const std::string base = basename(p.build());
 
+      const std::string dir  = dirname(p.build());
+      const std::string base = basename(p.build());
       if (p.dir().empty()) {
         RC_ASSERT(dir == ".");
       } else {
@@ -178,7 +178,7 @@ TEST_CASE("filesystem tests", "[FileSystem]") {
       Path p = *gen_path().as("Path");
       const std::pair<std::string, std::string> res = splitext(p.build());
 
-      const std::string ext = p.ext.empty() ? "" : "." + p.ext;
+      const std::string ext  = p.ext.empty() ? "" : "." + p.ext;
       const std::string rest = p.dir().empty() ? p.base : p.dir() + "/" + p.base;
       RC_ASSERT(res.first == rest);
       RC_ASSERT(res.second == ext);
@@ -195,8 +195,8 @@ TEST_CASE("filesystem tests", "[FileSystem]") {
       Path cp(p);
       std::default_random_engine dre;
 
-      const int n_ups = *rc::gen::inRange(0, 6).as("Number of .. constructs to insert");
-      const int n_dots = *rc::gen::inRange(0, 6).as("Number of . constructs to insert");
+      const int n_ups   = *rc::gen::inRange(0, 6).as("Number of .. constructs to insert");
+      const int n_dots  = *rc::gen::inRange(0, 6).as("Number of . constructs to insert");
       const int n_dupls = *rc::gen::inRange(0, 6).as("Number of duplicate / to insert");
 
       // TODO Test symbolic link resolution!

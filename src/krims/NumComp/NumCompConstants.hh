@@ -92,13 +92,13 @@ struct NumCompConstants {
             m_orig_default_tolerance_factor(default_tolerance_factor),
             m_orig_default_failure_action(default_failure_action) {
       default_tolerance_factor = tolerance_factor;
-      default_failure_action = failure_action;
+      default_failure_action   = failure_action;
     }
 
     /** Restore original settings */
     ~CacheChange() {
       if (!m_do_restore) return;
-      default_failure_action = m_orig_default_failure_action;
+      default_failure_action   = m_orig_default_failure_action;
       default_tolerance_factor = m_orig_default_tolerance_factor;
     }
 
@@ -115,10 +115,10 @@ struct NumCompConstants {
     }
 
     CacheChange& operator=(CacheChange&& other) {
-      m_do_restore = other.m_do_restore;
-      m_orig_default_failure_action = other.m_orig_default_failure_action;
+      m_do_restore                    = other.m_do_restore;
+      m_orig_default_failure_action   = other.m_orig_default_failure_action;
       m_orig_default_tolerance_factor = other.m_orig_default_tolerance_factor;
-      other.m_do_restore = false;
+      other.m_do_restore              = false;
       return *this;
     }
 

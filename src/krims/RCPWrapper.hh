@@ -60,7 +60,7 @@ class RCPWrapper {
   RCPWrapper(RCPWrapper&&) = default;
   RCPWrapper& operator=(RCPWrapper&&) = default;
   RCPWrapper& operator=(const RCPWrapper&) = default;
-  ~RCPWrapper() = default;
+  ~RCPWrapper()                            = default;
   ///@}
 
   /** \brief Check if this object is empty or not */
@@ -146,7 +146,7 @@ class RCPWrapper<T,
   RCPWrapper(RCPWrapper&&) = default;
   RCPWrapper& operator=(RCPWrapper&&) = default;
   RCPWrapper& operator=(const RCPWrapper&) = default;
-  ~RCPWrapper() = default;
+  ~RCPWrapper()                            = default;
   ///@}
 
   /** \brief Check if this object is empty or not */

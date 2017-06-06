@@ -181,7 +181,7 @@ TEST_CASE("Exception system", "[exception]") {
 
       // Generate a first size and a difference
       const ssize ssize1 = *gen::positive<ssize>();
-      const ssize diff = *gen::arbitrary<int>();
+      const ssize diff   = *gen::arbitrary<int>();
 
       // Assert that difference is not too large
       RC_PRE(-diff < ssize1);

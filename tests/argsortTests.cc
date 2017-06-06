@@ -45,7 +45,7 @@ struct SortedArrays {
     std::sort(std::begin(sorted), std::end(sorted), comp);
 
     // Argsort the arrays:
-    argsort_res = argsort(std::begin(unsorted), std::end(unsorted), comp);
+    argsort_res    = argsort(std::begin(unsorted), std::end(unsorted), comp);
     argsort_sorted = argsort(std::begin(sorted), std::end(sorted), comp);
   }
 };
@@ -64,7 +64,7 @@ struct SortedArrays<T, std::less<T>> {
     std::sort(std::begin(sorted), std::end(sorted));
 
     // Argsort the arrays:
-    argsort_res = argsort(std::begin(unsorted), std::end(unsorted));
+    argsort_res    = argsort(std::begin(unsorted), std::end(unsorted));
     argsort_sorted = argsort(std::begin(sorted), std::end(sorted));
   }
 };
@@ -99,7 +99,7 @@ struct TestFunctor {
 
     // Check the sorting is correct
     for (size_t i = 0; i + 1 < size; ++i) {
-      const size_t argsort_i = sorted.argsort_res[i];
+      const size_t argsort_i     = sorted.argsort_res[i];
       const size_t argsort_iplus = sorted.argsort_res[i + 1];
       RC_ASSERT(compOrEqual(array[argsort_i], array[argsort_iplus]));
     }

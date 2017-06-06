@@ -82,7 +82,7 @@ TEST_CASE("TupleUtils tests", "[TupleUtils]") {
       auto t1 = *gen::arbitrary<std::tuple<type1, type2, type3>>().as("First tuple");
       auto t2 = *gen::arbitrary<std::tuple<type4, type5>>().as("Second tuple");
 
-      auto sub = [](type1 e1, type2 e2, type3 e3) { return e1 - e2 - e3; };
+      auto sub     = [](type1 e1, type2 e2, type3 e3) { return e1 - e2 - e3; };
       auto res_sub = krims::apply(sub, t1);
       RC_ASSERT((std::get<0>(t1) - std::get<1>(t1) - std::get<2>(t1)) == res_sub);
 
@@ -99,22 +99,22 @@ TEST_CASE("TupleUtils tests", "[TupleUtils]") {
                 std::get<2>(t1));
       RC_ASSERT(res_inmult == std::get<1>(orig) && res_inmult == std::get<1>(t1));
 
-      auto concat = [](type4 e1, type5 e2) { return e1 + e2; };
+      auto concat     = [](type4 e1, type5 e2) { return e1 + e2; };
       auto res_concat = krims::apply(concat, t2);
       RC_ASSERT(std::get<0>(t2) + std::get<1>(t2) == res_concat);
 
-      auto id = [](const type3& e2) { return e2; };
-      auto val = *gen::arbitrary<std::tuple<type3>>().as("Tuple for id");
+      auto id     = [](const type3& e2) { return e2; };
+      auto val    = *gen::arbitrary<std::tuple<type3>>().as("Tuple for id");
       auto res_id = krims::apply(id, val);
       RC_ASSERT(std::get<0>(val) == res_id);
 
-      auto prod = []() { return 1; };
+      auto prod     = []() { return 1; };
       auto res_prod = krims::apply(prod, std::tuple<>{});
       RC_ASSERT(1 == res_prod);
 
 #ifdef KRIMS_HAVE_CXX14
       auto tboth = std::tuple_cat(t1, t2);
-      auto add = [](type1& e1, type2& e2, type3& e3, type4& e4, type5& e5) {
+      auto add   = [](type1& e1, type2& e2, type3& e3, type4& e4, type5& e5) {
         return std::make_pair(e1 + e2 + e3, e4 + e5);
       };
 
@@ -160,9 +160,9 @@ TEST_CASE("TupleUtils tests", "[TupleUtils]") {
 
     auto test = [&]() {
       auto torig = *gen::arbitrary<std::tuple<type1>>().as("Tuple");
+      auto fac   = *gen::arbitrary<int>().as("Multiplication factor");
 
       std::tuple<type1> t = torig;
-      auto fac = *gen::arbitrary<int>().as("Multiplication factor");
       tuple_for_each(tuple_utils_tests::Multfac{fac}, t);
       RC_ASSERT(std::get<0>(torig) * fac == std::get<0>(t));
 
@@ -182,9 +182,9 @@ TEST_CASE("TupleUtils tests", "[TupleUtils]") {
 
     auto test = [&]() {
       auto torig = *gen::arbitrary<std::tuple<type1, type2>>().as("Tuple");
+      auto fac   = *gen::arbitrary<int>().as("Multiplication factor");
 
       std::tuple<type1, type2> t = torig;
-      auto fac = *gen::arbitrary<int>().as("Multiplication factor");
       tuple_for_each(tuple_utils_tests::Multfac{fac}, t);
       RC_ASSERT(std::get<0>(torig) * fac == std::get<0>(t));
       RC_ASSERT(std::get<1>(torig) * fac == std::get<1>(t));
@@ -206,9 +206,9 @@ TEST_CASE("TupleUtils tests", "[TupleUtils]") {
 
     auto test = [&]() {
       auto torig = *gen::arbitrary<std::tuple<type1, type2, type3>>().as("Tuple");
+      auto fac   = *gen::arbitrary<int>().as("Multiplication factor");
 
       std::tuple<type1, type2, type3> t = torig;
-      auto fac = *gen::arbitrary<int>().as("Multiplication factor");
       tuple_for_each(tuple_utils_tests::Multfac{fac}, t);
       RC_ASSERT(std::get<0>(torig) * fac == std::get<0>(t));
       RC_ASSERT(std::get<1>(torig) * fac == std::get<1>(t));
@@ -232,9 +232,9 @@ TEST_CASE("TupleUtils tests", "[TupleUtils]") {
 
     auto test = [&]() {
       auto torig = *gen::arbitrary<std::tuple<type1, type2, type3, type4>>().as("Tuple");
+      auto fac   = *gen::arbitrary<int>().as("Multiplication factor");
 
       std::tuple<type1, type2, type3, type4> t = torig;
-      auto fac = *gen::arbitrary<int>().as("Multiplication factor");
       tuple_for_each(tuple_utils_tests::Multfac{fac}, t);
       RC_ASSERT(std::get<0>(torig) * fac == std::get<0>(t));
       RC_ASSERT(std::get<1>(torig) * fac == std::get<1>(t));
@@ -284,8 +284,8 @@ TEST_CASE("TupleUtils tests", "[TupleUtils]") {
     typedef long type3;
 
     auto test = [&]() {
-      auto t1 = *gen::arbitrary<std::tuple<type1, type2, type3>>().as("Tuple 1");
-      auto t2 = *gen::arbitrary<std::tuple<type1, type3, type2>>().as("Tuple 2");
+      auto t1      = *gen::arbitrary<std::tuple<type1, type2, type3>>().as("Tuple 1");
+      auto t2      = *gen::arbitrary<std::tuple<type1, type3, type2>>().as("Tuple 2");
       auto res_add = tuple_map(tuple_utils_tests::Add{}, t1, t2);
       RC_ASSERT(std::get<0>(t1) + std::get<0>(t2) == std::get<0>(res_add));
       RC_ASSERT(std::get<1>(t1) + std::get<1>(t2) == std::get<1>(res_add));
@@ -305,8 +305,8 @@ TEST_CASE("TupleUtils tests", "[TupleUtils]") {
     typedef float type2;
 
     auto test = [&]() {
-      auto t1 = *gen::arbitrary<std::tuple<type1, type2>>().as("Tuple 1");
-      auto t2 = *gen::arbitrary<std::tuple<type2, type1>>().as("Tuple 2");
+      auto t1      = *gen::arbitrary<std::tuple<type1, type2>>().as("Tuple 1");
+      auto t2      = *gen::arbitrary<std::tuple<type2, type1>>().as("Tuple 2");
       auto res_add = tuple_map(tuple_utils_tests::Add{}, t1, t2);
       RC_ASSERT(std::get<0>(t1) + std::get<0>(t2) == std::get<0>(res_add));
       RC_ASSERT(std::get<1>(t1) + std::get<1>(t2) == std::get<1>(res_add));
@@ -323,8 +323,8 @@ TEST_CASE("TupleUtils tests", "[TupleUtils]") {
     typedef double type1;
 
     auto test = [&]() {
-      auto t1 = *gen::arbitrary<std::tuple<type1>>().as("Tuple 1");
-      auto t2 = *gen::arbitrary<std::tuple<type1>>().as("Tuple 2");
+      auto t1      = *gen::arbitrary<std::tuple<type1>>().as("Tuple 1");
+      auto t2      = *gen::arbitrary<std::tuple<type1>>().as("Tuple 2");
       auto res_add = tuple_map(tuple_utils_tests::Add{}, t1, t2);
       RC_ASSERT(std::get<0>(t1) + std::get<0>(t2) == std::get<0>(res_add));
       auto res_minus = tuple_map(tuple_utils_tests::Minus{}, t1);

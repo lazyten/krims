@@ -36,7 +36,7 @@ struct DummySubscribable : public Subscribable, public std::array<T, 4> {
     this->at(3) = d4;
   }
 };
-} // namespace genmap_tests
+}  // namespace genmap_tests
 
 TEST_CASE("GenMap tests", "[genmap]") {
   using namespace genmap_tests;

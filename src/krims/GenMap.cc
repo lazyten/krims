@@ -23,7 +23,7 @@
 namespace krims {
 
 GenMap& GenMap::operator=(GenMap other) {
-  m_location = std::move(other.m_location);
+  m_location      = std::move(other.m_location);
   m_container_ptr = std::move(other.m_container_ptr);
   return *this;
 }
@@ -119,37 +119,31 @@ std::string GenMap::make_full_key(const std::string& key) const {
 }
 
 typename GenMap::iterator GenMap::begin(const std::string& path) {
-  const std::string path_full = make_full_key(path);
-
   // Obtain iterator to the first key-value pair, which has a
   // key starting with the full path.
   //
   // (since the keys are sorted alphabetically in the map
   //  the ones which follow next must all be below our current
   //  location or already well past it.)
-  auto it = starting_keys_begin(*m_container_ptr, path_full);
-  return iterator(it, path_full);
+  const std::string path_full = make_full_key(path);
+  return iterator(starting_keys_begin(*m_container_ptr, path_full), path_full);
 }
 
 typename GenMap::const_iterator GenMap::cbegin(const std::string& path) const {
   const std::string path_full = make_full_key(path);
-  auto it = starting_keys_begin(*m_container_ptr, path_full);
-  return const_iterator(it, path_full);
+  return const_iterator(starting_keys_begin(*m_container_ptr, path_full), path_full);
 }
 
 typename GenMap::iterator GenMap::end(const std::string& path) {
-  const std::string path_full = make_full_key(path);
-
   // Obtain the first key which does no longer start with the pull path,
   // i.e. where we are done processing the subpath.
-  auto it = starting_keys_end(*m_container_ptr, path_full);
-  return iterator(it, path_full);
+  const std::string path_full = make_full_key(path);
+  return iterator(starting_keys_end(*m_container_ptr, path_full), path_full);
 }
 
 typename GenMap::const_iterator GenMap::cend(const std::string& path) const {
   const std::string path_full = make_full_key(path);
-  auto it = starting_keys_end(*m_container_ptr, path_full);
-  return const_iterator(it, path_full);
+  return const_iterator(starting_keys_end(*m_container_ptr, path_full), path_full);
 }
 
 }  // namespace krims

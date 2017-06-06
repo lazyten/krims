@@ -101,8 +101,8 @@ class GenMapValue {
   //   - T should not be a GenMap (we do not want maps in maps)
 
   GenMapValue(const GenMapValue&) = default;
-  GenMapValue(GenMapValue&&) = default;
-  ~GenMapValue() = default;
+  GenMapValue(GenMapValue&&)      = default;
+  ~GenMapValue()                  = default;
   GenMapValue& operator=(const GenMapValue&) = default;
   GenMapValue& operator=(GenMapValue&&) = default;
 

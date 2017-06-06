@@ -75,7 +75,7 @@ TEST_CASE("split function", "[split]") {
   SECTION("Test split with array") {
     typedef std::array<std::string, 20> con_type;
     auto testable = [] {
-      const char sepc = *gen::nonZero<char>().as("Separator character");
+      const char sepc  = *gen::nonZero<char>().as("Separator character");
       const auto array = *rc::gen::container<con_type>(string_gen(sepc)).as("container");
       run_test(array, sepc);
     };

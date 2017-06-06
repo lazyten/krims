@@ -24,8 +24,8 @@ namespace krims {
 
 // TODO Multiplex for C++17 filesystem stuff
 std::pair<std::string, std::string> splitext(const std::string& path) {
-  const size_t slash = path.rfind('/');
-  const size_t dot = path.rfind('.');
+  const size_t slash  = path.rfind('/');
+  const size_t dot    = path.rfind('.');
   const bool have_dot = dot != std::string::npos;
 
   // Is this a deeper path, i.e. one containing a / or

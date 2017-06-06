@@ -38,8 +38,8 @@ void convert_b128_to_f80(const char* b128, char* b80) {
 #if defined FLOAT128 and defined FLOAT80
   // gcc understands __float128 => use it
   const FLOAT128* in = reinterpret_cast<const FLOAT128*>(b128);
-  FLOAT80* out = reinterpret_cast<FLOAT80*>(b80);
-  *out = static_cast<FLOAT80>(*in);
+  FLOAT80* out       = reinterpret_cast<FLOAT80*>(b80);
+  *out               = static_cast<FLOAT80>(*in);
 #else
   // Address the mantissa of the output float in extended 80bit
   // precision (The first 63 bits) as an 64bit integer
@@ -48,9 +48,9 @@ void convert_b128_to_f80(const char* b128, char* b80) {
   // Address the sign and exponent of the b128 and b80
   // integers (coincidently in both cases the last 2 bytes
   // in exactly the same shape and meaning of the bytes)
-  uint16_t& b80_exp = *reinterpret_cast<uint16_t*>(b80 + 8);
+  uint16_t& b80_exp        = *reinterpret_cast<uint16_t*>(b80 + 8);
   const uint16_t& b128_exp = *reinterpret_cast<const uint16_t*>(b128 + 14);
-  b80_exp = b128_exp;
+  b80_exp                  = b128_exp;
 
   // Copy the 64 most significant bits of the mantissa over
   //     (This means we need to start at bit 48 and go up to bit

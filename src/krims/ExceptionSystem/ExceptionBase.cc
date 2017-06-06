@@ -26,10 +26,10 @@ namespace krims {
 void ExceptionBase::add_exc_data(const char* file, int line, const char* function,
                                  const char* failed_condition,
                                  const char* exception_name) noexcept {
-  m_name = exception_name;
-  m_file = file;
-  m_line = line;
-  m_function = function;
+  m_name             = exception_name;
+  m_file             = file;
+  m_line             = line;
+  m_function         = function;
   m_failed_condition = failed_condition;
 
   // Rebuild the string stored in m_what_str.

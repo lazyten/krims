@@ -49,9 +49,9 @@ class CircularIterator
 
   //@{
   /** Defaults for the big five */
-  ~CircularIterator() = default;
-  CircularIterator() = default;
-  CircularIterator(CircularIterator&&) = default;
+  ~CircularIterator()                       = default;
+  CircularIterator()                        = default;
+  CircularIterator(CircularIterator&&)      = default;
   CircularIterator(const CircularIterator&) = default;
   CircularIterator& operator=(CircularIterator&&) = default;
   CircularIterator& operator=(const CircularIterator&) = default;

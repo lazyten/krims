@@ -39,10 +39,10 @@ namespace krims {
  * */
 template <typename String, typename Iterator>
 String join(Iterator begin, const Iterator end, const String& sep) {
-  using char_type = typename String::value_type;
-  using traits_type = typename String::traits_type;
+  using char_type      = typename String::value_type;
+  using traits_type    = typename String::traits_type;
   using allocator_type = typename String::allocator_type;
-  using stream_type = std::basic_ostringstream<char_type, traits_type, allocator_type>;
+  using stream_type    = std::basic_ostringstream<char_type, traits_type, allocator_type>;
 
   if (begin == end) return String{};
 
