@@ -76,27 +76,27 @@ void Backtrace::split_backtrace_string(const char* symbol, Frame& frame) const {
   //     executable(functionname+offset) [address]
   // Try to extract the functionname and the address
   const char* pos_bracketop = strchr(symbol, '(');
-  const char* start = pos_bracketop == nullptr ? symbol : pos_bracketop;
+  const char* start         = pos_bracketop == nullptr ? symbol : pos_bracketop;
 
   const char* pos_bracketcl = strchr(start, ')');
-  const char* pos_plus = strchr(start, '+');
-  const char* pos_sqbrop = strchr(start, '[');
-  const char* pos_sqbrcl = strchr(start, ']');
+  const char* pos_plus      = strchr(start, '+');
+  const char* pos_sqbrop    = strchr(start, '[');
+  const char* pos_sqbrcl    = strchr(start, ']');
 
   // Extract the address:
   if (pos_sqbrop != nullptr && pos_sqbrcl != nullptr && pos_sqbrop < pos_sqbrcl - 1) {
     const size_t len = static_cast<size_t>(pos_sqbrcl - pos_sqbrop - 1);
-    frame.address = std::string(pos_sqbrop + 1, len);
+    frame.address    = std::string(pos_sqbrop + 1, len);
   }
 
   // Extract the executable path
   if (pos_bracketop != nullptr && symbol < pos_bracketop) {
-    const size_t len = static_cast<size_t>(pos_bracketop - symbol);
+    const size_t len      = static_cast<size_t>(pos_bracketop - symbol);
     frame.executable_name = std::string(symbol, len);
   } else if (pos_sqbrop != nullptr && symbol < pos_sqbrop - 1) {
     // There is a space after the executable name
     // and before the opening [
-    const size_t len = static_cast<size_t>(pos_sqbrop - symbol - 1);
+    const size_t len      = static_cast<size_t>(pos_sqbrop - symbol - 1);
     frame.executable_name = std::string(symbol, len);
   }
 
@@ -112,7 +112,7 @@ void Backtrace::split_backtrace_string(const char* symbol, Frame& frame) const {
 
   // Extract the function name:
   if (pos_bracketop != nullptr && pos_plus != nullptr && pos_bracketop < pos_plus) {
-    const size_t len = static_cast<size_t>(pos_plus - pos_bracketop - 1);
+    const size_t len    = static_cast<size_t>(pos_plus - pos_bracketop - 1);
     frame.function_name = std::string(pos_bracketop + 1, len);
     frame.function_name = demangled_string(frame.function_name);
   }
@@ -130,15 +130,15 @@ void Backtrace::determine_file_line(const char* executable_name, const char* add
 
   // Allocate memory for addr2line call:
   const size_t maxlen = 4096;
-  auto* codefile = new char[maxlen];
-  auto* number = new char[maxlen];
+  auto* codefile      = new char[maxlen];
+  auto* number        = new char[maxlen];
 
   // call and interpret:
   int ret = krims::addr2line(executable_name, address, maxlen, codefile, number);
 
   if (ret == 0) {
     // All well, set values
-    frame.codefile = std::string(codefile);
+    frame.codefile    = std::string(codefile);
     frame.line_number = std::string(number);
   }
 
@@ -242,12 +242,12 @@ std::ostream& operator<<(std::ostream& out, const Backtrace& bt) {
   // If the Function is longer than 80 columns than just print them as is
   // (otherwise we get too much empty space)
   if (maxfunclen > 80) maxfunclen = 8;
-  const int maxlen = static_cast<int>(maxfunclen);
 
   // TODO Better table format
   //      Colour!
 
   // Print heading of the backtrace table:
+  const int maxlen = static_cast<int>(maxfunclen);
   out << "## " << std::setw(maxlen) << std::left << "function" << std::right << " @ ";
   if (bt.determine_file_line()) {
     out << "    file    :  linenr" << std::endl;

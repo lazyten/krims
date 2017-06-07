@@ -59,7 +59,7 @@ class GenMap : public Subscribable {
   /** \brief Construct parameter map from initialiser list of entry_types */
   GenMap(std::initializer_list<entry_type> il) : GenMap{} { update(il); };
 
-  ~GenMap() = default;
+  ~GenMap()        = default;
   GenMap(GenMap&&) = default;
 
   /** \brief Copy constructor
@@ -200,8 +200,9 @@ class GenMap : public Subscribable {
    **/
   iterator erase(iterator position) {
     // Extract actual map iterator by converting to it explictly:
+    typedef map_type::iterator mapiter;
     auto pos_conv = static_cast<typename map_type::iterator>(position);
-    typename map_type::iterator res = m_container_ptr->erase(pos_conv);
+    mapiter res   = m_container_ptr->erase(pos_conv);
     return iterator(std::move(res), m_location);
   }
 
@@ -212,9 +213,10 @@ class GenMap : public Subscribable {
    **/
   iterator erase(iterator first, iterator last) {
     // Extract actual map iterator by converting to it explictly:
+    typedef map_type::iterator mapiter;
     auto first_conv = static_cast<typename map_type::iterator>(first);
-    auto last_conv = static_cast<typename map_type::iterator>(last);
-    typename map_type::iterator res = m_container_ptr->erase(first_conv, last_conv);
+    auto last_conv  = static_cast<typename map_type::iterator>(last);
+    mapiter res     = m_container_ptr->erase(first_conv, last_conv);
     return iterator(std::move(res), m_location);
   }
 

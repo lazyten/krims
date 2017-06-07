@@ -44,7 +44,7 @@ RealType abs_or_rel_error(const T& lhs, const T& rhs) {
 
   const RealType absdiff = abs(lhs - rhs);
   const RealType maxside = std::max<RealType>(abs(lhs), abs(rhs));
-  const RealType maxone = std::max<RealType>(1, maxside);
+  const RealType maxone  = std::max<RealType>(1, maxside);
   return absdiff / maxone;
 
   // Alternative to control tolerance for absolute comparison (absErr)

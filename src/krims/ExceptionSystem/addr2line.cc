@@ -30,7 +30,7 @@ int addr2line(const char* execname, const char* addr, const size_t maxlen, char*
               char* number) {
   // By default set number and codefile to empty string
   codefile[0] = 0;
-  number[0] = 0;
+  number[0]   = 0;
 
   int pipefd[2];
   if (pipe(pipefd) != 0) return -1;

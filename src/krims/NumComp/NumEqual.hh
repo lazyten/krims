@@ -187,13 +187,12 @@ bool NumEqual<std::complex<T>, std::complex<U>,
 operator()(const std::complex<T>& lhs, const std::complex<U>& rhs) const {
   NumEqual<T, U> is_equal{m_tolerance, m_failure_action};
 
-  std::string part;
+  std::string part = "Real part";
   try {
     // First compare real.
     // If failure action is throw and the comparison fails
     // we get to the catch part below and use the part string
     // to identify which part has failed.
-    part = "Real part";
     const bool real_equal = is_equal(lhs.real(), rhs.real());
 
     // Now compare imaginary

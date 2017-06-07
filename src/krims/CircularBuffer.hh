@@ -219,7 +219,7 @@ void CircularBuffer<T, Container>::push_front(value_type val) {
   } else {
     // Push and update m_first circular iterator.
     auto first_iterator = m_storage.insert(m_first.position(), std::move(val));
-    m_first = circular_begin(m_storage, first_iterator);
+    m_first             = circular_begin(m_storage, first_iterator);
   }
 
   // Check that we inserted something
@@ -287,9 +287,9 @@ void CircularBuffer<T, Container>::max_size(size_type msize) {
   // begin_remove_range to the end of the container and then
   // the remaining elements at the front. If the end is not hit, then we are
   // done with one operation only.
-  using cont_iter = typename container_type::iterator;
+  using cont_iter           = typename container_type::iterator;
   const cont_iter del_begin = begin_remove_range.position();
-  const cont_iter del_end = [&] {
+  const cont_iter del_end   = [&] {
     auto it = del_begin;
     while (it != std::end(m_storage) && it != end_remove_range.position()) {
       ++it;

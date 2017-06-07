@@ -51,7 +51,7 @@ void run_test(const Container& array) {
 template <typename Container>
 struct TestFunctor {
   void operator()() const {
-    const auto size = *gen::inRange<size_t>(0, 101).as("Size of container to join");
+    const auto size  = *gen::inRange<size_t>(0, 101).as("Size of container to join");
     const auto array = *gen::container<Container>(
                               size, gen::arbitrary<typename Container::value_type>())
                               .as("Container to join");

@@ -37,7 +37,7 @@ std::uniform_int_distribution<size_t> dist(0, 100000);
 template <typename T>
 void test() {
   const auto size = *gen::inRange<size_t>(0, 50).as("Vector size");
-  const auto vec = *gen::container<std::vector<T>>(size, rc::gen::arbitrary<T>())
+  const auto vec  = *gen::container<std::vector<T>>(size, rc::gen::arbitrary<T>())
                           .as("Data to read/write");
   const std::string filename = std::string("temp.").append(std::to_string(dist(engine)));
 

@@ -73,7 +73,7 @@ TEST_CASE("CircularIteratorTests", "[CircularIterator]") {
       RC_PRE(v.size() > 0u);
       size_t pos = *gen::inRange<size_t>(0, v.size()).as("position to start the circle");
 
-      auto it = circular_begin(v, pos);
+      auto it   = circular_begin(v, pos);
       auto itp1 = ++it;
       auto itp2 = it++;
       RC_ASSERT(itp1 == itp2);
@@ -96,7 +96,7 @@ TEST_CASE("CircularIteratorTests", "[CircularIterator]") {
       RC_PRE(v.size() > 0u);
       size_t pos = *gen::inRange<size_t>(0, v.size()).as("position to start the circle");
 
-      auto it = circular_begin(v, pos);
+      auto it   = circular_begin(v, pos);
       auto res1 = --(++it);
       RC_ASSERT(res1 == it);
 
@@ -163,7 +163,7 @@ TEST_CASE("CircularIteratorTests", "[CircularIterator]") {
 
       // Construct the iterators:
       auto begin = circular_begin(v, startpos);
-      auto end = circular_end(v, startpos);
+      auto end   = circular_end(v, startpos);
 
       // Forward iteration:
       size_t n_iter = 0;
@@ -179,7 +179,7 @@ TEST_CASE("CircularIteratorTests", "[CircularIterator]") {
 
       // Backward iteration:
       n_iter = 0;
-      begin = circular_begin(v, startpos);
+      begin  = circular_begin(v, startpos);
       for (; begin != end; --begin) {
         size_t i_modded = (v.size() - n_iter + startpos) % v.size();
         if (v[i_modded] != *begin) {

@@ -94,8 +94,8 @@ class SubscriptionPointer {
 #endif
 
     // Move the subscription of other over:
-    m_subscribed_obj_ptr = other.m_subscribed_obj_ptr;
-    m_subscriber_id_ptr = std::move(other.m_subscriber_id_ptr);
+    m_subscribed_obj_ptr       = other.m_subscribed_obj_ptr;
+    m_subscriber_id_ptr        = std::move(other.m_subscriber_id_ptr);
     other.m_subscribed_obj_ptr = nullptr;
 
     return *this;

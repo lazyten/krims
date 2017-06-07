@@ -274,7 +274,7 @@ struct SubscriptionModel {
     RC_ASSERT(objects.size() == sut.objects.size());
 
     auto itmodel = std::begin(objects);
-    auto itsut = std::begin(sut.objects);
+    auto itsut   = std::begin(sut.objects);
     for (; itmodel != std::end(objects); ++itmodel, ++itsut) {
       oass(*itmodel, *itsut);
     }
@@ -458,7 +458,7 @@ struct CreateObjectPointer
 
     // Create new model pointer
     typename model_type::PointerModel pm;
-    pm.id = id;
+    pm.id           = id;
     pm.object_index = obj_index;
 
     // Push id at the front:
@@ -581,11 +581,10 @@ struct RedirectPointer
     // check we have enough pointers to remove this one:
     RC_PRE(model.pointers.size() > ptr_index);
     RC_PRE(model.pointers[ptr_index].object_index != obj_index);
-
     typename model_type::PointerModel& pm = model.pointers[ptr_index];
-    std::string id = pm.id;
 
     // delete the id from the currently pointed-to object subscribers list
+    std::string id = pm.id;
     if (pm.object_index != model_type::invalid_index) {
       auto& subscr = model.objects[pm.object_index].subscribers;
       for (auto it = std::begin(subscr); it != std::end(subscr); ++it) {
@@ -620,7 +619,7 @@ struct RedirectPointer
     auto& pm = model.pointers[ptr_index];
     if (pm.object_index != model_type::invalid_index) {
       auto subscribers = sut.objects[pm.object_index].subscribers();
-      auto res = std::find(std::begin(subscribers), std::end(subscribers), pm.id);
+      auto res         = std::find(std::begin(subscribers), std::end(subscribers), pm.id);
       RC_ASSERT(res == std::end(subscribers));
     }
 
@@ -679,10 +678,9 @@ struct ResetPointer : rc::state::Command<SubscriptionModel<SubscribableType>,
   void apply(model_type& model) const override {
     // check we have enough pointers to remove this one:
     RC_PRE(model.pointers.size() > ptr_index);
-
     typename model_type::PointerModel& pm = model.pointers[ptr_index];
-    std::string id = pm.id;
 
+    std::string id = pm.id;
     if (pm.object_index != model_type::invalid_index) {
       // delete the id from the object subscribers list
       auto& subscr = model.objects[pm.object_index].subscribers;
@@ -712,7 +710,7 @@ struct ResetPointer : rc::state::Command<SubscriptionModel<SubscribableType>,
     auto& pm = model.pointers[ptr_index];
     if (pm.object_index != model_type::invalid_index) {
       auto subscribers = sut.objects[pm.object_index].subscribers();
-      auto res = std::find(std::begin(subscribers), std::end(subscribers), pm.id);
+      auto res         = std::find(std::begin(subscribers), std::end(subscribers), pm.id);
       RC_ASSERT(res == std::end(subscribers));
     }
 #endif
@@ -748,10 +746,9 @@ struct RemovePointer : rc::state::Command<SubscriptionModel<SubscribableType>,
   void apply(model_type& model) const override {
     // check we have enough pointers to remove this one:
     RC_PRE(model.pointers.size() > ptr_index);
-
     typename model_type::PointerModel& pm = model.pointers[ptr_index];
-    std::string id = pm.id;
 
+    std::string id = pm.id;
     if (pm.object_index != model_type::invalid_index) {
       // delete the id from the object subscribers list
       auto& subscr = model.objects[pm.object_index].subscribers;
@@ -781,7 +778,7 @@ struct RemovePointer : rc::state::Command<SubscriptionModel<SubscribableType>,
     auto& pm = model.pointers[ptr_index];
     if (pm.object_index != model_type::invalid_index) {
       auto subscribers = sut.objects[pm.object_index].subscribers();
-      auto res = std::find(std::begin(subscribers), std::end(subscribers), pm.id);
+      auto res         = std::find(std::begin(subscribers), std::end(subscribers), pm.id);
       RC_ASSERT(res == std::end(subscribers));
     }
 #endif
@@ -795,9 +792,7 @@ struct RemovePointer : rc::state::Command<SubscriptionModel<SubscribableType>,
 
     // check that the other pointers have not changed.
     for (size_t i = 0; i < sut.pointers.size(); ++i) {
-      auto i_mod = i;
-      if (i >= ptr_index) i_mod = i + 1;
-
+      auto i_mod = i >= ptr_index ? i + 1 : i;
       model_type::assert_equal_pointer(sut, sut.pointers[i], model.pointers[i_mod]);
     }
   }
@@ -851,11 +846,10 @@ struct CopyRemovePointer
 
 #ifdef DEBUG
       if (model.pointers[ptr_index].object_index != model_type::invalid_index) {
-        // Extract object index:
-        size_t obj_index = sut.pointed_object_index_of(sut.pointers[ptr_index]);
-
-        // Check that the object made note of us:
+        // Extract object index and check that the object made note of us:
+        size_t obj_index     = sut.pointed_object_index_of(sut.pointers[ptr_index]);
         auto obj_subscribers = sut.objects[obj_index].subscribers();
+
         auto res = std::count_if(
               std::begin(obj_subscribers), std::end(obj_subscribers),
               [&](const std::string& oid) { return oid == copy.subscriber_id(); });
@@ -925,11 +919,10 @@ struct AssignRemovePointer
 
 #ifdef DEBUG
       if (model.pointers[ptr_index].object_index != model_type::invalid_index) {
-        // Extract object index:
-        size_t obj_index = sut.pointed_object_index_of(sut.pointers[ptr_index]);
-
-        // Check that the object made note of us:
+        // Extract object index and check that the object made note of us:
+        size_t obj_index     = sut.pointed_object_index_of(sut.pointers[ptr_index]);
         auto obj_subscribers = sut.objects[obj_index].subscribers();
+
         auto res = std::count_if(
               std::begin(obj_subscribers), std::end(obj_subscribers),
               [&](const std::string& oid) { return oid == copy.subscriber_id(); });

@@ -50,7 +50,7 @@ void write_binary(const std::vector<T>& data, const std::string& file) {
 
   // Write the data in binary form:
   const char* begin = reinterpret_cast<const char*>(data.data());
-  const char* end = reinterpret_cast<const char*>(&data[data.size()]);
+  const char* end   = reinterpret_cast<const char*>(&data[data.size()]);
   std::copy(begin, end, std::ostreambuf_iterator<char>(out));
   assert_throw(out, ExcIO());
 

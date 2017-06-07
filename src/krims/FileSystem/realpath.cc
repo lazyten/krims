@@ -33,9 +33,9 @@ std::string realpath(const std::string& path) {
 
   char* rp = ::realpath(path.c_str(), nullptr);
   if (rp == nullptr) {
-    const int errval = errno;
+    const int errval  = errno;
     char buffer[1024] = {0};
-    char* msg = strerror_r(errval, buffer, 1024);
+    char* msg         = strerror_r(errval, buffer, 1024);
     assert_throw(false, ExcRealpathError(errval, std::string(msg)));
   }
   std::string ret = std::string(rp);

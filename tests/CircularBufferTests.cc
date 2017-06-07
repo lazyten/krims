@@ -203,7 +203,7 @@ void exectute_random_test() {
   typedef CircularBuffer<T> sut_type;
   model_type model{};
   model.max_size = max_size;
-  model.data = std::move(data);
+  model.data     = std::move(data);
   sut_type sut{max_size};
 
   // Generate command sequence and execute random state test

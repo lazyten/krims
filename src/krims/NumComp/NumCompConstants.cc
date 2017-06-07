@@ -20,7 +20,7 @@
 #include "NumCompConstants.hh"
 
 namespace krims {
-double NumCompConstants::default_tolerance_factor = 100.;
+double NumCompConstants::default_tolerance_factor          = 100.;
 NumCompActionType NumCompConstants::default_failure_action = NumCompActionType::Return;
 
 }  // namespace krims
