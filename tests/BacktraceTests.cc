@@ -27,8 +27,9 @@ namespace tests {
 
 namespace detail {
 KRIMS_NOINLINE int inner(Backtrace& b, bool expensive) {
-  b.obtain_backtrace(expensive);
-  return 1;
+  /* clang-format off */
+  b.obtain_backtrace(expensive); return 1;
+  /* clang-format on */
 }
 
 KRIMS_NOINLINE int middle(Backtrace& b, bool expensive) {
@@ -83,9 +84,9 @@ TEST_CASE("Backtrace", "[backtrace]") {
 
   // The frame information we expect to get.
   const std::array<Backtrace::Frame, n> expected{{
-        {executable_end, addresses[0], funnames[0], "tests/BacktraceTests.cc", "30"},
-        {executable_end, addresses[1], funnames[1], "tests/BacktraceTests.cc", "35"},
-        {executable_end, addresses[2], funnames[2], "tests/BacktraceTests.cc", "40"},
+        {executable_end, addresses[0], funnames[0], "tests/BacktraceTests.cc", "31"},
+        {executable_end, addresses[1], funnames[1], "tests/BacktraceTests.cc", "36"},
+        {executable_end, addresses[2], funnames[2], "tests/BacktraceTests.cc", "41"},
   }};
 
   SECTION("Expensive test") {

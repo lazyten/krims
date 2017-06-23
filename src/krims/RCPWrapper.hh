@@ -21,6 +21,9 @@
 #include "ExceptionSystem/Exceptions.hh"
 #include "Subscribable.hh"
 #include "SubscriptionPointer.hh"
+#include <krims/TypeUtils/EnableIfLibrary.hh>
+#include <krims/TypeUtils/IsCheaplyCopyable.hh>
+#include <krims/TypeUtils/IsSubscribable.hh>
 #include <type_traits>
 
 namespace krims {
@@ -40,6 +43,8 @@ namespace krims {
  **/
 template <typename T, typename = void>
 class RCPWrapper {
+  // TODO This *is* a shared pointer, so derive off it!
+
   // Implementation for std::false_type, i.e. we don't have a subscribable
  public:
   /** \name Constructors */
@@ -104,8 +109,8 @@ class RCPWrapper {
  * may take both a std::shared_ptr as well as a SubscriptionPointer<T>.
  **/
 template <typename T>
-class RCPWrapper<T,
-                 typename std::enable_if<std::is_base_of<Subscribable, T>::value>::type> {
+class RCPWrapper<T, typename krims::enable_if_t<IsSubscribable<T>::value &&
+                                                !IsCheaplyCopyable<T>::value>> {
   // Implementation for std::true_type, i.e. we have a subscribable T
  public:
   // Make other RCPWrappers friends
