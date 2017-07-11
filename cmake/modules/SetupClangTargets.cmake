@@ -203,7 +203,6 @@ function(SCT_dump_fixes_yaml_merger file)
 	# Write temporary script file:
 	file(WRITE ${dir}/${filename}.tmp/${filename}
 "#!/usr/bin/env python3
-
 import argparse
 import yaml
 
@@ -214,21 +213,24 @@ parser.add_argument('files', nargs='*')
 args = parser.parse_args()
 
 # Merge content of files:
-merged={ 'MainSourceFile': '', 'Replacements': [] }
+merged={ 'Replacements': [], 'Diagnostics': [], }
 for replacefile in args.files:
   content = yaml.safe_load(open(replacefile, 'r'))
-  if not content: continue # Skip empty files
+  if not content:
+    continue # Skip empty files.
+  for k in merged:
+    if content.get(k):
+      merged[k].extend(content[k])
 
-  try:
-    if content['Replacements']:
-      merged['Replacements'].extend(content['Replacements'])
-  except KeyError:
-    pass # Ignore files with missing keys
+# Remove empty lists
+for k in list(merged.keys()):
+  if not merged[k]:
+    del merged[k]
 
-if merged['Replacements']:
+if merged:
+  merged['MainSourceFile'] = ''
   yaml.safe_dump(merged, open(args.outfile,'w'))
 else:
-  # Empty the file:
   open(args.outfile, 'w').close()
 "	)
 
