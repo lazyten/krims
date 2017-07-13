@@ -18,9 +18,6 @@
 //
 
 #include "realpath.hh"
-
-// Use the gnu version of strerror_r:
-#define _GNU_SOURCE 1
 #include <cstring>
 
 namespace krims {
@@ -33,11 +30,29 @@ std::string realpath(const std::string& path) {
 
   char* rp = ::realpath(path.c_str(), nullptr);
   if (rp == nullptr) {
-    const int errval  = errno;
-    char buffer[1024] = {0};
-    char* msg         = strerror_r(errval, buffer, 1024);
+    const int errval    = errno;
+    const size_t buflen = 1024;
+    char buffer[buflen] = {0};
+
+#ifdef _GNU_SOURCE
+    // The GNU compliant version returns the message as a
+    // char pointer into the provided buffer
+    char* msg = strerror_r(errval, buffer, buflen);
     assert_throw(false, ExcRealpathError(errval, std::string(msg)));
+#else
+    // The XSI compliant version only returns an int
+    // and stores the message in the buffer
+    int ret = strerror_r(errval, buffer, buflen);
+
+    // If ret is unequal to 0 we had an error in the strerror_r call.
+    assert_throw(ret == 0, ExcRealpathError(errval, "Unknown error"));
+
+    // Throw the actual error message
+    buffer[buflen - 1] = '\0';
+    assert_throw(false, ExcRealpathError(errval, std::string(&buffer[0])));
+#endif  // _GNU_SOURCE
   }
+
   std::string ret = std::string(rp);
   free(rp);
   return ret;
