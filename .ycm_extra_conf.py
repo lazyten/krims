@@ -26,10 +26,22 @@ import os
 # available on github:
 # https://github.com/Valloric/ycmd/blob/master/cpp/ycm/.ycm_extra_conf.py
 
+def FindStdInclude():
+  # Find the standard library include directory
 
-# These are the compilation flags that will be used in case there's no
-# compilation database set (by default, one is not set).
-flags = [
+  for include in [ "/usr/include/c++" ]:
+    for dir in ["v1"] + [ str(ver) for ver in range(4,10,1) ]:
+      if os.path.exists(os.path.join(dir,"cstdlib")):
+        return dir
+
+  # libc++ include directory:
+  return "/usr/include/c++/v1"
+
+
+def BuildBaseFlags():
+  # These are the compilation flags that will be used in case there's no
+  # compilation database set (by default, one is not set).
+  return [
     # Warnings: For a very detailed discussion about this
     # see the following stackexchange post:
     # https://programmers.stackexchange.com/questions/122608#124574
@@ -63,8 +75,8 @@ flags = [
     '-isystem', './build/external/catch/src/catchFromGit/include',
     '-isystem', '../rapidcheck/include',
     '-isystem', '../rapidcheck/ext/catch/include',
-    '-isystem', '/usr/lib/ycmd/clang_includes',
-]
+    '-isystem', FindStdInclude(),
+  ]
 
 def DirectoryOfThisScript():
   return os.path.dirname( os.path.abspath( __file__ ) )
@@ -106,7 +118,7 @@ def IsHeaderFile( filename ):
 
 def FlagsForFile( filename, **kwargs ):
   relative_to = DirectoryOfThisScript()
-  final_flags = MakeRelativePathsInFlagsAbsolute( flags, relative_to )
+  final_flags = MakeRelativePathsInFlagsAbsolute( BuildBaseFlags(), relative_to )
 
   return {
     'flags': final_flags,
