@@ -72,7 +72,7 @@ matrix:
           sources: *def_sources
           packages:
             - *def_packages
-            - &clang_newest [ clang-4.0, libc++-dev, clang-tidy-4.0 ]
+            - &clang_newest [ clang-4.0, libc++-dev, llvm-4.0, clang-tidy-4.0 ]
       install:
       - export GCOV="llvm-cov-4.0 gcov"
       compiler: clang
