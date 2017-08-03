@@ -13,7 +13,3 @@ build
 # building external projects:
 external/.last_pull
 external/rapidcheck
-
-# docs
-doc/latex
-doc/html

@@ -51,6 +51,7 @@ set(PackageModuleLocation share/cmake)
 
 # setup global options
 include(GlobalOption)
+global_option(ENABLE_DOCUMENTATION "Build documentation"         OFF )
 global_option(ENABLE_EXAMPLES      "Build example exectables"    ON  )
 global_option(ENABLE_TESTS         "Build unit test executables" ON  )
 
@@ -89,6 +90,10 @@ endif()
 if(KRIMS_ENABLE_EXAMPLES)
 	add_subdirectory(examples)
 	set(KRIMS_SUBDIRS ${KRIMS_SUBDIRS} examples)
+endif()
+
+if (KRIMS_ENABLE_DOCUMENTATION)
+	add_subdirectory(doc)
 endif()
 
 ##########################################################################
