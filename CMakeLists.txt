@@ -31,16 +31,6 @@ include(DebugReleaseBuild)
 drb_init()
 
 ##########################################################################
-# Global options
-
-# Path where cmake wants the modules and config packages:
-set(PackageModuleLocation share/cmake)
-
-# setup global options (needs to be done before call to project())
-option(KRIMS_ENABLE_TESTS "Build krims tests" ON)
-option(KRIMS_ENABLE_EXAMPLES "Build krims examples" ON)
-
-##########################################################################
 # Project setup
 
 project(krims VERSION 0.0.0)
@@ -52,6 +42,17 @@ include_directories("${PROJECT_BINARY_DIR}/src")  # for generated sources
 
 # enable testing of this project
 enable_testing()
+
+##########################################################################
+# Global options
+
+# Path where cmake wants the modules and config packages:
+set(PackageModuleLocation share/cmake)
+
+# setup global options
+include(GlobalOption)
+global_option(ENABLE_EXAMPLES      "Build example exectables"    ON  )
+global_option(ENABLE_TESTS         "Build unit test executables" ON  )
 
 ##########################################################################
 # Setup hard and optional dependencies and find components
