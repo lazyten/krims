@@ -21,6 +21,8 @@
 
 include(CMakeParseArguments)
 
+set(WARNING "The WriteVersionHeader cmake module is deprecated.")
+
 function(WRITE_VERSION_HEADER _filename)
 	# Write a header file which defines the macro contstants
 	# ${NAME}_VERSION_MAJOR, ${NAME}_VERSION_MINOR and
