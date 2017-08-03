@@ -34,7 +34,7 @@ add_custom_command(
 	OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/codedoc/html/index.html
 	       ${CMAKE_CURRENT_BINARY_DIR}/codedoc/latex/Makefile
 	COMMAND ${DOXYGEN_EXECUTABLE} "Doxyfile"
-	COMMENT "Creating source documentation with Doxygen"
+	COMMENT "Creating ${PROJECT_NAME} source documentation with Doxygen"
 	VERBATIM
 )
 set(DOCUMENTATION_FILES ${CMAKE_CURRENT_BINARY_DIR}/codedoc/html/index.html)
@@ -50,7 +50,7 @@ if (LATEX_FOUND)
 		OUTPUT   ${CMAKE_CURRENT_BINARY_DIR}/codedoc/latex/refman.pdf
 		DEPENDS  ${CMAKE_CURRENT_BINARY_DIR}/codedoc/latex/Makefile
 		COMMAND make
-		COMMENT "Create pdf reference manual"
+		COMMENT "Create ${PROJECT_NAME} pdf reference manual"
 		VERBATIM
 		WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/codedoc/latex"
 	)
