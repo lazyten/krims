@@ -18,6 +18,7 @@
 //
 
 #include "Backtrace.hh"
+#include "krims/config.hh"
 #include "krims/demangle.hh"
 #include <iomanip>
 #include <sstream>

@@ -19,6 +19,7 @@
 
 #pragma once
 #include "addr2line.hh"
+#include "krims/config.hh"
 #include <iostream>
 #include <string>
 #include <vector>

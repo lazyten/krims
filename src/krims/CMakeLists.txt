@@ -42,9 +42,8 @@ set(KRIMS_SOURCES
 	version.cc
 )
 
-# Dump the current version as an include file.
-include(WriteVersionHeader)
-write_version_header("${krims_BINARY_DIR}/src/krims/version_defs.hh")
+# Write the config file config.hh (into the binary dir)
+configure_file("config.hh.in" "config.hh")
 
 # Add the libraries for Debug and Release builds:
 drb_add_library(krims
@@ -79,7 +78,7 @@ install(DIRECTORY .
 	COMPONENT devel
 	FILES_MATCHING PATTERN "*.hh"
 )
-install(FILES "${krims_BINARY_DIR}/src/krims/version_defs.hh"
+install(FILES "${krims_BINARY_DIR}/src/krims/config.hh"
 	DESTINATION "include/krims"
 	COMPONENT devel
 )

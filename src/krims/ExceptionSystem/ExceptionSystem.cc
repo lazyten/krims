@@ -20,6 +20,7 @@
 #include "ExceptionSystem.hh"
 #include "Backtrace.hh"
 #include "ExceptionBase.hh"
+#include "krims/config.hh"
 #include <iostream>
 
 namespace krims {

@@ -19,6 +19,7 @@
 
 #include <catch.hpp>
 #include <krims/GenMap.hh>
+#include <krims/config.hh>
 #include <rapidcheck.h>
 
 namespace krims {
