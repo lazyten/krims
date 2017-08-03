@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 by the krims authors
+// Copyright (C) 2016-17 by the krims authors
 //
 // This file is part of krims.
 //
@@ -18,6 +18,7 @@
 //
 
 #pragma once
+#include "krims/config.hh"
 #include <functional>
 #include <tuple>
 #include <utility>

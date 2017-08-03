@@ -18,6 +18,7 @@
 //
 
 #pragma once
+#include "krims/config.hh"
 #include <type_traits>
 
 namespace krims {

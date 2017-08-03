@@ -18,6 +18,7 @@
 //
 
 #include "demangle.hh"
+#include "krims/config.hh"
 #include <cstdlib>
 #include <cstring>
 #ifdef KRIMS_HAVE_LIBSTDCXX_DEMANGLER

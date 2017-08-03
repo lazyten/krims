@@ -54,9 +54,10 @@ class GenMapValue {
    * This includes std::string and all relevant numeric types (integers,
    * floating point numbers, complex numbers)
    **/
-  template <typename T, typename std::enable_if<!std::is_reference<T>::value &&
-                                                      IsCheaplyCopyable<T>::value,
-                                                int>::type = 0>
+  template <
+        typename T,
+        typename std::enable_if<
+              !std::is_reference<T>::value && IsCheaplyCopyable<T>::value, int>::type = 0>
   GenMapValue(T t) {
     // Note about the enable_if:
     //   - We need to make sure that T is the actual type (and not a

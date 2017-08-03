@@ -20,6 +20,7 @@
 #include <array>
 #include <catch.hpp>
 #include <krims/ExceptionSystem/Backtrace.hh>
+#include <krims/config.hh>
 #include <krims/macros/noinline.hh>
 
 namespace krims {
@@ -84,9 +85,9 @@ TEST_CASE("Backtrace", "[backtrace]") {
 
   // The frame information we expect to get.
   const std::array<Backtrace::Frame, n> expected{{
-        {executable_end, addresses[0], funnames[0], "tests/BacktraceTests.cc", "31"},
-        {executable_end, addresses[1], funnames[1], "tests/BacktraceTests.cc", "36"},
-        {executable_end, addresses[2], funnames[2], "tests/BacktraceTests.cc", "41"},
+        {executable_end, addresses[0], funnames[0], "tests/BacktraceTests.cc", "32"},
+        {executable_end, addresses[1], funnames[1], "tests/BacktraceTests.cc", "37"},
+        {executable_end, addresses[2], funnames[2], "tests/BacktraceTests.cc", "42"},
   }};
 
   SECTION("Expensive test") {
