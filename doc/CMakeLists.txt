@@ -19,48 +19,16 @@
 ##
 ## ---------------------------------------------------------------------
 
-find_package(Doxygen)
-find_package(LATEX)
+include(Documentation)
 
-if (NOT DOXYGEN_FOUND)
-	message(FATAL_ERROR "Doxygen is needed to build the documentation.")
-endif()
-
-# Write actual doxygen file
+# Exclude patterns for the actual Doxyfile generated with configure_file
+set(DOXY_EXCLUDE "")
+set(DOXY_EXCLUDE_PATTERNS "")
 configure_file("Doxyfile.in" "Doxyfile" @ONLY)
 
-# Add command to build the documentation
-add_custom_command(
-	OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/codedoc/html/index.html
-	       ${CMAKE_CURRENT_BINARY_DIR}/codedoc/latex/Makefile
-	COMMAND ${DOXYGEN_EXECUTABLE} "Doxyfile"
-	COMMENT "Creating ${PROJECT_NAME} source documentation with Doxygen"
-	VERBATIM
-)
-set(DOCUMENTATION_FILES ${CMAKE_CURRENT_BINARY_DIR}/codedoc/html/index.html)
+setup_doxygen(doc-krims-doxygen "Doxyfile"
+	      "${CMAKE_CURRENT_BINARY_DIR}/codedoc"
+	      "share/doc/krims")
 
-install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/codedoc/html
-	DESTINATION share/doc/krims
-	COMPONENT doc
-)
-
-# If latex was found also build the latex documentation
-if (LATEX_FOUND)
-	add_custom_command(
-		OUTPUT   ${CMAKE_CURRENT_BINARY_DIR}/codedoc/latex/refman.pdf
-		DEPENDS  ${CMAKE_CURRENT_BINARY_DIR}/codedoc/latex/Makefile
-		COMMAND make
-		COMMENT "Create ${PROJECT_NAME} pdf reference manual"
-		VERBATIM
-		WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/codedoc/latex"
-	)
-	set(DOCUMENTATION_FILES ${DOCUMENTATION_FILES} ${CMAKE_CURRENT_BINARY_DIR}/codedoc/latex/refman.pdf)
-
-	install(FILES ${CMAKE_CURRENT_BINARY_DIR}/codedoc/latex/refman.pdf
-		DESTINATION share/doc/krims
-		COMPONENT doc
-	)
-endif()
-
-# Target to drive building the documentation
-add_custom_target(doc-krims ALL DEPENDS ${DOCUMENTATION_FILES})
+add_custom_target(doc-krims ALL)
+add_dependencies(doc-krims doc-krims-doxygen)
