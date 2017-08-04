@@ -23,8 +23,12 @@ include(Documentation)
 
 # Exclude patterns for the actual Doxyfile generated with configure_file
 set(DOXY_EXCLUDE_PATTERNS "")
-configure_file("Doxyfile.in" "Doxyfile" @ONLY)
+set(DOXY_LATEX "OFF")
+if (DOCUMENTATION_DOXYGEN_LATEX)
+	set(DOXY_LATEX "ON")
+endif()
 
+configure_file("Doxyfile.in" "Doxyfile" @ONLY)
 setup_doxygen(doc-krims-doxygen "${CMAKE_CURRENT_BINARY_DIR}/Doxyfile"
 	      "${CMAKE_CURRENT_BINARY_DIR}/codedoc"
 	      "share/doc/krims")
