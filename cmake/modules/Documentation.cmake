@@ -19,6 +19,8 @@
 ##
 ## ---------------------------------------------------------------------
 
+option(DOCUMENTATION_DOXYGEN_LATEX "Build the latex doxygen documentation" OFF)
+
 function(setup_doxygen DOXYTARGET DOXYFILE DOXYDIR INSTALLDIR)
 	# Run doxygen if the target ${DOXYTARGET} is built.
 	# ${DOXYFILE} is the doxygen config to use and ${DOXYDIR}
@@ -33,10 +35,14 @@ function(setup_doxygen DOXYTARGET DOXYFILE DOXYDIR INSTALLDIR)
 		message(FATAL_ERROR "Doxygen is needed for the setup_doxygen function of the Documentation package")
 	endif()
 
+	if(DOCUMENTATION_DOXYGEN_LATEX)
+		set(LATEXFILE ${DOXYDIR}/latex/Makefile)
+	endif()
+
 	# Always run doxygen
 	add_custom_command(
 		DEPENDS "${DOXYFILE}"
-		OUTPUT dummy ${DOXYDIR}/html/index.html ${DOXYDIR}/latex/Makefile
+		OUTPUT dummy ${DOXYDIR}/html/index.html ${LATEXFILE}
 		COMMAND ${DOXYGEN_EXECUTABLE} "${DOXYFILE}"
 		COMMENT "Creating ${PROJECT_NAME} source documentation with Doxygen"
 		VERBATIM
@@ -50,7 +56,7 @@ function(setup_doxygen DOXYTARGET DOXYFILE DOXYDIR INSTALLDIR)
 
 	# Run Latex if we have it.
 	find_package(LATEX COMPONENTS PDFLATEX)
-	if (LATEX_FOUND)
+	if (LATEX_FOUND AND DOCUMENTATION_DOXYGEN_LATEX)
 		add_custom_command(
 			OUTPUT   ${DOXYDIR}/latex/refman.pdf
 			DEPENDS  ${DOXYDIR}/latex/Makefile
