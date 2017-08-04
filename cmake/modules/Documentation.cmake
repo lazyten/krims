@@ -19,13 +19,6 @@
 ##
 ## ---------------------------------------------------------------------
 
-find_package(Doxygen)
-find_package(LATEX)
-
-if (NOT DOXYGEN_FOUND)
-	message(FATAL_ERROR "Doxygen is needed for the Documentation krims package")
-endif()
-
 function(setup_doxygen DOXYTARGET DOXYFILE DOXYDIR INSTALLDIR)
 	# Run doxygen if the target ${DOXYTARGET} is built.
 	# ${DOXYFILE} is the doxygen config to use and ${DOXYDIR}
@@ -35,12 +28,19 @@ function(setup_doxygen DOXYTARGET DOXYFILE DOXYDIR INSTALLDIR)
 	# The resulting pdf and html documentation will be installed to ${INSTALLDIR}
 	# once the doc component is installed.
 
+	find_package(Doxygen)
+	if (NOT DOXYGEN_FOUND)
+		message(FATAL_ERROR "Doxygen is needed for the setup_doxygen function of the Documentation package")
+	endif()
+
 	# Always run doxygen
 	add_custom_command(
+		DEPENDS "${DOXYFILE}"
 		OUTPUT dummy ${DOXYDIR}/html/index.html ${DOXYDIR}/latex/Makefile
-		COMMAND ${DOXYGEN_EXECUTABLE} "Doxyfile"
+		COMMAND ${DOXYGEN_EXECUTABLE} "${DOXYFILE}"
 		COMMENT "Creating ${PROJECT_NAME} source documentation with Doxygen"
 		VERBATIM
+		WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
 	)
 	install(DIRECTORY ${DOXYDIR}/html
 		DESTINATION ${INSTALLDIR}
@@ -49,6 +49,7 @@ function(setup_doxygen DOXYTARGET DOXYFILE DOXYDIR INSTALLDIR)
 	set(DOXY_FILES ${DOXYDIR}/html/index.html ${DOXYDIR}/latex/Makefile)
 
 	# Run Latex if we have it.
+	find_package(LATEX COMPONENTS PDFLATEX)
 	if (LATEX_FOUND)
 		add_custom_command(
 			OUTPUT   ${DOXYDIR}/latex/refman.pdf
@@ -66,5 +67,52 @@ function(setup_doxygen DOXYTARGET DOXYFILE DOXYDIR INSTALLDIR)
 	endif()
 
 	add_custom_target(${DOXYTARGET} ALL DEPENDS ${DOXY_FILES})
+endfunction()
+
+function(setup_latex LATEXTARGET MAINFILE INSTALLDIR FEATURES)
+	# Run latex on the mainfile if the target ${LATEXTARGET} is built.
+	# ${MAINFILE} is the main tex file with the \begin{document}.
+	#
+	# The resulting pdf will be installed to ${INSTALLDIR}
+	# once the doc component is installed.
+	#
+	# FEATURES is a list which indicates which latex features are needed.
+	# Currently only "bibtex" and "" (i.e. plain latex) are understood.
+	find_package(LATEX COMPONENTS PDFLATEX BIBTEX)
+	if (NOT LATEX_FOUND)
+		message(FATAL_ERROR "Latex is needed for the setup_latex call of the Documentation package")
+	endif()
+
+	get_filename_component(TEXNAME ${MAINFILE} NAME_WE)
+	if (FEATURES EQUAL "bibtex")
+		add_custom_command(
+			DEPENDS ${TEXNAME}.tex
+			OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${TEXNAME}.aux
+			COMMAND ${PDFLATEX_COMPILER} -halt-on-error -output-directory ${CMAKE_CURRENT_BINARY_DIR} ${TEXNAME}.tex
+			WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+			VERBATIM
+		)
+
+		add_custom_command(
+			DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${TEXNAME}.aux
+			OUTPUT  ${CMAKE_CURRENT_BINARY_DIR}/${TEXNAME}.bbl
+			COMMAND ${BIBTEX_COMPILER} ${TEXNAME}.aux
+			WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+			VERBATIM
+		)
+		set(extradepends ${CMAKE_CURRENT_BINARY_DIR}/${TEXNAME}.bbl)
+	endif()
+
+	add_custom_command(
+		OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${TEXNAME}.pdf
+		DEPENDS ${TEXNAME}.tex ${extradepends}
+		COMMAND ${PDFLATEX_COMPILER} -halt-on-error -output-directory ${CMAKE_CURRENT_BINARY_DIR} ${TEXNAME}.tex
+		COMMAND ${PDFLATEX_COMPILER} -halt-on-error -output-directory ${CMAKE_CURRENT_BINARY_DIR} ${TEXNAME}.tex
+		VERBATIM
+		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+	)
+
+	install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${TEXNAME}.pdf DESTINATION ${INSTALLDIR} COMPONENT doc)
+	add_custom_target(${LATEXTARGET} DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${TEXNAME}.pdf)
 endfunction()
 
