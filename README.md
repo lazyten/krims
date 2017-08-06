@@ -34,11 +34,10 @@ cmake --build .
 ```
 
 ## Short description
-This section sketches the basic functionality of all individual
+This section sketches the basic functionality of some
 parts of the library.
 
 - [CMake module ``DebugReleaseBuild``](#cmake-module-debugreleasebuild)
-- [CMake module ``WriteVersionHeader``](#cmake-module-writeversionheader)
 - [CMake module ``SetupClangTargets``](#cmake-module-setupclangtargets)
 - [The exception system](#the-exception-system)
 - [Performing floating point comparisons](#performing-floating-point-comparisons)
@@ -89,14 +88,6 @@ drb_target_compile_definitions(RELEASE mylib PUBLIC "EXAMPLE")
 # call target_link_libraries on both versions
 drb_target_link_libraries(ALL mylib dependency1 dependency2)
 ```
-
-### CMake module ``WriteVersionHeader``
-- Located at [cmake/modules/WriteVersionHeader.cmake](cmake/modules/WriteVersionHeader.cmake)
-- The ``write_version_header`` cmake function exports the Project version number
-  from CMake into a C++ header (this way one only needs to bump the version at one place)
-- The syntax is ``write_version_header file [NAME namesp] [VERSION version_string]``
-- The resulting data is put into the namespace ``namesp::detail``.
-- If ``NAME`` or ``VERSION`` are not provided, the current project name and version are used.
 
 ### CMake module ``SetupClangTargets``
 - Add targets to easily run certain clang tools on the project
