@@ -49,16 +49,6 @@ if (NOT CMAKE_CXX_STANDARD VERSION_LESS 17)
 	set(KRIMS_HAVE_CXX17 ON)
 endif()
 
-#############################
-#-- Experimental features --#
-#############################
-option(KRIMS_ENABLE_EXPERIMENTAL "Enable experimental features in krims" OFF)
-if(KRIMS_ENABLE_EXPERIMENTAL)
-	# Enable addr2line translation
-	message(STATUS "Enable experimental features for krims")
-	LIST(APPEND KRIMS_DEFINITIONS "KRIMS_ENABLE_EXPERIMENTAL")
-endif()
-
 ########################
 #-- Exception system --#
 ########################
