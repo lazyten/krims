@@ -26,10 +26,6 @@
 #       KRIMS_DEPENDENCIES_RELEASE         release mode needs these extras
 #       KRIMS_DEPENDENCIES_TEST            tests need these extra libraries
 #
-#       KRIMS_DEFINITIONS                  definitions for all compilation
-#       KRIMS_DEFINITIONS_DEBUG            definitions for debug mode
-#       KRIMS_DEFINITIONS_RELEASE          definitions for release mode
-#
 
 ####################
 #-- Empty it all --#
@@ -38,9 +34,6 @@ set(KRIMS_DEPENDENCIES "")
 set(KRIMS_DEPENDENCIES_DEBUG "")
 set(KRIMS_DEPENDENCIES_RELEASE "")
 set(KRIMS_DEPENDENCIES_TEST "")
-set(KRIMS_DEFINITIONS "")
-set(KRIMS_DEFINITIONS_DEBUG "")
-set(KRIMS_DEFINITIONS_RELEASE "")
 
 ########################################
 #-- Link with some threading library --#

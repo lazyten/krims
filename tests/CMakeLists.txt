@@ -49,13 +49,6 @@ drb_add_executable(krims_tests
 	FILES ${KRIMS_TESTS_SOURCES}
 )
 
-drb_target_compile_definitions(ALL     krims_tests
-	PRIVATE ${KRIMS_DEFINITIONS})
-drb_target_compile_definitions(DEBUG   krims_tests
-	PRIVATE ${KRIMS_DEFINITIONS_DEBUG})
-drb_target_compile_definitions(RELEASE krims_tests
-	PRIVATE ${KRIMS_DEFINITIONS_RELEASE})
-
 drb_target_link_libraries(ALL     krims_tests
 	${KRIMS_DEPENDENCIES} ${KRIMS_DEPENDENCIES_TEST})
 drb_target_link_libraries(DEBUG   krims_tests
