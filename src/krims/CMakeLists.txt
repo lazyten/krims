@@ -89,6 +89,6 @@ export(EXPORT KrimsTargets
 install(EXPORT KrimsTargets
 	FILE "krimsTargets.cmake"
 	NAMESPACE Upstream::
-	DESTINATION "${PackageModuleLocation}/krims"
+	DESTINATION "share/cmake/krims"
 )
 

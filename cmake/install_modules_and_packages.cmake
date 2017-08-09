@@ -26,7 +26,7 @@
 
 # Installing cmake modules
 install(DIRECTORY "${krims_SOURCE_DIR}/cmake/modules"
-	DESTINATION ${PackageModuleLocation}
+	DESTINATION share/cmake
 	COMPONENT devel
 	FILES_MATCHING PATTERN "*.cmake"
 )
@@ -48,7 +48,7 @@ configure_file(cmake/krimsConfig.cmake.in
 install(FILES
 	"${krims_BINARY_DIR}/krimsConfig.cmake"
 	"${krims_BINARY_DIR}/krimsConfigVersion.cmake"
-	DESTINATION "${PackageModuleLocation}/krims"
+	DESTINATION "share/cmake/krims"
 	COMPONENT devel
 )
 
