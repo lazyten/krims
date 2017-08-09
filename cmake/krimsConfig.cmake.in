@@ -19,4 +19,19 @@
 ##
 ## ---------------------------------------------------------------------
 
+if ("@CMAKE_VERSION@" VERSION_GREATER 3.1.0)
+	cmake_minimum_required(VERSION 3.1.0)
+
+	# The @ variable is substituted at configure time.
+	# So if the configure time cmake version is greater than
+	# 3.1.0 we used the Threads::Threads target in configuring
+	# krims. Hence we need to find it first before krims is usable
+	# again.
+
+	# TODO Perhaps it is better to export what the Threads::Threads
+	#      target actually is and import it here?
+	set(THREADS_PREFER_PTHREAD_FLAG ON)
+	find_package(Threads REQUIRED)
+endif()
+
 include("${CMAKE_CURRENT_LIST_DIR}/krimsTargets.cmake")

@@ -41,7 +41,7 @@ write_basic_package_version_file(
 # Adjust a configure file
 configure_file(cmake/krimsConfig.cmake.in
 	"${krims_BINARY_DIR}/krimsConfig.cmake"
-	COPYONLY
+	@ONLY
 )
 
 # Set an export location:
