@@ -29,7 +29,7 @@
 include(CMakeParseArguments)
 
 if (NOT DRB_INITIALISED)
-	message(FATAL_ERROR "The SwigInterface module requires the DebugReleaseBuild \
+	message(FATAL_ERROR "The CppInterface module requires the DebugReleaseBuild \
 module to be included and set up. Please include the module and call 'drb_init()'")
 endif()
 
