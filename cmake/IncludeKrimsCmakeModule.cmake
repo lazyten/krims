@@ -1,6 +1,6 @@
 ## ---------------------------------------------------------------------
 ##
-## Copyright (C) 2016 by the krims authors
+## Copyright (C) 2017 by the krims authors
 ##
 ## This file is part of krims.
 ##
@@ -80,15 +80,20 @@ macro(include_krims_cmake_module MODULE)
 	# Determine FIRST_TRY_LOCATION, i.e the place where we first try to find
 	# the module
 	set(FIRST_TRY_LOCATION "")
-	if (NOT "$ENV{krims_DIR}" MATCHES "NOTFOUND"
+	if (NOT "$ENV{krims_DIR}" STREQUAL ""
+			AND NOT "$ENV{krims_DIR}" MATCHES "NOTFOUND"
 			AND NOT "$ENV{krims_DIR}" MATCHES "AUTOCHECKOUT")
 		set(FIRST_TRY_LOCATION
 			"$ENV{krims_DIR}/share/cmake/modules/${MODULE}.cmake")
 	endif()
 
-	if (NOT "${krims_DIR}" MATCHES "NOTFOUND"
+	# krims_DIR points to the directory containing the package config
+	# this is a sister directory to the modules directory containing
+	# the module files we are after.
+	if (NOT "${krims_DIR}" STREQUAL ""
+			AND NOT "${krims_DIR}" MATCHES "NOTFOUND"
 			AND NOT "${krims_DIR}" MATCHES "AUTOCHECKOUT")
-		set(FIRST_TRY_LOCATION "${krims_DIR}/share/cmake/modules/${MODULE}.cmake")
+		set(FIRST_TRY_LOCATION "${krims_DIR}/../modules/${MODULE}.cmake")
 	endif()
 
 	if ("${krims_DIR}" STREQUAL "krims_DIR-AUTOCHECKOUT"
@@ -101,6 +106,7 @@ macro(include_krims_cmake_module MODULE)
 	endif()
 
 	# Try the first try location
+	set(RES "NOTFOUND")
 	if (NOT "${FIRST_TRY_LOCATION}" STREQUAL "")
 		include("${FIRST_TRY_LOCATION}" OPTIONAL RESULT_VARIABLE RES)
 	endif()
