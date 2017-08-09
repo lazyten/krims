@@ -57,10 +57,6 @@ drb_set_target_properties(
 	VERSION "${PROJECT_VERSION}"
 )
 
-drb_target_compile_definitions(ALL     krims PUBLIC ${KRIMS_DEFINITIONS})
-drb_target_compile_definitions(DEBUG   krims PUBLIC ${KRIMS_DEFINITIONS_DEBUG})
-drb_target_compile_definitions(RELEASE krims PUBLIC ${KRIMS_DEFINITIONS_RELEASE})
-
 drb_target_link_libraries(ALL     krims ${KRIMS_DEPENDENCIES})
 drb_target_link_libraries(DEBUG   krims ${KRIMS_DEPENDENCIES_DEBUG})
 drb_target_link_libraries(RELEASE krims ${KRIMS_DEPENDENCIES_RELEASE})
@@ -93,6 +89,6 @@ export(EXPORT KrimsTargets
 install(EXPORT KrimsTargets
 	FILE "krimsTargets.cmake"
 	NAMESPACE Upstream::
-	DESTINATION "${PackageModuleLocation}/krims"
+	DESTINATION "share/cmake/krims"
 )
 

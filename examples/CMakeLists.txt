@@ -48,9 +48,6 @@ function(setup_example_target TARGET)
 		COMPILE_DEFINITIONS "${EXAMPLE_BUILD_TYPE}"
 	)
 
-	# setup definitions.
-	target_compile_definitions(${TARGET} PRIVATE "${KRIMS_DEFINITIONS};${KRIMS_DEFINITIONS_${EXAMPLE_BUILD_TYPE}}")
-
 	# link it with the appropriate krims library target
 	target_link_libraries(${TARGET}
 		${krims_${EXAMPLE_BUILD_TYPE}_TARGET}

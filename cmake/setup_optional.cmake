@@ -26,10 +26,6 @@
 #       KRIMS_DEPENDENCIES_RELEASE		release mode needs these extras
 #       KRIMS_DEPENDENCIES_TEST			tests need these extra libraries
 #
-#       KRIMS_DEFINITIONS			definitions for all compilation
-#       KRIMS_DEFINITIONS_DEBUG			definitions for debug mode
-#       KRIMS_DEFINITIONS_RELEASE		definitions for release mode
-#
 
 #
 # Modules and macros
@@ -47,16 +43,6 @@ endif()
 if (NOT CMAKE_CXX_STANDARD VERSION_LESS 17)
 	message(STATUS "Detected C++17 support: Setting KRIMS_HAVE_CXX17")
 	set(KRIMS_HAVE_CXX17 ON)
-endif()
-
-#############################
-#-- Experimental features --#
-#############################
-option(KRIMS_ENABLE_EXPERIMENTAL "Enable experimental features in krims" OFF)
-if(KRIMS_ENABLE_EXPERIMENTAL)
-	# Enable addr2line translation
-	message(STATUS "Enable experimental features for krims")
-	LIST(APPEND KRIMS_DEFINITIONS "KRIMS_ENABLE_EXPERIMENTAL")
 endif()
 
 ########################

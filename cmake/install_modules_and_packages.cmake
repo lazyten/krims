@@ -26,7 +26,7 @@
 
 # Installing cmake modules
 install(DIRECTORY "${krims_SOURCE_DIR}/cmake/modules"
-	DESTINATION ${PackageModuleLocation}
+	DESTINATION share/cmake
 	COMPONENT devel
 	FILES_MATCHING PATTERN "*.cmake"
 )
@@ -41,14 +41,14 @@ write_basic_package_version_file(
 # Adjust a configure file
 configure_file(cmake/krimsConfig.cmake.in
 	"${krims_BINARY_DIR}/krimsConfig.cmake"
-	COPYONLY
+	@ONLY
 )
 
 # Set an export location:
 install(FILES
 	"${krims_BINARY_DIR}/krimsConfig.cmake"
 	"${krims_BINARY_DIR}/krimsConfigVersion.cmake"
-	DESTINATION "${PackageModuleLocation}/krims"
+	DESTINATION "share/cmake/krims"
 	COMPONENT devel
 )
 
