@@ -20,6 +20,7 @@
 ## ---------------------------------------------------------------------
 
 include(CheckCXXCompilerFlag)
+include(CheckCCompilerFlag)
 
 macro(determine_supported_cxx_standards)
 	# macro to check for the highest fully supported c++ standard.
@@ -193,7 +194,7 @@ macro(use_cxx_standard STANDARD)
 endmacro(use_cxx_standard)
 
 macro(enable_if_compiles VARIABLE FLAG)
-	# Checks whether a compiler supports a flag and if yes
+	# Checks whether a cxx compiler supports a flag and if yes
 	# adds it to the variable provided.
 	#
 	string(REGEX REPLACE "[^a-zA-Z0-9]" "" FLAG_CLEAN "${FLAG}")
@@ -203,6 +204,32 @@ macro(enable_if_compiles VARIABLE FLAG)
 	endif()
 	unset(FLAG_CLEAN)
 endmacro(enable_if_compiles)
+
+macro(enable_if_cc_compiles VARIABLE FLAG)
+	# Checks whether a plain c compiler supports a flag and if yes
+	# adds it to the variable provided.
+	#
+	string(REGEX REPLACE "[^a-zA-Z0-9]" "" FLAG_CLEAN "${FLAG}")
+	CHECK_C_COMPILER_FLAG("-Werror ${FLAG}" DRB_CC_HAVE_FLAG_${FLAG_CLEAN})
+	if (DRB_CC_HAVE_FLAG_${FLAG_CLEAN})
+		set(${VARIABLE} "${${VARIABLE}} ${FLAG}")
+	endif()
+	unset(FLAG_CLEAN)
+endmacro(enable_if_cc_compiles)
+
+macro(enable_if_all_compiles VARIABLE1 VARIABLE2 FLAG)
+	# Checks whether the plain c compiler as well as the C++ compiler
+	# supports a flag and if yes adds it to the variable provided.
+	#
+	string(REGEX REPLACE "[^a-zA-Z0-9]" "" FLAG_CLEAN "${FLAG}")
+	CHECK_C_COMPILER_FLAG("-Werror ${FLAG}" DRB_CC_HAVE_FLAG_${FLAG_CLEAN})
+	CHECK_CXX_COMPILER_FLAG("-Werror ${FLAG}" DRB_HAVE_FLAG_${FLAG_CLEAN})
+	if (DRB_CC_HAVE_FLAG_${FLAG_CLEAN} AND DRB_HAVE_FLAG_${FLAG_CLEAN})
+		set(${VARIABLE1} "${${VARIABLE1}} ${FLAG}")
+		set(${VARIABLE2} "${${VARIABLE2}} ${FLAG}")
+	endif()
+	unset(FLAG_CLEAN)
+endmacro()
 
 # TODO have something similar for the linker
 

@@ -1,6 +1,6 @@
 ## ---------------------------------------------------------------------
 ##
-## Copyright (C) 2016 by the krims authors
+## Copyright (C) 2016-17 by the krims authors
 ##
 ## This file is part of krims.
 ##
@@ -36,10 +36,12 @@
 # Warnings
 #
 # Show high confidence warning
-enable_if_compiles(CMAKE_CXX_FLAGS "-Wall")
+enable_if_compiles(CMAKE_CXX_FLAGS  "-Wall")
+enable_if_cc_compiles(CMAKE_C_FLAGS "-Wall")
 
 # Show valuable extra warnings
-enable_if_compiles(CMAKE_CXX_FLAGS "-Wextra")
+enable_if_compiles(CMAKE_CXX_FLAGS  "-Wextra")
+enable_if_cc_compiles(CMAKE_C_FLAGS "-Wextra")
 
 # Warn if virtual classes do not have a virtual destructor
 enable_if_compiles(CMAKE_CXX_FLAGS "-Wnon-virtual-dtor")
@@ -54,22 +56,23 @@ enable_if_compiles(CMAKE_CXX_FLAGS "-Wold-style-cast")
 enable_if_compiles(CMAKE_CXX_FLAGS "-Wcast-align")
 
 # But silence some rather annoying warnings
-enable_if_compiles(CMAKE_CXX_FLAGS "-Wno-unused-macros")
-enable_if_compiles(CMAKE_CXX_FLAGS "-Wno-unused-parameter")
+enable_if_all_compiles(CMAKE_CXX_FLAGS CMAKE_C_FLAGS "-Wno-unused-macros")
+enable_if_all_compiles(CMAKE_CXX_FLAGS CMAKE_C_FLAGS "-Wno-unused-parameter")
 
 # Turn on warnings about language extensions
-enable_if_compiles(CMAKE_CXX_FLAGS "-pedantic")
+enable_if_compiles(CMAKE_CXX_FLAGS  "-pedantic")
+enable_if_cc_compiles(CMAKE_C_FLAGS "-pedantic")
 
 #
 # Warnings as errors
 #
 # Make warnings errors, such that we cannot ignore them
-enable_if_compiles(CMAKE_CXX_FLAGS "-Werror")
+enable_if_compiles(CMAKE_CXX_FLAGS  "-Werror")
+enable_if_cc_compiles(CMAKE_C_FLAGS "-Werror")
 
-# Do not make overloaded virtuals errors:
-# TODO maybe do?
-enable_if_compiles(CMAKE_CXX_FLAGS "-Wno-error=overloaded-virtual")
-enable_if_compiles(CMAKE_CXX_FLAGS "-Wno-error=deprecated-declarations")
+# Some things we rather want as warnings, not as errors:
+enable_if_compiles(CMAKE_CXX_FLAGS  "-Wno-error=deprecated-declarations")
+enable_if_cc_compiles(CMAKE_C_FLAGS "-Wno-error=extra-semi")
 
 #######################
 #-- Bug workarounds --#
@@ -91,8 +94,8 @@ set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -rdynamic")
 # Extra stuff for debug:
 #
 if (CMAKE_BUILD_TYPE MATCHES "Debug")
-	enable_if_compiles(CMAKE_CXX_FLAGS_DEBUG "-O0")
-	enable_if_compiles(CMAKE_CXX_FLAGS_DEBUG "-Og")
+	enable_if_all_compiles(CMAKE_CXX_FLAGS_DEBUG CMAKE_C_FLAGS_DEBUG "-O0")
+	enable_if_all_compiles(CMAKE_CXX_FLAGS_DEBUG CMAKE_C_FLAGS_DEBUG "-Og")
 
 	# Common linker flags for all of debug:
 	set(COMMON_LINKER_FLAGS_DEBUG "${COMMON_LINKER_FLAGS_DEBUG} -g")
@@ -114,8 +117,8 @@ endif()
 option(DRB_MACHINE_SPECIFIC_OPTIM_Release "Enable machine-specific optimisations in REALEASE build. Your build might not be transferable to other machines.")
 if (CMAKE_BUILD_TYPE MATCHES "Release")
 	if (DRB_MACHINE_SPECIFIC_OPTIM_Release)
-		enable_if_compiles(CMAKE_CXX_FLAGS_RELEASE "-march=native")
-		enable_if_compiles(CMAKE_CXX_FLAGS_RELEASE "-mtune=native")
+		enable_if_all_compiles(CMAKE_CXX_FLAGS_RELEASE CMAKE_C_FLAGS_RELEASE  "-march=native")
+		enable_if_all_compiles(CMAKE_CXX_FLAGS_RELEASE CMAKE_C_FLAGS_RELEASE  "-mtune=native")
 		message(STATUS "Enabled machine-specific optimisations in Release build.")
 	endif()
 endif()
