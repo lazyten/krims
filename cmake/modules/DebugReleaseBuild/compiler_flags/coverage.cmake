@@ -30,17 +30,14 @@ endif()
 option(DRB_COVERAGE_Debug "Compile with coverage testing in the Debug build." OFF)
 
 if(DRB_COVERAGE_Debug AND CMAKE_BUILD_TYPE MATCHES "Debug")
-	set(_FLAGSS "--coverage")
-	enable_if_compiles(_FLAGSS "--coverage")
-
 	# TODO This does only enable so-called DebugInfo-based coverage in clang.
 	#      But clang has more to offer. See
 	#      http://clang.llvm.org/docs/SourceBasedCodeCoverage.html
 	#      http://clang.llvm.org/docs/SanitizerCoverage.html
 
-	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} ${_FLAGSS}")
-	set(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} ${_FLAGSS}")
-	unset(_FLAGSS)
+	set(CMAKE_CXX_FLAGS_DEBUG        "${CMAKE_CXX_FLAGS_DEBUG} --coverage")
+	set(CMAKE_C_FLAGS_DEBUG          "${CMAKE_C_FLAGS_DEBUG}   --coverage")
+	set(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} --coverage")
 
 	message(STATUS "Enabled coverage analysis in the Debug build.")
 endif()

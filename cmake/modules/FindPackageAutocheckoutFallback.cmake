@@ -131,8 +131,6 @@ Either provide the installation prefix of the ${NAME} library in the environment
 variable ${NAME}_DIR or enable autocheckout via -DAUTOCHECKOUT_MISSING_REPOS=ON.")
 	endif()
 
-	message(WARNING "This part of find_package_autocheckout_fallback has never been tested.")
-
 	# Setup library targets
 	set(${NAME}_DEBUG_TARGET   "Upstream::${NAME}.g"
 		CACHE INTERNAL "Target name of debug version of ${NAME}")

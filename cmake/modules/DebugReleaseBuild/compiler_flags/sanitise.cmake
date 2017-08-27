@@ -35,9 +35,9 @@ endif()
 # Options
 #
 
-option(DRB_SANITIZE_ADDRESS_Release "Enable detection of memory errors (Out-of-bounds, use-after-free, ...) in RELEASE build.")
-option(DRB_SANITIZE_THREAD_Release "Enable detection of data races introduced by multi-threading in the RELEASE build.")
-option(DRB_SANITIZE_UNDEFINED_Release "Enable detection of undefined behaviour instructions in the RELEASE build.")
+option(DRB_SANITIZE_ADDRESS_Release   "Enable detection of memory errors (Out-of-bounds, use-after-free, ...) in RELEASE build.")
+option(DRB_SANITIZE_THREAD_Release    "Enable detection of data races introduced by multi-threading in the RELEASE build.")
+option(DRB_SANITIZE_UNDEFINED_Release "Enable detection of undefined behaviour instructions (negative shifts, integer overflows) in the RELEASE build.")
 
 set(DRB_SANITIZE_OPTIONS DRB_SANITIZE_THREAD_Release DRB_SANITIZE_ADDRESS_Release
 	DRB_SANITIZE_UNDEFINED_Release)
@@ -72,10 +72,11 @@ if (CMAKE_BUILD_TYPE MATCHES "Release" AND DRB_HAVE_ANY_SANITIZE)
 
 	# Set flags for sanitizer:
 	set(_FLAGSS "-g")
+	set(dummy "")
 
 	if(DRB_SANITIZE_MEMORY_Release)
 		set(_FLAGSS "${_FLAGSS} -fsanitize=memory")
-		enable_if_compiles(_FLAGSS "-fsanitize-memory-track-origin")
+		enable_if_all_compiles(_FLAGSS dummy "-fsanitize-memory-track-origin")
 		message(STATUS "Enabled memory sanitiser in Release build.")
 	elseif(DRB_SANITIZE_THREAD_Release)
 		set(_FLAGSS "${_FLAGSS} -fsanitize=thread")
@@ -89,12 +90,14 @@ if (CMAKE_BUILD_TYPE MATCHES "Release" AND DRB_HAVE_ANY_SANITIZE)
 	endif()
 
 	# Disable some further optimisations
-	enable_if_compiles(_FLAGSS "-fno-omit-frame-pointer")
-	enable_if_compiles(_FLAGSS "-fno-optimize-sibling-calls")
+	enable_if_all_compiles(_FLAGSS dummy "-fno-omit-frame-pointer")
+	enable_if_all_compiles(_FLAGSS dummy "-fno-optimize-sibling-calls")
 
 	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${_FLAGSS}")
+	set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} ${_FLAGSS}")
 	set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} ${_FLAGSS}")
 	unset(_FLAGSS)
+	unset(dummy)
 endif()
 
 #
