@@ -49,10 +49,13 @@ bool ExceptionSystem::initialise(ExceptionVerbosity verbosity) {
     // clang-tidy flags an error in libstdc++ here, that's why we need the NOLINT
     std::call_once(once_init, &do_once_initialise, verbosity);  // NOLINT
   } catch (const std::system_error& e) {
-    std::cerr
-          << "Could not setup ExceptionSystem due to std::system_error. \nThis can hint "
-             "that the program is *not* linked to the pthread library."
-          << std::endl;
+    std::cerr << "Could not setup ExceptionSystem due to std::system_error. \nThis can "
+                 "happen if the program is *not* linked to the pthreads library "
+                 "properly. Note, that there are known issues when linking krims "
+                 "together with the '-lpthread' flag. For this reason linking to the "
+                 "pthreads library with the flag '-pthread' is highly recommended in all "
+                 "cases."
+              << std::endl;
     throw;
   } catch (const std::bad_alloc& e) {
     std::cerr << "Could not allocate memory for ExceptionSystem. Exiting now."
