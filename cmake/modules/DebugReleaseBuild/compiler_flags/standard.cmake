@@ -60,15 +60,13 @@ enable_if_all_compiles(CMAKE_CXX_FLAGS CMAKE_C_FLAGS "-Wno-unused-macros")
 enable_if_all_compiles(CMAKE_CXX_FLAGS CMAKE_C_FLAGS "-Wno-unused-parameter")
 
 # Turn on warnings about language extensions
-enable_if_compiles(CMAKE_CXX_FLAGS  "-pedantic")
-enable_if_cc_compiles(CMAKE_C_FLAGS "-pedantic")
+enable_if_all_compiles(CMAKE_CXX_FLAGS CMAKE_C_FLAGS "-pedantic")
 
 #
 # Warnings as errors
 #
 # Make warnings errors, such that we cannot ignore them
-enable_if_compiles(CMAKE_CXX_FLAGS  "-Werror")
-enable_if_cc_compiles(CMAKE_C_FLAGS "-Werror")
+enable_if_all_compiles(CMAKE_CXX_FLAGS CMAKE_C_FLAGS "-Werror")
 
 # Some things we rather want as warnings, not as errors:
 enable_if_compiles(CMAKE_CXX_FLAGS  "-Wno-error=deprecated-declarations")
@@ -114,7 +112,8 @@ endif()
 #
 # Extra stuff for release:
 #
-option(DRB_MACHINE_SPECIFIC_OPTIM_Release "Enable machine-specific optimisations in REALEASE build. Your build might not be transferable to other machines.")
+option(DRB_MACHINE_SPECIFIC_OPTIM_Release
+	"Enable machine-specific optimisations in REALEASE build. Your build might not be transferable to other machines.")
 if (CMAKE_BUILD_TYPE MATCHES "Release")
 	if (DRB_MACHINE_SPECIFIC_OPTIM_Release)
 		enable_if_all_compiles(CMAKE_CXX_FLAGS_RELEASE CMAKE_C_FLAGS_RELEASE  "-march=native")

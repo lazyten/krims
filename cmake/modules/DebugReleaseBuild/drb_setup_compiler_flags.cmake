@@ -219,7 +219,7 @@ endmacro(enable_if_cc_compiles)
 
 macro(enable_if_all_compiles VARIABLE1 VARIABLE2 FLAG)
 	# Checks whether the plain c compiler as well as the C++ compiler
-	# supports a flag and if yes adds it to the variable provided.
+	# supports a flag and if yes adds it to the variables provided.
 	#
 	string(REGEX REPLACE "[^a-zA-Z0-9]" "" FLAG_CLEAN "${FLAG}")
 	CHECK_C_COMPILER_FLAG("-Werror ${FLAG}" DRB_CC_HAVE_FLAG_${FLAG_CLEAN})

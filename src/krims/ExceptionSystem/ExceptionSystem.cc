@@ -50,8 +50,8 @@ bool ExceptionSystem::initialise(ExceptionVerbosity verbosity) {
     std::call_once(once_init, &do_once_initialise, verbosity);  // NOLINT
   } catch (const std::system_error& e) {
     std::cerr
-          << "Could not setup ExceptionSystem due to std::system_error. \nUsually this "
-             "happens if the program is *not* linked to the pthread library."
+          << "Could not setup ExceptionSystem due to std::system_error. \nThis can hint "
+             "that the program is *not* linked to the pthread library."
           << std::endl;
     throw;
   } catch (const std::bad_alloc& e) {
