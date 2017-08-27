@@ -38,6 +38,13 @@ set(KRIMS_DEPENDENCIES_TEST "")
 ########################################
 #-- Link with some threading library --#
 ########################################
+# Finding threads might fail if -Werror is used on
+# cmake up to 3.3
+set(OLD_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+set(OLD_C_FLAGS   "${CMAKE_C_FLAGS}")
+set(CMAKE_CXX_FLAGS "-Wno-error -Wno-error=pointer-to-int-cast")
+set(CMAKE_C_FLAGS "-Wno-error -Wno-error=pointer-to-int-cast")
+
 if (CMAKE_VERSION VERSION_GREATER 3.1.0)
 	set(THREADS_PREFER_PTHREAD_FLAG ON)
 	find_package(Threads REQUIRED)
@@ -48,6 +55,10 @@ else()
 	set(KRIMS_DEPENDENCIES ${KRIMS_DEPENDENCIES} ${CMAKE_THREAD_LIBS_INIT})
 endif()
 
+set(CMAKE_CXX_FLAGS "${OLD_CXX_FLAGS}")
+set(CMAKE_C_FLAGS "${OLD_C_FLAGS}")
+unset(OLD_C_FLAGS)
+unset(OLD_CXX_FLAGS)
 
 ############################
 #-- rapidcheck and catch --#
