@@ -78,6 +78,8 @@ if (CMAKE_BUILD_TYPE MATCHES "Release" AND DRB_HAVE_ANY_SANITIZE)
 		set(_FLAGSS "${_FLAGSS} -fsanitize=memory")
 		enable_if_all_compiles(_FLAGSS dummy "-fsanitize-memory-track-origin")
 		message(STATUS "Enabled memory sanitiser in Release build.")
+		message("For address symbolisation you might need to set the environment \
+variables ASAN_SYMBOLIZER_PATH and ASAN_OPTIONS=symbolize=1")
 	elseif(DRB_SANITIZE_THREAD_Release)
 		set(_FLAGSS "${_FLAGSS} -fsanitize=thread")
 		message(STATUS "Enabled thread sanitiser in Release build.")
@@ -98,6 +100,7 @@ if (CMAKE_BUILD_TYPE MATCHES "Release" AND DRB_HAVE_ANY_SANITIZE)
 	set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} ${_FLAGSS}")
 	unset(_FLAGSS)
 	unset(dummy)
+
 endif()
 
 #

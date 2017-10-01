@@ -21,6 +21,7 @@
 
 include(CheckCXXCompilerFlag)
 include(CheckCCompilerFlag)
+include(CheckCXXSourceRuns)
 
 macro(determine_supported_cxx_standards)
 	# macro to check for the highest fully supported c++ standard.
@@ -81,7 +82,7 @@ function(determine_supported_stdlib_cxx)
 		# as the standard c++ library
 		set(CMAKE_REQUIRED_FLAGS_ORIG "${CMAKE_REQUIRED_FLAGS}")
 		set(CMAKE_REQUIRED_FLAGS "-stdlib=libc++ -Werror -std=c++11")
-		CHECK_CXX_SOURCE_COMPILES("#include <vector>
+                CHECK_CXX_SOURCE_RUNS("#include <vector>
 			int main() { std::vector<int> v{0,}; return v[0]; }" DRB_HAVE_LLVM_LIBCXX)
 		set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS_ORIG}")
 		unset(CMAKE_REQUIRED_FLAGS_ORIG)

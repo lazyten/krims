@@ -25,25 +25,35 @@ namespace krims {
 namespace tests {
 using namespace rc;
 
+template <typename T, typename... Args>
+void throw_exception(Args... args) {
+  assert_throw(false, T(std::forward<Args>(args)...));
+}
+
+template <typename T, typename... Args>
+void throw_exception_dbg(Args... args) {
+  assert_dbg(false, T(std::forward<Args>(args)...));
+}
+
 TEST_CASE("Exception system", "[exception]") {
   SECTION("Test throw or raise mechanism") {
 #ifdef DEBUG
     // Test if an ExcNotImplemented exception would be thrown:
-    REQUIRE_THROWS_AS(assert_dbg(false, ExcNotImplemented()), ExcNotImplemented);
+    REQUIRE_THROWS_AS(throw_exception_dbg<ExcNotImplemented>(), ExcNotImplemented);
 
     // Test if an ExcIO exception would be thrown:
-    REQUIRE_THROWS_AS(assert_dbg(false, ExcIO()), ExcIO);
+    REQUIRE_THROWS_AS(throw_exception_dbg<ExcIO>(), ExcIO);
 #else
     // Test that indeed nothing happens here:
-    REQUIRE_NOTHROW(assert_dbg(false, ExcNotImplemented()));
-    REQUIRE_NOTHROW(assert_dbg(false, ExcIO()));
+    REQUIRE_NOTHROW(throw_exception_dbg<ExcNotImplemented>());
+    REQUIRE_NOTHROW(throw_exception_dbg<ExcIO>());
 #endif
 
     // Test if an ExcNotImplemented exception would be thrown:
-    REQUIRE_THROWS_AS(assert_throw(false, ExcNotImplemented()), ExcNotImplemented);
+    REQUIRE_THROWS_AS(throw_exception<ExcNotImplemented>(), ExcNotImplemented);
 
     // Test if an ExcIO exception would be thrown:
-    REQUIRE_THROWS_AS(assert_throw(false, ExcIO()), ExcIO);
+    REQUIRE_THROWS_AS(throw_exception<ExcIO>(), ExcIO);
   }
 
   //

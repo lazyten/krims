@@ -60,9 +60,9 @@ TEST_CASE("GenMap tests", "[genmap]") {
     REQUIRE(m.at<DummySubscribable<double>>("dummy") == dum);
   }
 
-//
-// ---------------------------------------------------------------
-//
+    //
+    // ---------------------------------------------------------------
+    //
 
 #ifdef DEBUG
   SECTION("Check that type safety is assured") {
@@ -115,9 +115,8 @@ TEST_CASE("GenMap tests", "[genmap]") {
 
     RCPWrapper<DummySubscribable<double>> dumptr =
           m.at_ptr<DummySubscribable<double>>("dum");
-    REQUIRE_THROWS_AS(
-          auto s = static_cast<std::shared_ptr<DummySubscribable<double>>>(dumptr),
-          ExcDisabled);
+    REQUIRE_THROWS_AS(static_cast<std::shared_ptr<DummySubscribable<double>>>(dumptr),
+                      ExcDisabled);
   }
 #endif
 
