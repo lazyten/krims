@@ -143,3 +143,18 @@ function(cpp_interface_python3 MODULE_NAME)
 	swig_link_libraries(${MODULE_NAME} ${PYTHON_LIBRARIES} ${link})
 endfunction()
 
+if (DRB_SANITIZE_ADDRESS_Release)
+	if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+		set(HINTPATH
+		"/usr/lib/clang/${CMAKE_CXX_COMPILER_VERSION}/lib/linux/libclang_rt.asan-x86_64.so")
+	elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+		set(HINTPATH "/usr/lib/x86_64-linux-gnu/libasan.so.4")
+	endif()
+
+	message("   # Address sanitiser hint
+   #
+   For getting the address sanitiser to work from python try running
+   python with LD_PRELOAD=<path to asan.so>, e.g. something like
+   LD_PRELOAD=${HINTPATH}
+   #")
+endif()
