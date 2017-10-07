@@ -41,7 +41,7 @@ env:
     - TESTS=1  TESTS_REGEX="krims_tests_"
 
 before_install:
-    - travis_retry pip install --user cpp-coveralls
+    - travis_retry pip3 install --user cpp-coveralls
 
 addons:
   apt:
@@ -49,6 +49,7 @@ addons:
       - ubuntu-toolchain-r-test     # libstdc++-4.9-dev (gcc 4.8's libstdc++ is buggy)
       - llvm-toolchain-trusty-4.0   # clang-4.0
     packages: &def_packages
+      - python3-pip
       - ninja-build
 
 matrix:
@@ -131,7 +132,7 @@ script:
 
 after_success:
   - cd ${TRAVIS_BUILD_DIR}
-  - if [ "${GCOV}" ]; then coveralls --gcov "$GCOV" --gcov-options '\-lp'
+  - if [ "${GCOV}" ]; then python3 coveralls --gcov "$GCOV" --gcov-options '\-lp'
            --root ${PWD} --build-root ${PWD}/build
            --include src
     ;fi
