@@ -465,6 +465,10 @@ is not used to compile the project.")
 	set(YAML_MERGER "${FIXDIR}/merge_yaml_fixes.py")
 	SCT_dump_fixes_yaml_merger(${YAML_MERGER})
 
+        # Find python3 interpreter
+	set(Python_ADDITIONAL_VERSIONS 3)
+	find_package(PythonInterp REQUIRED)
+
 	# Command to merge the fixes we found above:
 	add_custom_command(OUTPUT ${FIXFILE}
 		COMMAND
@@ -472,7 +476,7 @@ is not used to compile the project.")
 		COMMAND
 		${CMAKE_COMMAND} -E remove -f ${APPLYFILE}
 		COMMAND
-		${YAML_MERGER} -o "${FIXFILE}" ${SOURCE_FIX_FILES}
+                ${PYTHON_EXECUTABLE} ${YAML_MERGER} -o "${FIXFILE}" ${SOURCE_FIX_FILES}
 		COMMAND
 		${CMAKE_COMMAND} -E touch "${FIXFILE}"
 		##

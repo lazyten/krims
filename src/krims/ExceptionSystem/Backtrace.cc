@@ -191,18 +191,24 @@ void Backtrace::parse_backtrace() {
       break;
     }
 
+    //
+    // Stuff which happens inside the c++ library when exception handling
+    //
     if (std::strstr(stacktrace[frame], "__cxa_call_unexpected") != nullptr) {
       // The current frame indicates that an unexpected exception was
-      // caught. This is certainly already inside the exception handling
-      // part of the c++ library.
+      // caught.
+      initframe = frame + 1;
+      break;
+    }
+
+    if (std::strstr(stacktrace[frame], "__cxa_throw") != nullptr) {
+      // The current frame indicates that a rethrow occurred.
       initframe = frame + 1;
       break;
     }
 
     if (std::strstr(stacktrace[frame], "__cxa_rethrow") != nullptr) {
       // The current frame indicates that a rethrow occurred.
-      // This is certainly already inside the exception handling
-      // part of the c++ library.
       initframe = frame + 1;
       break;
     }
