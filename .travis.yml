@@ -132,7 +132,7 @@ script:
 
 after_success:
   - cd ${TRAVIS_BUILD_DIR}
-  - if [ "${GCOV}" ]; then python3 coveralls --gcov "$GCOV" --gcov-options '\-lp'
+  - if [ "${GCOV}" ]; then coveralls --gcov "$GCOV" --gcov-options '\-lp'
            --root ${PWD} --build-root ${PWD}/build
            --include src
     ;fi
