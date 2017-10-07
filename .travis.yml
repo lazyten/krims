@@ -41,7 +41,9 @@ env:
     - TESTS=1  TESTS_REGEX="krims_tests_"
 
 before_install:
-    - travis_retry pip3 install --user cpp-coveralls
+  # Note: Using pip, i.e. python2 is on purpose, becase there were problems
+  #       with python3
+  - travis_retry pip install --user cpp-coveralls
 
 addons:
   apt:
