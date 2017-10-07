@@ -115,8 +115,9 @@ TEST_CASE("GenMap tests", "[genmap]") {
 
     RCPWrapper<DummySubscribable<double>> dumptr =
           m.at_ptr<DummySubscribable<double>>("dum");
-    REQUIRE_THROWS_AS(static_cast<std::shared_ptr<DummySubscribable<double>>>(dumptr),
-                      ExcDisabled);
+    REQUIRE_THROWS_AS(
+          (void)static_cast<std::shared_ptr<DummySubscribable<double>>>(dumptr),
+          ExcDisabled);
   }
 #endif
 
