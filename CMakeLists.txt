@@ -33,7 +33,7 @@ drb_init()
 ##########################################################################
 # Project setup
 
-project(krims VERSION 0.1.0)
+project(krims VERSION 0.2.1)
 message("\n# Configuring ${PROJECT_NAME}\n#")
 
 # Global include directories for this project:
