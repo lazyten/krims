@@ -26,17 +26,15 @@ include(CheckCXXSourceRuns)
 macro(determine_supported_cxx_standards)
         # macro to check for the highest fully supported c++ standard.
         # Sets the cache variable DRB_HIGHEST_CXX_SUPPORT to the plain
-        # plain values (98,11,14,17).
+        # plain values (11,14,17).
+        # C++ 98 is *not* supported by DRB.
         #
         # Note that the macro does not enforce any particular standard.
         #
-        set(DRB_HIGHEST_CXX_SUPPORT 98 CACHE INTERNAL "The highest c++ standard supported.")
+        set(DRB_HIGHEST_CXX_SUPPORT 11 CACHE INTERNAL "The highest c++ standard supported.")
         if (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
-                # All of gcc supports 98
-                set(DRB_HIGHEST_CXX_SUPPORT 98)
-
-                if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.8.1")
-                        set(DRB_HIGHEST_CXX_SUPPORT 11)
+                if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.8.1")
+                        message(FATAL_ERROR "The minimum gcc compiler version supported is 4.8.1")
                 endif()
 
                 if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "5.0")
@@ -52,8 +50,8 @@ macro(determine_supported_cxx_standards)
                 # All of clang supports 98
                 set(DRB_HIGHEST_CXX_SUPPORT 98)
 
-                if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "3.3")
-                        set(DRB_HIGHEST_CXX_SUPPORT 11)
+                if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS "3.3")
+                        message(FATAL_ERROR "The minimum clang compiler version supported is 3.3")
                 endif()
 
                 if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "3.4")
@@ -67,14 +65,19 @@ macro(determine_supported_cxx_standards)
                 # TODO Extend once c++2a is ready
         else()
                 message(WARNING "Determining maximum supported C++ version is not supported for compiler ${CMAKE_CXX_COMPILER_ID} yet. \
-                Going with C++98.")
+                Going with C++11.")
+        endif()
+
+        # CMake < 3.8 do not support c++17 natively.
+        if(CMAKE_VERSION VERSION_LESS "3.8" AND DRB_HIGHEST_CXX_SUPPORT VERSION_GREATER 14)
+                set(DRB_HIGHEST_CXX_SUPPORT 14)
         endif()
 endmacro(determine_supported_cxx_standards)
 
 function(determine_supported_stdlib_cxx)
         # macro to check for the ideal standard library to use.
         #
-        # For clang this would be libc++ if it is available, for 
+        # For clang this would be libc++ if it is available, for
         # gcc it would be libstdc++.
         #
         # The result is stored in cache under DRB_CXX_STANDARD_LIBRARY
@@ -182,7 +185,7 @@ macro(use_cxx_standard STANDARD)
         #
         # sets the variable
         #	CMAKE_CXX_STANDARD
-        # to the plain value STANDARD (98,11,14 or 17)
+        # to the plain value STANDARD (11,14 or 17)
         #
         if (CMAKE_VERSION VERSION_LESS "3.1")
                 # Determine the flag for the requested c++ standard.
@@ -282,7 +285,7 @@ macro(DRB_SETUP_COMPILER_FLAGS CXX_STANDARD)
         # check what standards are supported
         determine_supported_cxx_standards()
 
-        # If DRB_MAXIMUM_CXX_STANDARD is present and not set to "auto",
+        # If DRB_MAXIMUM_CXX_STANDARD is present and not set to "highest",
         # enforce a lower standard than supported:
         if(DEFINED DRB_MAXIMUM_CXX_STANDARD
                         AND NOT "${DRB_MAXIMUM_CXX_STANDARD}" STREQUAL "highest" )
@@ -302,29 +305,29 @@ macro(DRB_SETUP_COMPILER_FLAGS CXX_STANDARD)
                 STRING "The maximal C++ standard DebugReleaseBuild makes use of. \
                 Set to \"highest\" to let DRB use the highest available C++ standard (default).")
 
-                # enforce the highest standard we are ok with:
-                if (DRB_HIGHEST_CXX_SUPPORT VERSION_GREATER CXX_STANDARD)
-                        use_cxx_standard(${DRB_HIGHEST_CXX_SUPPORT})
-                else()
-                        use_cxx_standard(${CXX_STANDARD})
-                endif()
+        # enforce the highest standard we are ok with:
+        if (DRB_HIGHEST_CXX_SUPPORT VERSION_GREATER CXX_STANDARD)
+                use_cxx_standard(${DRB_HIGHEST_CXX_SUPPORT})
+        else()
+                use_cxx_standard(${CXX_STANDARD})
+        endif()
 
-                # Check what standard library should be used
-                determine_supported_stdlib_cxx()
-                stdlib_cxx_flags(${DRB_CXX_STANDARD_LIBRARY} CMAKE_CXX_FLAGS CMAKE_EXE_LINKER_FLAGS)
+        # Check what standard library should be used
+        determine_supported_stdlib_cxx()
+        stdlib_cxx_flags(${DRB_CXX_STANDARD_LIBRARY} CMAKE_CXX_FLAGS CMAKE_EXE_LINKER_FLAGS)
 
-                if (CMAKE_CXX_COMPILER_ID MATCHES "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-                        # We have a known "standard" compiler
-                        include("${DRB_DIR}/compiler_flags/standard.cmake")
-                else()
-                        message(WARNING "Untested compiler: ${CMAKE_CXX_COMPILER_ID}, you are on your own.")
-                        message(WARNING "Currently we only support clang and gnu compilers.")
+        if (CMAKE_CXX_COMPILER_ID MATCHES "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+                # We have a known "standard" compiler
+                include("${DRB_DIR}/compiler_flags/standard.cmake")
+        else()
+                message(WARNING "Untested compiler: ${CMAKE_CXX_COMPILER_ID}, you are on your own.")
+                message(WARNING "Currently we only support clang and gnu compilers.")
 
-                        # Try to fall back to the standard
-                        include("${DRB_DIR}/compiler_flags/standard.cmake")
-                endif()
+                # Try to fall back to the standard
+                include("${DRB_DIR}/compiler_flags/standard.cmake")
+        endif()
 
-                # Setup compiler flags for special compile options (if desired and available)
-                include("${DRB_DIR}/compiler_flags/coverage.cmake")
-                include("${DRB_DIR}/compiler_flags/sanitise.cmake")
-        endmacro(DRB_SETUP_COMPILER_FLAGS)
+        # Setup compiler flags for special compile options (if desired and available)
+        include("${DRB_DIR}/compiler_flags/coverage.cmake")
+        include("${DRB_DIR}/compiler_flags/sanitise.cmake")
+endmacro(DRB_SETUP_COMPILER_FLAGS)
