@@ -126,15 +126,12 @@ function(cxx_standard_flag STANDARD VARIABLE)
         set (FLAG "c++${STANDARD}")
         if (STANDARD EQUAL "14")
                 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS "3.5")
-                        # Clang <3.5 needs special treatment here,
-                        # since c++14 flag is not yet know there
                         set(FLAG "c++1y")
                 endif()
         endif()
         if (STANDARD EQUAL "17")
-                if (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
-                        # Gnu compilers currently need special treatment
-                        # since c++17 flag is not yet know there
+                if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS "5.1")
+                        # TODO 5.1 is an estimate here
                         set(FLAG "c++1z")
                 endif()
         endif()
